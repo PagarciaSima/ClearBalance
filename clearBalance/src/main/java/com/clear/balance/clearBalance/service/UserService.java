@@ -1,0 +1,18 @@
+package com.clear.balance.clearBalance.service;
+
+import java.util.Collection;
+
+import com.clear.balance.clearBalance.domain.User;
+import com.clear.balance.clearBalance.dto.UserDto;
+
+public interface UserService {
+    /* Basic CRUD  */
+	UserDto create(User data);
+    Collection<User> list(int page, int pageSize);
+    User get(Long id);
+    User update(User data);
+    Boolean delete(Long id);
+
+    User getUserByEmail(String email);
+
+}
