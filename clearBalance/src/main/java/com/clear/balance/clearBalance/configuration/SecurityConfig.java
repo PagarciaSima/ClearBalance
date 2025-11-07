@@ -1,6 +1,6 @@
 package com.clear.balance.clearBalance.configuration;
 
-import static org.springframework.security.config.Customizer.withDefaults;
+import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,10 +11,16 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.clear.balance.clearBalance.filter.CustomAuthorizationFilter;
 import com.clear.balance.clearBalance.handler.CustomAccessDeniedHandler;
 import com.clear.balance.clearBalance.handler.CustomAuthenticationEntryPoint;
 import com.clear.balance.clearBalance.service.impl.CustomUserDetailsServiceImpl;
@@ -30,11 +36,13 @@ public class SecurityConfig {
 	public static final String[] PUBLIC_URLS = { "/user/verify/password/**", "/user/login/**", "/user/verify/code/**",
 			"/user/register/**", "/user/resetpassword/**", "/user/verify/account/**", "/user/refresh/token/**",
 			"/user/image/**", "/user/new/password/**" };
-
+	public static final List<String> ALLOWED_METHODS =
+	            List.of("GET", "POST", "PUT", "DELETE", "OPTIONS");
 	private static final int STRENGHT = 12;
 	private final CustomAccessDeniedHandler customAccessDeniedHandler;
 	private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 	private final CustomUserDetailsServiceImpl customUserDetailsServiceImpl;
+    private final CustomAuthorizationFilter customAuthorizationFilter;
 
 	@Bean
 	BCryptPasswordEncoder passwordEncoder() {
@@ -51,19 +59,36 @@ public class SecurityConfig {
 
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http.csrf(csrf -> csrf.disable()).cors(withDefaults());
-		http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-		http.authorizeHttpRequests(request -> request.requestMatchers(PUBLIC_URLS).permitAll());
-		http.authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.OPTIONS).permitAll());
-		http.authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.DELETE, "/user/delete/**")
-				.hasAnyAuthority("DELETE:USER"));
-		http.authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.DELETE, "/customer/delete/**")
-				.hasAnyAuthority("DELETE:CUSTOMER"));
-		// Manages unauthorized access attempts / 403
-		http.exceptionHandling(exception -> exception.accessDeniedHandler(customAccessDeniedHandler)
-				// Manages unauthenticated access attempts / 401
-				.authenticationEntryPoint(customAuthenticationEntryPoint));
-		http.authorizeHttpRequests(request -> request.anyRequest().authenticated());
-		return http.build();
+	    http
+	        .csrf(AbstractHttpConfigurer::disable)
+	        .cors(configure -> configure.configurationSource(corsConfigurationSource()))
+	        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+	        .authorizeHttpRequests(request -> request
+	            .requestMatchers(PUBLIC_URLS).permitAll()
+	            .requestMatchers(HttpMethod.OPTIONS).permitAll()
+	            .requestMatchers(HttpMethod.DELETE, "/user/delete/**").hasAnyAuthority("DELETE:USER")
+	            .requestMatchers(HttpMethod.DELETE, "/customer/delete/**").hasAnyAuthority("DELETE:CUSTOMER")
+	            .anyRequest().authenticated()
+	        )
+	        .exceptionHandling(exception -> exception
+	            .accessDeniedHandler(customAccessDeniedHandler)
+	            .authenticationEntryPoint(customAuthenticationEntryPoint)
+	        );
+	    	//.addFilterBefore(customAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
+
+	    return http.build();
+	}
+
+	@Bean
+	CorsConfigurationSource corsConfigurationSource() {
+	    CorsConfiguration configuration = new CorsConfiguration();
+	    configuration.setAllowedOrigins(List.of("http://localhost:4200")); 
+	    configuration.setAllowedMethods(ALLOWED_METHODS);
+	    configuration.setAllowedHeaders(List.of("*"));
+	    configuration.setExposedHeaders(List.of("*"));
+	    configuration.setAllowCredentials(true);
+	    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+	    source.registerCorsConfiguration("/**", configuration);
+	    return source;
 	}
 }
