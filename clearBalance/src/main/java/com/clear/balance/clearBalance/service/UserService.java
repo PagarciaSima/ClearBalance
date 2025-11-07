@@ -13,6 +13,6 @@ public interface UserService {
     User update(User data);
     Boolean delete(Long id);
 
-    User getUserByEmail(String email);
+    UserDto getUserByEmail(String email);
 
 }
