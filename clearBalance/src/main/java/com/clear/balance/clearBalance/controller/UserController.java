@@ -45,16 +45,8 @@ public class UserController {
 		authenticationManager
 				.authenticate(new UsernamePasswordAuthenticationToken(loginRequestDto.getEmail(), loginRequestDto.getPassword()));
 		UserDto userDto = userService.getUserByEmail(loginRequestDto.getEmail());
-		 // Build and return response
-        return ResponseEntity.ok()
-                .body(HttpResponse.builder()
-                        .timeStamp(LocalDateTime.now().toString())
-                        .data(Map.of("user", userDto))
-                        .message("Login successful")
-                        .status(HttpStatus.OK)
-                        .statusCode(HttpStatus.OK.value())
-                        .build());
-    }
+		return userDto.isUsingMfa() ? sendVerificationCode(userDto) : sendResponse(userDto);
+	}
 
 	/**
      * Registers a new user in the system.
@@ -105,5 +97,29 @@ public class UserController {
     private URI getUri() {
         return URI.create(fromCurrentContextPath().path("/user/get/<userId>").toUriString());
     }
+    
+	private ResponseEntity<HttpResponse> sendVerificationCode(UserDto user) {
+		this.userService.sendVerificationCode(user);
+		return ResponseEntity.ok()
+                .body(HttpResponse.builder()
+                        .timeStamp(LocalDateTime.now().toString())
+                        .data(Map.of("user", user))
+                        .message("Login successful")
+                        .status(HttpStatus.OK)
+                        .statusCode(HttpStatus.OK.value())
+                        .build());
+	}
+
+	private ResponseEntity<HttpResponse> sendResponse(UserDto user) {
+        return ResponseEntity.ok()
+                .body(HttpResponse.builder()
+                        .timeStamp(LocalDateTime.now().toString())
+                        .data(Map.of("user", user))
+                        .message("Login successful")
+                        .status(HttpStatus.OK)
+                        .statusCode(HttpStatus.OK.value())
+                        .build());
+    }
+
 
 }

@@ -8,5 +8,20 @@
     "name": "application.version",
     "type": "java.lang.String",
     "description": "A description for 'application.version'"
+  },
+  {
+    "name": "twilio.from-number",
+    "type": "java.lang.String",
+    "description": "A description for 'twilio.from-number'"
+  },
+  {
+    "name": "twilio.sid-key",
+    "type": "java.lang.String",
+    "description": "A description for 'twilio.sid-key'"
+  },
+  {
+    "name": "twilio.token-key",
+    "type": "java.lang.String",
+    "description": "A description for 'twilio.token-key'"
   }
 ]}

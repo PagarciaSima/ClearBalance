@@ -2,16 +2,20 @@ package com.clear.balance.clearBalance.service.impl;
 
 import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentContextPath;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.clear.balance.clearBalance.Utils.SmsUtils;
 import com.clear.balance.clearBalance.domain.AccountVerification;
 import com.clear.balance.clearBalance.domain.Role;
+import com.clear.balance.clearBalance.domain.TwoFactorVerification;
 import com.clear.balance.clearBalance.domain.User;
 import com.clear.balance.clearBalance.domain.UserRole;
 import com.clear.balance.clearBalance.dto.UserDto;
@@ -21,6 +25,7 @@ import com.clear.balance.clearBalance.enumeration.VerificationType;
 import com.clear.balance.clearBalance.exeception.ApiException;
 import com.clear.balance.clearBalance.repository.AccountVerificationRepository;
 import com.clear.balance.clearBalance.repository.RoleRepository;
+import com.clear.balance.clearBalance.repository.TwoFactorVerificationRepository;
 import com.clear.balance.clearBalance.repository.UserRepository;
 import com.clear.balance.clearBalance.service.EmailService;
 import com.clear.balance.clearBalance.service.UserService;
@@ -32,11 +37,14 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 public class UserServiceImpl implements UserService {
+	private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 	private final UserRepository userRepository;
 	private final RoleRepository roleRepository;
 	private final BCryptPasswordEncoder encoder;
 	private final EmailService emailService;
 	private final AccountVerificationRepository accountVerificationRepository;
+    private final TwoFactorVerificationRepository twoFactorVerificationRepository; 
+    private final SmsUtils smsUtils;
 
 	/**
 	 * Creates a new user in the system.
@@ -156,5 +164,27 @@ public class UserServiceImpl implements UserService {
 				() -> emailService.sendVerificationEmail(firstName, email, verificationUrl, verificationType));
 
 	}
+
+	@Override
+	public void sendVerificationCode(UserDto userDto) {
+	    LocalDateTime expirationDate = LocalDateTime.now().plusDays(1);
+	    String verificationCode = RandomStringUtils.randomAlphabetic(8).toUpperCase();
+
+	    User user = userRepository.findByEmail(userDto.getEmail())
+	            .orElseThrow(() -> new ApiException("User not found with email: " + userDto.getEmail()));
+
+	    twoFactorVerificationRepository.deleteByUserId(user.getId());
+
+	    TwoFactorVerification verification = TwoFactorVerification.builder()
+	            .userId(user.getId())
+	            .code(verificationCode)
+	            .expirationDate(expirationDate)
+	            .build();
+
+	    twoFactorVerificationRepository.save(verification);
+	    smsUtils.sendSMS(user.getPhone(), "From: ClearBalance \nVerification code \n" + verificationCode); 
+	}
+
+
 
 }

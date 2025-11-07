@@ -44,7 +44,10 @@
 		    <artifactId>mysql-connector-j</artifactId>
 		    <scope>runtime</scope>
 		</dependency>
-
+		<dependency>
+		    <groupId>org.apache.commons</groupId>
+		    <artifactId>commons-lang3</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
@@ -94,7 +97,12 @@
 		    <scope>runtime</scope>
 		    <optional>true</optional>
 		</dependency>
-
+		<!-- https://mvnrepository.com/artifact/com.twilio.sdk/twilio -->
+		<dependency>
+		    <groupId>com.twilio.sdk</groupId>
+		    <artifactId>twilio</artifactId>
+		    <version>9.2.5</version>
+		</dependency>
 	</dependencies>
 	
 	<profiles>

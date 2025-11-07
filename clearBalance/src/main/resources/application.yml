@@ -5,3 +5,8 @@ spring:
 application:
   title: ClearBalance
   version: 1.0
+  
+twilio:
+  from-number: ${FROM_NUMBER}
+  sid-key: ${SID_KEY}
+  token-key: ${TOKEN_KEY}

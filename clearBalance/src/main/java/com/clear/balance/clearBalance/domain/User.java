@@ -32,6 +32,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(columnDefinition = "BIGINT UNSIGNED")
     private Long id;
 
     @NotEmpty(message = "First name is required")
