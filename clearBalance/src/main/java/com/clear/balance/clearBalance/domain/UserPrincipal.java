@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserPrincipal implements UserDetails {
 
-	private static final long serialVersionUID = 1907725179336300395L;
 	
 	private final User user;
 	private final String permissions;

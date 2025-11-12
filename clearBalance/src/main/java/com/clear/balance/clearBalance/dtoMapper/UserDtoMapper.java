@@ -7,6 +7,7 @@ import com.clear.balance.clearBalance.domain.User;
 import com.clear.balance.clearBalance.dto.UserDto;
 
 public class UserDtoMapper {
+	
     public static UserDto fromUser(User user) {
     	UserDto userDTO = new UserDto();
         BeanUtils.copyProperties(user, userDTO);

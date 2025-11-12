@@ -24,7 +24,7 @@ public class LocaleConfig {
      * The default locale is set to English if no header is provided.
      */
     @Bean
-    public LocaleResolver localeResolver() {
+    LocaleResolver localeResolver() {
         AcceptHeaderLocaleResolver localeResolver = new AcceptHeaderLocaleResolver();
         localeResolver.setDefaultLocale(Locale.ENGLISH);
         return localeResolver;

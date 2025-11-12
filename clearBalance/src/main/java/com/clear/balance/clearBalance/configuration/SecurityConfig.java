@@ -15,12 +15,10 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.clear.balance.clearBalance.filter.CustomAuthorizationFilter;
 import com.clear.balance.clearBalance.handler.CustomAccessDeniedHandler;
 import com.clear.balance.clearBalance.handler.CustomAuthenticationEntryPoint;
 import com.clear.balance.clearBalance.service.impl.CustomUserDetailsServiceImpl;
@@ -33,16 +31,32 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-	public static final String[] PUBLIC_URLS = { "/user/verify/password/**", "/user/login/**", "/user/verify/code/**",
-			"/user/register/**", "/user/resetpassword/**", "/user/verify/account/**", "/user/refresh/token/**",
-			"/user/image/**", "/user/new/password/**" };
+
+	public static final String[] PUBLIC_URLS = {
+		    "/user/verify/password/**",
+		    "/user/login/**",
+		    "/user/verify/code/**",
+		    "/user/register/**",
+		    "/user/resetpassword/**",
+		    "/user/verify/account/**",
+		    "/user/refresh/token/**",
+		    "/user/image/**",
+		    "/user/new/password/**",
+
+		    // Swagger / OpenAPI
+		    "/swagger-ui.html",
+		    "/swagger-ui/**",
+		    "/v3/api-docs/**"
+		};
+
 	public static final List<String> ALLOWED_METHODS =
 	            List.of("GET", "POST", "PUT", "DELETE", "OPTIONS");
 	private static final int STRENGHT = 12;
 	private final CustomAccessDeniedHandler customAccessDeniedHandler;
 	private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 	private final CustomUserDetailsServiceImpl customUserDetailsServiceImpl;
-    private final CustomAuthorizationFilter customAuthorizationFilter;
+    //private final CustomAuthorizationFilter customAuthorizationFilter;
+
 
 	@Bean
 	BCryptPasswordEncoder passwordEncoder() {
@@ -70,11 +84,11 @@ public class SecurityConfig {
 	            .requestMatchers(HttpMethod.DELETE, "/customer/delete/**").hasAnyAuthority("DELETE:CUSTOMER")
 	            .anyRequest().authenticated()
 	        )
+	        //.addFilterBefore(customAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)
 	        .exceptionHandling(exception -> exception
 	            .accessDeniedHandler(customAccessDeniedHandler)
 	            .authenticationEntryPoint(customAuthenticationEntryPoint)
 	        );
-	    	//.addFilterBefore(customAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
 
 	    return http.build();
 	}

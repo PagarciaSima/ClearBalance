@@ -22,8 +22,17 @@ public class CustomUserDetailsServiceImpl implements UserDetailsService {
     private final UserRepository userRepository;
     private final UserRoleRepository userRoleRepository;
 
+    /**
+     * Loads a user by their email for Spring Security authentication.
+     *
+     * @param email the email of the user
+     * @return UserDetails object containing user information and permissions
+     * @throws UsernameNotFoundException if the user does not exist or has no assigned role
+     */
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        log.info("Attempting to load user by email: {}", email);
+
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> {
                     log.error("User not found in the database: {}", email);
@@ -38,8 +47,8 @@ public class CustomUserDetailsServiceImpl implements UserDetailsService {
             throw new UsernameNotFoundException("User has no assigned role");
         }
 
+        log.info("User {} role found: {}", email, role.getPermission());
         return new UserPrincipal(user, role.getPermission());
     }
-
 
 }

@@ -13,7 +13,9 @@ public interface UserService {
     User update(User data);
     Boolean delete(Long id);
 
-    UserDto getUserByEmail(String email);
+    UserDto getUserDtoByEmail(String email);
+	User getUserByEmail(String email);
 	void sendVerificationCode(UserDto userDto);
+	UserDto verifyCode(String email, String code);
 
 }
