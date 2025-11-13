@@ -4,12 +4,13 @@ import static org.springframework.web.servlet.support.ServletUriComponentsBuilde
 
 import java.net.URI;
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,6 +32,7 @@ import com.clear.balance.clearBalance.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import static org.springframework.security.authentication.UsernamePasswordAuthenticationToken.unauthenticated;
 
 /**
  * REST controller for managing user-related operations such as registration.
@@ -52,7 +54,7 @@ public class UserController {
 	@PostMapping("/login")
 	public ResponseEntity<?> login(@RequestBody(required = true) @Valid LoginRequestDto loginRequestDto) {
 		authenticationManager.authenticate(
-				new UsernamePasswordAuthenticationToken(loginRequestDto.getEmail(), loginRequestDto.getPassword()));
+				unauthenticated(loginRequestDto.getEmail(), loginRequestDto.getPassword()));
 		UserDto userDto = userService.getUserDtoByEmail(loginRequestDto.getEmail());
 		return userDto.isUsingMfa() ? sendVerificationCode(userDto) : sendResponse(userDto);
 	}
@@ -94,15 +96,58 @@ public class UserController {
 		}
 	}
 
+	@GetMapping("/profile")
+	public ResponseEntity<HttpResponse> profile(Authentication authentication) {
+
+		UserDto user = userService.getUserDtoByEmail(authentication.getName());
+		return ResponseEntity.ok().body(HttpResponse.builder().timeStamp(LocalDateTime.now().toString())
+				.data(Map.of("user", user))
+				.message("Profile Retrieve")
+				.status(HttpStatus.OK)
+				.statusCode(HttpStatus.OK.value())
+				.build());
+	}
+	
+	/**
+	 * Verifies a user's two-factor authentication code and returns authentication tokens if valid.
+	 * <p>
+	 * This endpoint validates the provided verification code for the given email address. 
+	 * If the verification is successful, it returns a response containing the authenticated user's data, 
+	 * an access token, and a refresh token. Otherwise, an appropriate error is thrown and handled globally.
+	 * </p>
+	 *
+	 * @param email the user's email address
+	 * @param code the verification code to validate
+	 * @return a {@link ResponseEntity} containing an {@link HttpResponse} with user details and tokens
+	 */
 	@GetMapping("/verify/code/{email}/{code}")
 	public ResponseEntity<HttpResponse> verifyCode(@PathVariable String email, @PathVariable String code) {
+	    log.info("Received request to verify code '{}' for user '{}'", code, email);
 
-		UserDto user = userService.verifyCode(email, code);
-		return ResponseEntity.ok().body(HttpResponse.builder().timeStamp(LocalDateTime.now().toString())
-				.data(Map.of("user", user, "access_token", tokenProvider.createAccessToken(getUserPrincipal(user)),
-						"refresh_token", tokenProvider.createRefreshToken(getUserPrincipal(user))))
-				.message("Login successful").status(HttpStatus.OK).statusCode(HttpStatus.OK.value()).build());
+	    try {
+	        UserDto user = userService.verifyCode(email, code);
+	        log.info("Verification successful for user '{}'", email);
+
+	        Map<String, Object> data = new LinkedHashMap<>();
+	        data.put("user", user);
+	        data.put("access_token", tokenProvider.createAccessToken(getUserPrincipal(user)));
+	        data.put("refresh_token", tokenProvider.createRefreshToken(getUserPrincipal(user)));
+
+	        HttpResponse response = HttpResponse.builder()
+	                .timeStamp(LocalDateTime.now().toString())
+	                .data(data)
+	                .message("Login successful")
+	                .status(HttpStatus.OK)
+	                .statusCode(HttpStatus.OK.value())
+	                .build();
+
+	        return ResponseEntity.ok().body(response);
+	    } catch (Exception e) {
+	        log.error("Failed to verify code '{}' for user '{}': {}", code, email, e.getMessage());
+	        throw e; // rethrow to be handled by global exception handler
+	    }
 	}
+
 
 	/**
 	 * Builds a generic URI template for user-related operations.
@@ -138,10 +183,20 @@ public class UserController {
 	 * @throws ApiException if the user is null or token generation fails
 	 */
 	private ResponseEntity<HttpResponse> sendResponse(UserDto user) {
-		return ResponseEntity.ok().body(HttpResponse.builder().timeStamp(LocalDateTime.now().toString())
-				.data(Map.of("user", user, "access_token", tokenProvider.createAccessToken(getUserPrincipal(user)),
-						"refresh_token", tokenProvider.createRefreshToken(getUserPrincipal(user))))
-				.message("Login successful").status(HttpStatus.OK).statusCode(HttpStatus.OK.value()).build());
+	    Map<String, Object> data = new LinkedHashMap<>();
+	    data.put("user", user);
+	    data.put("access_token", tokenProvider.createAccessToken(getUserPrincipal(user)));
+	    data.put("refresh_token", tokenProvider.createRefreshToken(getUserPrincipal(user)));
+
+	    return ResponseEntity.ok().body(
+	            HttpResponse.builder()
+	                    .timeStamp(LocalDateTime.now().toString())
+	                    .data(data)
+	                    .message("Login successful")
+	                    .status(HttpStatus.OK)
+	                    .statusCode(HttpStatus.OK.value())
+	                    .build()
+	    );
 	}
 
 	/**

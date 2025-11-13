@@ -27,7 +27,6 @@ import com.clear.balance.clearBalance.repository.AccountVerificationRepository;
 import com.clear.balance.clearBalance.repository.RoleRepository;
 import com.clear.balance.clearBalance.repository.TwoFactorVerificationRepository;
 import com.clear.balance.clearBalance.repository.UserRepository;
-import com.clear.balance.clearBalance.repository.UserRoleRepository;
 import com.clear.balance.clearBalance.service.EmailService;
 import com.clear.balance.clearBalance.service.UserService;
 

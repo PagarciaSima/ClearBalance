@@ -15,10 +15,12 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.clear.balance.clearBalance.filter.CustomAuthorizationFilter;
 import com.clear.balance.clearBalance.handler.CustomAccessDeniedHandler;
 import com.clear.balance.clearBalance.handler.CustomAuthenticationEntryPoint;
 import com.clear.balance.clearBalance.service.impl.CustomUserDetailsServiceImpl;
@@ -55,7 +57,7 @@ public class SecurityConfig {
 	private final CustomAccessDeniedHandler customAccessDeniedHandler;
 	private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 	private final CustomUserDetailsServiceImpl customUserDetailsServiceImpl;
-    //private final CustomAuthorizationFilter customAuthorizationFilter;
+    private final CustomAuthorizationFilter customAuthorizationFilter;
 
 
 	@Bean
@@ -84,7 +86,7 @@ public class SecurityConfig {
 	            .requestMatchers(HttpMethod.DELETE, "/customer/delete/**").hasAnyAuthority("DELETE:CUSTOMER")
 	            .anyRequest().authenticated()
 	        )
-	        //.addFilterBefore(customAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)
+	        .addFilterBefore(customAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)
 	        .exceptionHandling(exception -> exception
 	            .accessDeniedHandler(customAccessDeniedHandler)
 	            .authenticationEntryPoint(customAuthenticationEntryPoint)
