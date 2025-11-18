@@ -11,7 +11,7 @@ import lombok.experimental.SuperBuilder;
 
 @Data
 @SuperBuilder
-@JsonInclude(content = JsonInclude.Include.NON_DEFAULT)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class HttpResponse {
     protected String timeStamp;
     protected int statusCode;

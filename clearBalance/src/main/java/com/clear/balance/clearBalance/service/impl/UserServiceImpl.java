@@ -8,12 +8,13 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.clear.balance.clearBalance.Utils.SmsUtils;
 import com.clear.balance.clearBalance.domain.AccountVerification;
+import com.clear.balance.clearBalance.domain.ResetPasswordVerification;
 import com.clear.balance.clearBalance.domain.Role;
 import com.clear.balance.clearBalance.domain.TwoFactorVerification;
 import com.clear.balance.clearBalance.domain.User;
@@ -24,6 +25,7 @@ import com.clear.balance.clearBalance.enumeration.RoleType;
 import com.clear.balance.clearBalance.enumeration.VerificationType;
 import com.clear.balance.clearBalance.exeception.ApiException;
 import com.clear.balance.clearBalance.repository.AccountVerificationRepository;
+import com.clear.balance.clearBalance.repository.ResetPasswordVerificationRepository;
 import com.clear.balance.clearBalance.repository.RoleRepository;
 import com.clear.balance.clearBalance.repository.TwoFactorVerificationRepository;
 import com.clear.balance.clearBalance.repository.UserRepository;
@@ -40,11 +42,13 @@ public class UserServiceImpl implements UserService {
 	private final UserRepository userRepository;
 	private final RoleRepository roleRepository;
 	private final RoleServiceImpl roleServiceImpl;
-	private final BCryptPasswordEncoder encoder;
+	private final PasswordEncoder encoder;
 	private final EmailService emailService;
 	private final AccountVerificationRepository accountVerificationRepository;
 	private final TwoFactorVerificationRepository twoFactorVerificationRepository;
+	private final ResetPasswordVerificationRepository resetPasswordVerificationRepository;
 	private final SmsUtils smsUtils;
+    private static final String DATE_FORMAT = "yyyy-MM-dd hh:mm:ss";
 
 	/**
 	 * Creates a new user in the system.
@@ -364,5 +368,159 @@ public class UserServiceImpl implements UserService {
 		log.info("Verification code '{}' successfully verified for user '{}'", code, email);
 
 		return UserDtoMapper.fromUser(user, roleServiceImpl.getRoleByUserId(user.getId()));
+	}
+	
+	/**
+	 * Resets the password process for the user associated with the given email.
+	 * <p>
+	 * This method performs the following steps:
+	 * <ul>
+	 *   <li>Retrieves the user by email and throws an {@link ApiException} if not found.</li>
+	 *   <li>Deletes any previous {@link ResetPasswordVerification} entries for the user.</li>
+	 *   <li>Generates a new password reset verification URL with a 24-hour expiration.</li>
+	 *   <li>Saves the verification entity to the database.</li>
+	 *   <li>(Optionally) Sends a password reset email to the user.</li>
+	 * </ul>
+	 * </p>
+	 *
+	 * @param email the email address of the user requesting the password reset
+	 * @return a {@link UserDto} representing the user whose password reset was initiated
+	 * @throws ApiException if no user exists with the provided email
+	 */
+	@Override
+	@Transactional
+	public UserDto resetPassword(String email) {
+	    User user = this.getUserByEmail(email); 
+	    if (user == null) {
+	        throw new ApiException("There is no account for this email address: " + email);
+	    }
+	    
+	    // Delete existing ResetPasswordVerification entries for the user
+	    resetPasswordVerificationRepository.deleteByUserId(user.getId());
+	    
+	    LocalDateTime expirationDate = LocalDateTime.now().plusDays(1);
+	    String verificationUrl = getVerificationUrl(UUID.randomUUID().toString(),
+	            VerificationType.PASSWORD.getType());
+	    
+	    log.info("Verification URL for password reset: {}", verificationUrl);
+	    
+	    //Create & save ResetPasswordVerification
+	    ResetPasswordVerification resetVerification = ResetPasswordVerification.builder()
+	            .user(user)
+	            .url(verificationUrl)
+	            .expirationDate(expirationDate) 
+	            .build();
+	    
+	    resetPasswordVerificationRepository.save(resetVerification);
+	    
+	    //Send email
+	    // sendEmail(user.getFirstName(), user.getEmail(), verificationUrl, VerificationType.PASSWORD);
+	    
+	    log.info("Password reset initiated for user: {}", email);
+	    return UserDtoMapper.fromUser(user);
+	}
+
+	/**
+	 * Verifies the validity of a password reset request identified by the given key.
+	 * <p>
+	 * This method performs the following steps:
+	 * <ul>
+	 *   <li>Logs the received verification key.</li>
+	 *   <li>Searches for a {@link ResetPasswordVerification} entry whose URL contains the key.</li>
+	 *   <li>Throws an {@link ApiException} if no matching verification entry exists.</li>
+	 *   <li>Checks whether the verification link has expired and deletes it if so,
+	 *       throwing an {@link ApiException} to notify the client.</li>
+	 *   <li>Retrieves the associated {@link User} when the key is valid and not expired.</li>
+	 *   <li>Returns a {@link UserDto} mapped from the verified user.</li>
+	 * </ul>
+	 * </p>
+	 *
+	 * @param key the unique password reset verification key included in the reset URL
+	 * @return a {@link UserDto} representing the user associated with the valid reset request
+	 * @throws ApiException if the verification key is invalid or the reset link has expired
+	 */
+	@Override
+	@Transactional
+	public UserDto verifyPassword(String key) {
+	    log.info("Verifying password reset key: {}", key);
+	    
+	    // Buscar por el UUID (parte final de la URL)
+	    ResetPasswordVerification verification = resetPasswordVerificationRepository.findByUrlContaining(key)
+	            .orElseThrow(() -> {
+	                log.error("Invalid password reset key: {}", key);
+	                return new ApiException("Invalid password reset link. Please request a new one.");
+	            });
+	    
+	    // Verificar si ha expirado
+	    if (verification.getExpirationDate().isBefore(LocalDateTime.now())) {
+	        log.warn("Password reset link has expired for key: {}", key);
+	        resetPasswordVerificationRepository.delete(verification);
+	        throw new ApiException("This link has expired. Please request a new password reset.");
+	    }
+	    
+	    User user = verification.getUser();
+	    log.info("Password reset key verified successfully for user: {}", user.getEmail());
+	    
+	    return UserDtoMapper.fromUser(user);
+	}
+
+	/**
+	 * Renews the user's password using a valid password reset verification key.
+	 * <p>
+	 * This method performs the following operations:
+	 * <ul>
+	 *   <li>Validates that the provided password and confirmation match.</li>
+	 *   <li>Retrieves the corresponding {@link ResetPasswordVerification} using the reset key,
+	 *       throwing an {@link ApiException} if the key is invalid.</li>
+	 *   <li>Checks whether the reset link has expired, removing it and throwing an
+	 *       {@link ApiException} if it is no longer valid.</li>
+	 *   <li>Encodes and updates the user's password with the newly provided value.</li>
+	 *   <li>Persists the updated user entity.</li>
+	 *   <li>Deletes the verification entry after successful password renewal.</li>
+	 *   <li>Returns a {@link UserDto} representing the updated user.</li>
+	 * </ul>
+	 * </p>
+	 *
+	 * @param key the unique verification key extracted from the password reset URL
+	 * @param password the new password the user wants to set
+	 * @param confirmPassword the confirmation of the new password, which must match {@code password}
+	 * @return a {@link UserDto} representing the user whose password was successfully renewed
+	 * @throws ApiException if passwords do not match, the key is invalid, or the reset link has expired
+	 */
+	@Override
+	@Transactional
+	public UserDto renewPassword(String key, String password, String confirmPassword) {
+	    log.info("Renewing password for key: {}", key);
+	    
+	    // 1. Check if passwords match
+	    if (!password.equals(confirmPassword)) {
+	        log.error("Passwords do not match for key: {}", key);
+	        throw new ApiException("Passwords do not match. Please try again.");
+	    }
+	    
+	    // 2. Check that reset link exists
+	    ResetPasswordVerification verification = resetPasswordVerificationRepository.findByUrlContaining(key)
+	            .orElseThrow(() -> {
+	                log.error("Invalid password reset key: {}", key);
+	                return new ApiException("Invalid password reset link. Please request a new one.");
+	            });
+	    
+	    // 3. Check if link has expired
+	    if (verification.getExpirationDate().isBefore(LocalDateTime.now())) {
+	        log.warn("Password reset link has expired for key: {}", key);
+	        resetPasswordVerificationRepository.delete(verification);
+	        throw new ApiException("This link has expired. Please request a new password reset.");
+	    }
+	    
+	    // 4. Update user's old password with the new encoded password
+	    User user = verification.getUser();
+	    user.setPassword(encoder.encode(password));
+	    userRepository.save(user);
+	    
+	    // 5. Delete the used verification entry
+	    resetPasswordVerificationRepository.delete(verification);
+	    
+	    log.info("Password successfully renewed for user: {}", user.getEmail());
+	    return UserDtoMapper.fromUser(user);
 	}
 }

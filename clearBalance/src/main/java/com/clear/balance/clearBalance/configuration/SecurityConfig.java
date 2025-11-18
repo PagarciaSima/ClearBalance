@@ -5,15 +5,11 @@ import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.ProviderManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -23,7 +19,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import com.clear.balance.clearBalance.filter.CustomAuthorizationFilter;
 import com.clear.balance.clearBalance.handler.CustomAccessDeniedHandler;
 import com.clear.balance.clearBalance.handler.CustomAuthenticationEntryPoint;
-import com.clear.balance.clearBalance.service.impl.CustomUserDetailsServiceImpl;
 
 import lombok.RequiredArgsConstructor;
 
@@ -53,25 +48,9 @@ public class SecurityConfig {
 
 	public static final List<String> ALLOWED_METHODS =
 	            List.of("GET", "POST", "PUT", "DELETE", "OPTIONS");
-	private static final int STRENGHT = 12;
 	private final CustomAccessDeniedHandler customAccessDeniedHandler;
 	private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
-	private final CustomUserDetailsServiceImpl customUserDetailsServiceImpl;
     private final CustomAuthorizationFilter customAuthorizationFilter;
-
-
-	@Bean
-	BCryptPasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder(STRENGHT);
-	}
-
-	@Bean
-	AuthenticationManager authenticationManager() {
-		DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-		authProvider.setUserDetailsService(customUserDetailsServiceImpl);
-		authProvider.setPasswordEncoder(passwordEncoder());
-		return new ProviderManager(authProvider);
-	}
 
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

@@ -22,8 +22,10 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.clear.balance.clearBalance.domain.UserPrincipal;
+import com.clear.balance.clearBalance.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -35,6 +37,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class TokenProvider {
 
 	private static final String CLEAR_BALANCE_LLC = "CLEAR_BALANCE_LLC";
@@ -43,6 +46,7 @@ public class TokenProvider {
 	public static final long ACCESS_TOKEN_EXPIRATION_TIME = 1 * 60 * 60 * 1000; // 1 hour
 	private static final long REFRESH_TOKEN_EXPIRATION_TIME = 24 * 60 * 60 * 1000; // 24 hours
 	private static final String TOKEN_CANNOT_BE_VERIFIED = "Token cannot be verified";
+	private final UserService userService;
 
 	@Value("${jwt.secret}")
 	private String secret;
@@ -92,41 +96,48 @@ public class TokenProvider {
 		}
 	}
 	
-    /**
-     * Retrieves the subject (typically the user identifier) from a JWT token.
-     * <p>
-     * This method verifies the token using the configured JWTVerifier and returns the "sub" claim.
-     * In case of expiration or invalid claims, it logs the issue and sets an attribute in the HttpServletRequest.
-     *
-     * @param token   the JWT token to decode
-     * @param request the current HttpServletRequest, used to store error attributes if needed
-     * @return the subject (sub claim) if the token is valid; null if the token is expired or invalid
-     */
-    public String getSubject(String token, HttpServletRequest request) {
-        log.debug("Attempting to extract subject from token.");
+	/**
+	 * Extracts the subject (typically the user's email or identifier) from the provided JWT token.
+	 * <p>
+	 * This method verifies the token using the configured JWT verifier. If verification succeeds,
+	 * it retrieves and returns the subject from the token. The following exceptions are handled:
+	 * <ul>
+	 *     <li>{@link TokenExpiredException} – if the token has expired, it is logged and re-thrown for higher-level handling.</li>
+	 *     <li>{@link InvalidClaimException} – if the token contains invalid claims, it is logged and re-thrown.</li>
+	 *     <li>{@link Exception} – any other unexpected errors during verification are logged and wrapped in a {@link RuntimeException}.</li>
+	 * </ul>
+	 * <p>
+	 * Logs are generated at debug and info levels for tracing the token verification and subject extraction process.
+	 *
+	 * @param token the JWT token string to verify and extract the subject from
+	 * @param request the {@link HttpServletRequest} associated with the current request (used for context if needed)
+	 * @return the subject extracted from the JWT token
+	 * @throws TokenExpiredException if the token has expired
+	 * @throws InvalidClaimException if the token contains invalid claims
+	 * @throws RuntimeException for any other unexpected errors during token verification
+	 */
 
-        try {
-            DecodedJWT decodedJWT = this.getJWTVerifier().verify(token);
-            String subject = decodedJWT.getSubject();
-            log.info("Successfully retrieved subject '{}' from token.", subject);
-            return subject;
+	public String getSubject(String token, HttpServletRequest request) {
+	    log.debug("Attempting to extract subject from token.");
+	    try {
+	        DecodedJWT decodedJWT = this.getJWTVerifier().verify(token);
+	        String subject = decodedJWT.getSubject();
+	        log.info("Successfully retrieved subject '{}' from token.", subject);
+	        return subject;
 
-        } catch (TokenExpiredException e) {
-            log.error("Token has expired: {}", e.getMessage());
-            request.setAttribute("expiredMessage", e.getMessage());
+	    } catch (TokenExpiredException e) {
+	        log.error("Token has expired: {}", e.getMessage());
+	        throw e; // relanzar para que se maneje en el filtro
 
-        } catch (InvalidClaimException e) {
-            log.error("Invalid claim in token: {}", e.getMessage());
-            request.setAttribute("invalidClaim", e.getMessage());
+	    } catch (InvalidClaimException e) {
+	        log.error("Invalid claim in token: {}", e.getMessage());
+	        throw e;
 
-        } catch (Exception e) {
-            log.error("Error verifying token: {}", e.getMessage(), e);
-            request.setAttribute("tokenError", e.getMessage());
-        }
-
-        log.warn("Failed to retrieve subject from token.");
-        return null;
-    }
+	    } catch (Exception e) {
+	        log.error("Error verifying token: {}", e.getMessage(), e);
+	        throw new RuntimeException(e);
+	    }
+	}
     
 	/**
 	 * Extracts granted authorities (roles/permissions) from a verified JWT token.
@@ -147,35 +158,33 @@ public class TokenProvider {
 		return authorities;
 	}
 	
-	/**
-	 * Builds and returns an {@link Authentication} object based on the given user information.
-	 * <p>
-	 * This method creates a {@link UsernamePasswordAuthenticationToken} with the user's email as the principal,
-	 * no credentials (since the token is already verified), and the provided list of authorities (roles or permissions).
-	 * It also attaches additional request details for audit or security purposes.
-	 * </p>
-	 *
-	 * @param email        the email (or username) of the authenticated user
-	 * @param authorities  the list of {@link GrantedAuthority} associated with the user
-	 * @param request      the current {@link HttpServletRequest} used to extract request metadata
-	 * @return an authenticated {@link Authentication} token representing the user
-	 */
-	public Authentication getAuthentication(String email, List<GrantedAuthority> authorities,
-	        HttpServletRequest request) {
+    /**
+     * Builds a Spring Security {@link Authentication} token for a given user email and authorities.
+     * <p>
+     * This method fetches the user by email, creates a {@link UsernamePasswordAuthenticationToken},
+     * and attaches extra request details like IP address and session ID.
+     *
+     * @param email       The email of the user to authenticate.
+     * @param authorities List of {@link GrantedAuthority} granted to the user.
+     * @param request     The {@link HttpServletRequest} containing request-specific information.
+     * @return An {@link Authentication} token ready to be used in the Spring Security context.
+     */
+    public Authentication getAuthentication(String email, List<GrantedAuthority> authorities,
+                                            HttpServletRequest request) {
 
-	    log.debug("Building authentication token for user: {}", email);
+        log.debug("Building authentication token for user: {}", email);
 
-	    UsernamePasswordAuthenticationToken userPasswordAuthToken =
-	            new UsernamePasswordAuthenticationToken(email, null, authorities);
-	    
-	    // Set extra data like IP address, session ID, etc.
-	    userPasswordAuthToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        UsernamePasswordAuthenticationToken userPasswordAuthToken =
+                new UsernamePasswordAuthenticationToken(userService.getUserByEmail(email), null, authorities);
 
-	    log.info("Authentication token successfully created for user: {} with {} authorities",
-	            email, authorities.size());
+        // Set extra data like IP address, session ID, etc.
+        userPasswordAuthToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-	    return userPasswordAuthToken;
-	}
+        log.info("Authentication token successfully created for user: {} with {} authorities",
+                email, authorities.size());
+
+        return userPasswordAuthToken;
+    }
 	
     /**
      * Validates if a JWT token is valid for a given email.

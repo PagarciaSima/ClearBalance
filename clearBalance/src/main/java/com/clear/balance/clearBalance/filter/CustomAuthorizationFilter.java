@@ -14,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.clear.balance.clearBalance.Utils.ExceptionUtils;
 import com.clear.balance.clearBalance.provider.TokenProvider;
 
 import jakarta.servlet.FilterChain;
@@ -22,13 +23,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
-/**
- * @author Junior RT
- * @version 1.0
- * @license Get Arrays, LLC (https://getarrays.io)
- * @since 1/2/2023
- */
 
 @Component
 @RequiredArgsConstructor
@@ -46,31 +40,57 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
 			"/user/register"
 	};
 	
+	/**
+	 * Filters incoming HTTP requests to handle JWT-based authentication.
+	 * <p>
+	 * This method is invoked for every request (unless {@link #shouldNotFilter(HttpServletRequest)} returns true)
+	 * and performs the following steps:
+	 * <ol>
+	 *     <li>Extracts the JWT token and subject (email) from the request using {@link #getRequestValues(HttpServletRequest)}.</li>
+	 *     <li>Validates the token via {@link TokenProvider#isTokenValid(String, String)}.</li>
+	 *     <li>If valid, retrieves authorities from the token and sets the {@link Authentication} object
+	 *         in the {@link SecurityContextHolder}.</li>
+	 *     <li>If invalid or null, clears the security context.</li>
+	 *     <li>Delegates to the rest of the filter chain.</li>
+	 * </ol>
+	 * <p>
+	 * Any exceptions during token processing (invalid signature, expired token, null values, etc.) are logged
+	 * and processed using {@link ExceptionUtils#processError(HttpServletRequest, HttpServletResponse, Exception)}.
+	 *
+	 * @param request the incoming {@link HttpServletRequest}
+	 * @param response the {@link HttpServletResponse} to write errors if needed
+	 * @param filterChain the {@link FilterChain} to pass control to the next filter
+	 * @throws ServletException if an exception occurs during filtering
+	 * @throws IOException if an I/O error occurs during filtering
+	 */
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-			throws ServletException, IOException {
+	        throws ServletException, IOException {
 
-		try {
-			Map<String, String> values = getRequestValues(request);
-			String token = this.getToken(request);
-			if(this.tokenProvider.isTokenValid(values.get("email"), token)) {
-				List<GrantedAuthority> authorities = this.tokenProvider.getAuthoritiesFromToken(values.get(TOKEN_KEY));
-				Authentication authentication = this.tokenProvider.getAuthentication(values.get(EMAIL_KEY), authorities, request);
-				SecurityContextHolder.getContext().setAuthentication(authentication);
-			} else {
-				SecurityContextHolder.clearContext();
-			}
-			filterChain.doFilter(request, response);
-		} catch (Exception e) {
-			log.error("Error logging in: {}", e.getMessage());
-			processError(request, response, e);
-		}
+	    try {
+	        Map<String, String> values = getRequestValues(request);
+	        String token = this.getToken(request);
+
+	        log.debug("Processing authentication for token: {}", token);
+
+	        if (this.tokenProvider.isTokenValid(values.get(EMAIL_KEY), token)) {
+	            List<GrantedAuthority> authorities = this.tokenProvider.getAuthoritiesFromToken(values.get(TOKEN_KEY));
+	            Authentication authentication = this.tokenProvider.getAuthentication(values.get(EMAIL_KEY), authorities, request);
+	            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+	            log.info("Authentication successful for email: {}", values.get(EMAIL_KEY));
+	        } else {
+	            SecurityContextHolder.clearContext();
+	            log.warn("Invalid or missing token for request to {}", request.getRequestURI());
+	        }
+
+	        filterChain.doFilter(request, response);
+	    } catch (Exception e) {
+	        log.error("Error processing authentication: {}", e.getMessage(), e);
+	        ExceptionUtils.processError(request, response, e);
+	    }
 	}
-	
-	private void processError(HttpServletRequest request, HttpServletResponse response, Exception e) {
-		// TODO Auto-generated method stub
-		
-	}
+
 
 	/**
 	 * Extracts the JWT token from the HTTP Authorization header if present and properly formatted.
@@ -89,7 +109,7 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
 	            .filter(header -> header.startsWith(TOKEN_PREFIX))
 	            // Replace prefix "Bearer " and trim whitespace
 	            .map(header -> header.replace(TOKEN_PREFIX, "").trim())
-	            .orElse(null);
+	            .get();
 	}
 
 	/**
@@ -131,6 +151,23 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
 	    return false;
 	}
 	
+	/**
+	 * Extracts key values from the HTTP request related to authentication.
+	 * <p>
+	 * This method retrieves the JWT token from the request using {@link #getToken(HttpServletRequest)} 
+	 * and then extracts the subject (typically the user's email) from the token via the {@link TokenProvider}.
+	 * It returns a map containing:
+	 * <ul>
+	 *     <li>{@code "email"}: the subject extracted from the JWT token (may be null if the token is missing or invalid)</li>
+	 *     <li>{@code "token"}: the raw JWT token extracted from the Authorization header (may be null if missing)</li>
+	 * </ul>
+	 * <p>
+	 * Note: If the token is null or invalid, calling this method may result in a {@link NullPointerException} 
+	 * when the subject cannot be retrieved. Consider adding null checks or exception handling when using this method.
+	 *
+	 * @param request the {@link HttpServletRequest} containing the Authorization header
+	 * @return a {@link Map} with keys "email" and "token" containing the extracted values
+	 */
 	Map<String, String> getRequestValues(HttpServletRequest request) {
         return Map.of(
     		EMAIL_KEY, tokenProvider.getSubject(getToken(request), request),

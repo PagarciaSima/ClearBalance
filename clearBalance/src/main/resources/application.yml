@@ -1,6 +1,11 @@
 jwt:
   secret: ${JWT_SECRET}
-  
+server:
+  error:
+    path: /user/error
+    whitelabel:
+      enabled: false
+      
 spring:
   profiles:
     active: ${ACTIVE_PROFILE:dev}

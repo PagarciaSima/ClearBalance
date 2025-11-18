@@ -1,5 +1,6 @@
 package com.clear.balance.clearBalance.controller;
 
+import static org.springframework.security.authentication.UsernamePasswordAuthenticationToken.unauthenticated;
 import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentContextPath;
 
 import java.net.URI;
@@ -12,12 +13,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.clear.balance.clearBalance.Utils.ExceptionUtils;
 import com.clear.balance.clearBalance.domain.HttpResponse;
 import com.clear.balance.clearBalance.domain.User;
 import com.clear.balance.clearBalance.domain.UserPrincipal;
@@ -29,10 +32,11 @@ import com.clear.balance.clearBalance.provider.TokenProvider;
 import com.clear.balance.clearBalance.service.RoleService;
 import com.clear.balance.clearBalance.service.UserService;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import static org.springframework.security.authentication.UsernamePasswordAuthenticationToken.unauthenticated;
 
 /**
  * REST controller for managing user-related operations such as registration.
@@ -50,15 +54,41 @@ public class UserController {
 	private final AuthenticationManager authenticationManager;
 	private final TokenProvider tokenProvider;
 	private final RoleService roleService;
+	private final HttpServletRequest request;
+	private final HttpServletResponse response;
 
-	@PostMapping("/login")
-	public ResponseEntity<?> login(@RequestBody(required = true) @Valid LoginRequestDto loginRequestDto) {
-		authenticationManager.authenticate(
-				unauthenticated(loginRequestDto.getEmail(), loginRequestDto.getPassword()));
-		UserDto userDto = userService.getUserDtoByEmail(loginRequestDto.getEmail());
-		return userDto.isUsingMfa() ? sendVerificationCode(userDto) : sendResponse(userDto);
-	}
+    /**
+     * Handles user login requests.
+     * <p>
+     * This method authenticates the user using their email and password,
+     * retrieves the authenticated {@link UserDto}, and then:
+     * <ul>
+     *     <li>If the user is using MFA (multi-factor authentication), it sends a verification code.</li>
+     *     <li>If not, it sends the standard login response.</li>
+     * </ul>
+     *
+     * @param loginRequestDto the login request containing email and password
+     * @return a {@link ResponseEntity} containing either the MFA verification response
+     *         or the standard user login response
+     */
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody @Valid LoginRequestDto loginRequestDto) {
+        log.info("Login attempt for user: {}", loginRequestDto.getEmail());
 
+        Authentication authentication = authenticate(loginRequestDto.getEmail(), loginRequestDto.getPassword());
+        log.debug("Authentication object created for user: {}", loginRequestDto.getEmail());
+
+        UserDto userDto = getAuthenticatedUserDto(authentication);
+        if (userDto == null) {
+            log.warn("Authenticated UserDto is null for user: {}", loginRequestDto.getEmail());
+            return ResponseEntity.status(500).body("Failed to retrieve authenticated user information.");
+        }
+
+        log.info("User '{}' authenticated successfully. MFA enabled: {}", userDto.getEmail(), userDto.isUsingMfa());
+
+        return userDto.isUsingMfa() ? sendVerificationCode(userDto) : sendResponse(userDto);
+    }
+    
 	/**
 	 * Registers a new user in the system.
 	 * <p>
@@ -83,9 +113,13 @@ public class UserController {
 
 			// Build and return response
 			ResponseEntity<HttpResponse> response = ResponseEntity.created(getUri())
-					.body(HttpResponse.builder().timeStamp(LocalDateTime.now().toString()).data(Map.of("user", userDto))
+					.body(
+							HttpResponse.builder()
+							.timeStamp(LocalDateTime.now().toString())
+							.data(Map.of("user", userDto))
 							.message(String.format("User account created for user %s", user.getFirstName()))
-							.status(HttpStatus.CREATED).statusCode(HttpStatus.CREATED.value()).build());
+							.status(HttpStatus.CREATED).statusCode(HttpStatus.CREATED.value())
+							.build());
 
 			log.info("Registration completed successfully for email: {}", user.getEmail());
 			return response;
@@ -96,18 +130,117 @@ public class UserController {
 		}
 	}
 
-	@GetMapping("/profile")
-	public ResponseEntity<HttpResponse> profile(Authentication authentication) {
+    /**
+     * Retrieves the profile information of the authenticated user.
+     *
+     * @param authentication The authentication object containing the user's details.
+     * @return ResponseEntity containing HttpResponse with user profile data and HTTP status.
+     */
+    @GetMapping("/profile")
+    public ResponseEntity<HttpResponse> profile(Authentication authentication) {
+        log.info("Profile request received for user: {}", authentication.getName());
 
-		UserDto user = userService.getUserDtoByEmail(authentication.getName());
-		return ResponseEntity.ok().body(HttpResponse.builder().timeStamp(LocalDateTime.now().toString())
-				.data(Map.of("user", user))
-				.message("Profile Retrieve")
-				.status(HttpStatus.OK)
-				.statusCode(HttpStatus.OK.value())
-				.build());
-	}
-	
+        UserDto user = userService.getUserDtoByEmail(authentication.getName());
+        log.debug("User retrieved from service: {}", user);
+
+        HttpResponse response = HttpResponse.builder()
+                .timeStamp(LocalDateTime.now().toString())
+                .data(Map.of("user", user))
+                .message("Profile retrieved successfully")
+                .status(HttpStatus.OK)
+                .statusCode(HttpStatus.OK.value())
+                .build();
+
+        log.info("Profile response prepared for user: {}", authentication.getName());
+        return ResponseEntity.ok().body(response);
+    }
+    
+    /**
+     * Handles password reset requests for a given user email.
+     * <p>
+     * This endpoint triggers the password reset process by delegating to the
+     * {@link UserService#resetPassword(String)} method. If the email exists,
+     * a reset link or temporary password is sent to the user.
+     * </p>
+     *
+     * @param email the email address of the user requesting the password reset
+     * @return a {@link ResponseEntity} containing an {@link HttpResponse} with the result
+     */
+    @GetMapping("/resetpassword/{email}")
+    public ResponseEntity<HttpResponse> resetPassword(@PathVariable("email") String email) {
+        log.info("Received password reset request for email: {}", email);
+
+        UserDto user = userService.resetPassword(email);
+        log.info("Password reset process completed for user: {}", user.getId());
+
+        HttpResponse response = HttpResponse.builder()
+                .timeStamp(LocalDateTime.now().toString())
+                .message("Email sent. Please check your email to reset your password")
+                .status(HttpStatus.OK)
+                .statusCode(HttpStatus.OK.value())
+                .build();
+
+        log.debug("Password reset response generated for email: {}", email);
+
+        return ResponseEntity.ok().body(response);
+    }
+    
+    /**
+     * Verifies a password reset request using the provided verification key.
+     * <p>
+     * This endpoint is called when the user clicks the password reset link sent to their email.
+     * It performs the following actions:
+     * <ul>
+     *   <li>Logs the received verification key.</li>
+     *   <li>Delegates the verification process to {@code userService.verifyPassword(key)}.</li>
+     *   <li>Builds an {@link HttpResponse} instructing the client to prompt the user
+     *       to enter a new password.</li>
+     * </ul>
+     * </p>
+     *
+     * @param key the unique verification key included in the password reset URL
+     * @return a {@link ResponseEntity} containing an {@link HttpResponse} with the user data
+     *         and a message indicating that the user may proceed to set a new password
+     */
+    @GetMapping("/verify/password/{key}")
+    public ResponseEntity<HttpResponse> verifyPassword(@PathVariable("key") String key) {
+        log.info("Verifying password reset key: {}", key);
+        UserDto user = userService.verifyPassword(key);
+        log.debug("Password verification process completed");
+
+        HttpResponse response = HttpResponse.builder()
+                .timeStamp(LocalDateTime.now().toString())
+                .data(Map.of("user", user))
+                .message("Please enter a new password")
+                .status(HttpStatus.OK)
+                .statusCode(HttpStatus.OK.value())
+                .build();
+
+
+        return ResponseEntity.ok().body(response);
+    }
+    
+    @PatchMapping("/resetpassword/{key}/{password}/{confirmPassword}")
+    public ResponseEntity<HttpResponse> resetPassword(
+    		@PathVariable("key") String key,
+    		@PathVariable("password") String password,
+    		@PathVariable("confirmPassword") String confirmPassword
+	) {
+        log.info("Resetting password using key: {}", key);
+        UserDto user = userService.renewPassword(key, password, confirmPassword);
+        log.debug("Password reset process completed");
+
+        HttpResponse response = HttpResponse.builder()
+                .timeStamp(LocalDateTime.now().toString())
+                .data(Map.of("user", user))
+                .message("Password successfully changed")
+                .status(HttpStatus.OK)
+                .statusCode(HttpStatus.OK.value())
+                .build();
+
+        return ResponseEntity.ok().body(response);
+    }
+    
 	/**
 	 * Verifies a user's two-factor authentication code and returns authentication tokens if valid.
 	 * <p>
@@ -148,6 +281,28 @@ public class UserController {
 	    }
 	}
 
+    /**
+     * Handles unmapped or invalid HTTP requests and returns a detailed error response.
+     *
+     * @param request The HttpServletRequest object containing request details.
+     * @return ResponseEntity containing HttpResponse with error details and HTTP 400 status.
+     */
+    @RequestMapping("/error")
+    public ResponseEntity<HttpResponse> handleError(HttpServletRequest request) {
+        String method = request.getMethod();
+        String path = request.getRequestURI();
+        log.warn("Unhandled request received: {} {}", method, path);
+
+        HttpResponse response = HttpResponse.builder()
+                .timeStamp(LocalDateTime.now().toString())
+                .reason("There is no mapping for a " + method + " request for this path on the server")
+                .status(HttpStatus.BAD_REQUEST)
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .build();
+
+        log.info("Returning BAD_REQUEST response for {} {}", method, path);
+        return ResponseEntity.badRequest().body(response);
+    }
 
 	/**
 	 * Builds a generic URI template for user-related operations.
@@ -221,7 +376,7 @@ public class UserController {
 			var role = roleService.getRoleByUserId(user.getId());
 			log.trace("Fetched role for user ID {}: {}", user.getId(), role);
 
-			var userPrincipal = new UserPrincipal(UserDtoMapper.toUser(userDto), role.getPermission());
+			var userPrincipal = new UserPrincipal(UserDtoMapper.toUser(userDto), role);
 
 			log.info("Successfully created UserPrincipal for user: {}", user.getEmail());
 			return userPrincipal;
@@ -230,4 +385,61 @@ public class UserController {
 			throw e;
 		}
 	}
+	
+    /**
+     * Attempts to authenticate a user with the given email and password.
+     * <p>
+     * If authentication succeeds, returns an {@link Authentication} object.
+     * If authentication fails, logs the error, writes a detailed JSON error response
+     * to the client using {@link ExceptionUtils#processError}, and throws an {@link ApiException}.
+     *
+     * @param email    The email of the user attempting to authenticate.
+     * @param password The password provided by the user.
+     * @return An {@link Authentication} object if authentication succeeds.
+     * @throws ApiException if authentication fails.
+     */
+    private Authentication authenticate(String email, String password) {
+        log.debug("Starting authentication process for user: {}", email);
+        Authentication authentication = null;
+
+        try {
+            authentication = authenticationManager.authenticate(
+                    unauthenticated(email, password));
+            log.info("User '{}' successfully authenticated", email);
+        } catch (Exception e) {
+            log.error("Authentication failed for user '{}': {}", email, e.getMessage(), e);
+            ExceptionUtils.processError(request, response, e);
+            log.debug("ApiException thrown for user '{}'", email);
+            throw new ApiException(e.getMessage());
+        }
+
+        return authentication;
+    }
+    
+    /**
+     * Retrieves the authenticated user's {@link UserDto} from the given {@link Authentication} object.
+     * <p>
+     * If the {@link Authentication} principal is not an instance of {@link UserPrincipal} or is null,
+     * this method returns {@code null}.
+     *
+     * @param authentication the {@link Authentication} object containing the authenticated principal
+     * @return the {@link UserDto} of the authenticated user, or {@code null} if not available
+     */
+    private UserDto getAuthenticatedUserDto(Authentication authentication) {
+        if (authentication == null || authentication.getPrincipal() == null) {
+            log.warn("Authentication or principal is null. Cannot retrieve UserDto.");
+            return null;
+        }
+
+        Object principal = authentication.getPrincipal();
+
+        if (principal instanceof UserPrincipal) {
+            UserDto userDto = ((UserPrincipal) principal).getUser();
+            log.debug("Retrieved UserDto for authenticated user: {}", userDto.getEmail());
+            return userDto;
+        } else {
+            log.warn("Authentication principal is not an instance of UserPrincipal. Found: {}", principal.getClass().getName());
+            return null;
+        }
+    }
 }

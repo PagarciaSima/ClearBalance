@@ -17,5 +17,8 @@ public interface UserService {
 	User getUserByEmail(String email);
 	void sendVerificationCode(UserDto userDto);
 	UserDto verifyCode(String email, String code);
+	UserDto resetPassword(String email);
+	UserDto verifyPassword(String key);
+	UserDto renewPassword(String key, String password, String confirmPassword);
 
 }

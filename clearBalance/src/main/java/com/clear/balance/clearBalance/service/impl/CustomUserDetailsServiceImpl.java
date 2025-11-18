@@ -48,7 +48,7 @@ public class CustomUserDetailsServiceImpl implements UserDetailsService {
         }
 
         log.info("User {} role found: {}", email, role.getPermission());
-        return new UserPrincipal(user, role.getPermission());
+        return new UserPrincipal(user, role);
     }
 
 }

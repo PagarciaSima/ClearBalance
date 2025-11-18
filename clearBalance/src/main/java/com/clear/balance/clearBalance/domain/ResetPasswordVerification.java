@@ -4,36 +4,37 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@Entity
-@Table(name = "twofactorverifications")
-@Getter
-@Setter
-@Builder
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TwoFactorVerification {
-
+@Builder
+@Entity
+@Table(name = "resetpasswordverifications")
+public class ResetPasswordVerification {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id", nullable = false, unique = true, columnDefinition = "BIGINT UNSIGNED")
-    private Long userId; 
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
+    private User user;
 
-    @Column(name = "code", nullable = false, unique = true, length = 10)
-    private String code;
+    @Column(nullable = false, unique = true)
+    private String url;
 
     @Column(name = "expiration_date", nullable = false)
     private LocalDateTime expirationDate;
 }
-

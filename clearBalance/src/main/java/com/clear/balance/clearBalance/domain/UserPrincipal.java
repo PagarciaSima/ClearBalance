@@ -8,6 +8,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.clear.balance.clearBalance.dto.UserDto;
+import com.clear.balance.clearBalance.dtoMapper.UserDtoMapper;
+
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -16,10 +19,10 @@ public class UserPrincipal implements UserDetails {
 	private static final long serialVersionUID = 1907725179336300395L;
 	
 	private final User user;
-	private final String permissions;
+	private final Role role;
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		return Arrays.stream(permissions.split(","))
+		return Arrays.stream(this.role.getPermission().split(","))
 	             .map(String::trim)
 	             .map(SimpleGrantedAuthority::new)
 	             .collect(Collectors.toList());
@@ -53,5 +56,9 @@ public class UserPrincipal implements UserDetails {
 	@Override
 	public boolean isEnabled() {
 		return this.user.isEnabled();
+	}
+	
+	public UserDto getUser() {
+		return UserDtoMapper.fromUser(this.user, this.role);
 	}
 }
