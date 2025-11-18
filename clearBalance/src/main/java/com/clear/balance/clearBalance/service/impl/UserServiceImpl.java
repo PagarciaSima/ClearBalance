@@ -86,7 +86,7 @@ public class UserServiceImpl implements UserService {
 			// 2. Save user with basic data
 			log.debug("Encoding password and saving basic user information for: {}", user.getEmail());
 			user.setPassword(encoder.encode(user.getPassword()));
-			user.setEnabled(true);
+			user.setEnabled(false);
 			user.setNotLocked(true);
 			userRepository.save(user);
 
@@ -521,6 +521,49 @@ public class UserServiceImpl implements UserService {
 	    resetPasswordVerificationRepository.delete(verification);
 	    
 	    log.info("Password successfully renewed for user: {}", user.getEmail());
+	    return UserDtoMapper.fromUser(user);
+	}
+
+	/**
+	 * Verifies and activates a user account using the provided verification key.
+	 * <p>
+	 * This method handles the account activation flow after a user clicks the 
+	 * verification link sent to their email during registration. It performs the following steps:
+	 * <ul>
+	 *   <li>Logs the received verification key.</li>
+	 *   <li>Retrieves the corresponding {@link AccountVerification} entry using the key,
+	 *       throwing an {@link ApiException} if the key is invalid.</li>
+	 *   <li>Activates the user's account by setting {@code enabled = true} and persists the change.</li>
+	 *   <li>Deletes the verification entry to prevent reuse.</li>
+	 *   <li>Returns a {@link UserDto} representing the newly activated user.</li>
+	 * </ul>
+	 * </p>
+	 *
+	 * @param key the unique account verification key extracted from the activation URL
+	 * @return a {@link UserDto} representing the user whose account has been successfully activated
+	 * @throws ApiException if the verification key is invalid
+	 */
+	@Override
+	@Transactional
+	public UserDto verifyAccount(String key) {
+	    log.info("Verifying account with key: {}", key);
+	    
+	    // Search by UUID key
+	    AccountVerification verification = accountVerificationRepository.findByUrlContaining(key)
+	            .orElseThrow(() -> {
+	                log.error("Invalid account verification key: {}", key);
+	                return new ApiException("Invalid account verification link. Please request a new one.");
+	            });
+	    
+	    // Activar la cuenta del usuario
+	    User user = verification.getUser();
+	    user.setEnabled(true);
+	    userRepository.save(user);
+	    
+	    // Delete verification entry
+	    accountVerificationRepository.delete(verification);
+	    
+	    log.info("Account successfully verified and activated for user: {}", user.getEmail());
 	    return UserDtoMapper.fromUser(user);
 	}
 }

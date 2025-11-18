@@ -280,6 +280,37 @@ public class UserController {
 	        throw e; // rethrow to be handled by global exception handler
 	    }
 	}
+	
+	/**
+	 * Verifies a user account using the provided verification key.
+	 * <p>
+	 * This endpoint is invoked when the user clicks the account verification link
+	 * sent to their email during the registration process. It performs the following actions:
+	 * <ul>
+	 *   <li>Logs the received verification key.</li>
+	 *   <li>Delegates the verification logic to {@code userService.verifyAccount(key)}.</li>
+	 *   <li>Logs completion of the verification for debugging purposes.</li>
+	 *   <li>Builds an {@link HttpResponse} indicating that the account has been successfully verified.</li>
+	 * </ul>
+	 * </p>
+	 *
+	 * @param key the unique verification key included in the account activation URL
+	 * @return a {@link ResponseEntity} containing an {@link HttpResponse} with a success message
+	 */
+	@GetMapping("/verify/account/{key}")
+	public ResponseEntity<HttpResponse> verifyAccount(@PathVariable String key) {
+		log.info("Verifying account with key: {}", key);
+        UserDto user = userService.verifyAccount(key);
+        log.debug("Account verification process completed for user ID: {}", user.getId());
+        HttpResponse response = HttpResponse.builder()
+                .timeStamp(LocalDateTime.now().toString())
+                .message("Account verified successfully")
+                .status(HttpStatus.OK)
+                .statusCode(HttpStatus.OK.value())
+                .build();
+
+        return ResponseEntity.ok().body(response);
+	}
 
     /**
      * Handles unmapped or invalid HTTP requests and returns a detailed error response.
