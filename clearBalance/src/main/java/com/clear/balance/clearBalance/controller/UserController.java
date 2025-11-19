@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -50,6 +51,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class UserController {
 
+	private static final String TOKEN_PREFIX = "Bearer ";
 	private final UserService userService;
 	private final AuthenticationManager authenticationManager;
 	private final TokenProvider tokenProvider;
@@ -311,8 +313,63 @@ public class UserController {
 
         return ResponseEntity.ok().body(response);
 	}
+	
+	@GetMapping("/refresh/token")
+	public ResponseEntity<HttpResponse> refreshToken(HttpServletRequest request) {
+		log.info("Received token refresh request");
+		HttpResponse response = null;
+		String token = request.getHeader(HttpHeaders.AUTHORIZATION).substring(TOKEN_PREFIX.length());
 
-    /**
+		if(isHeaderTokenValid(request, token)) {
+			UserDto user = this.userService.getUserDtoByEmail(this.tokenProvider.getSubject(token, request));
+			response = HttpResponse.builder()
+	                .timeStamp(LocalDateTime.now().toString())
+	                .data(
+	                		Map.of(
+	                				"user", user,
+	                				"refresh_token", tokenProvider.createRefreshToken(getUserPrincipal(user))
+            				)
+            		)
+	                .message("Token refreshed successfully")
+	                .status(HttpStatus.OK)
+	                .statusCode(HttpStatus.OK.value())
+	                .build();
+		} else {
+			response = HttpResponse.builder()
+	                .timeStamp(LocalDateTime.now().toString())
+	                .reason("Refresh token missing or invalid")
+	                .developerMessage("Refresh token missing or invalid")
+	                .status(HttpStatus.BAD_REQUEST)
+	                .statusCode(HttpStatus.BAD_REQUEST.value())
+	                .build();
+		}
+		
+        return ResponseEntity.ok().body(response);
+	}
+
+	/**
+	 * Validates whether the authorization header contains a valid token.
+	 * <p>
+	 * This method checks the following conditions:
+	 * <ul>
+	 *   <li>The {@code Authorization} header exists in the request.</li>
+	 *   <li>The header starts with the expected token prefix (e.g., "Bearer ").</li>
+	 *   <li>The provided token is valid according to the {@code tokenProvider}, using the token's subject.</li>
+	 * </ul>
+	 * </p>
+	 *
+	 * @param request the incoming HTTP request containing the authorization header
+	 * @param token the JWT or security token extracted from the authorization header
+	 * @return {@code true} if the header and token are valid; {@code false} otherwise
+	 */
+	private boolean isHeaderTokenValid(HttpServletRequest request, String token) {
+	    String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+	    return authHeader != null && 
+	           authHeader.startsWith(TOKEN_PREFIX) &&
+	           tokenProvider.isTokenValid(tokenProvider.getSubject(token, request), token);
+	}
+	
+	/**
      * Handles unmapped or invalid HTTP requests and returns a detailed error response.
      *
      * @param request The HttpServletRequest object containing request details.
