@@ -1,1 +1,109 @@
 /* You can add global styles to this file, and also import other style files */
+
+a {
+    text-decoration: none !important;
+    color: #0D6EFD;
+    transition: color 0.3s ease, opacity 0.3s ease;
+}
+
+a:hover {
+    color: #0a58ca;
+    opacity: 0.8;
+}
+
+a:focus {
+    outline: 2px solid #0D6EFD;
+    outline-offset: 2px;
+}
+
+.card {
+    padding-left: 15px;
+    padding-right: 15px;
+    border: solid 1px #1f034a !important;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background: linear-gradient(135deg, #b6c3ff 0%, #36499b 100%);
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(13, 110, 253, 0.4);
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+/* Títulos dentro de cards con color blanco */
+.card h2, 
+.card h5,
+.card .card-title {
+    font-weight: 600;
+    letter-spacing: -0.5px;
+    color: white;
+}
+
+/* Labels y texto en blanco */
+.card label,
+.card p {
+    color: white;
+}
+
+/* Iconos en blanco */
+.card i {
+    color: white;
+}
+
+/* Mejora para los formularios dentro de cards */
+.card .form-control {
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 0.75rem 1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+}
+
+.card .form-control:focus {
+    border-color: white;
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.3);
+    background: white;
+}
+
+.card .form-control::placeholder {
+    color: #666;
+}
+
+/* Mejora para los botones dentro de cards */
+.card .btn {
+    border-radius: 8px;
+    padding: 0.75rem 2rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.card .btn-primary {
+    background: rgba(255, 255, 255, 0.95);
+    color: #667eea;
+    border: none;
+    font-weight: 600;
+}
+
+.card .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    background: white;
+    color: #764ba2;
+}
+
+/* Enlaces dentro de cards en blanco */
+.card a {
+    color: white !important;
+    font-weight: 500;
+}
+
+.card a:hover {
+    color: rgba(255, 255, 255, 0.8) !important;
+}

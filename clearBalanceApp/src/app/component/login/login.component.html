@@ -1,1 +1,97 @@
-<p>login works!</p>
+<section>
+    <div class="row justify-content-center my-5">
+        <div class="col-md-6 mt-3">
+            <!-- Login Card -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="text-center">
+                        <h2><i style="margin-right: 5px;" class="bi bi-safe"></i>ClearBalance</h2>
+                        <h5 class="card-title mt-4 mb-5">Account Login</h5>
+                    </div>
+                    <!-- Error message -->
+                    <div class="alert alert-danger bg-danger text-light border-0 alert-dismissible fade show"
+                        role="alert"
+                    >
+                        error message
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"
+                            aria-label="Close">
+                        </button>
+                    </div>
+                    <!-- Login form -->
+                    <form>
+                        <div class="form-outline mb-4">
+                            <label class="form-label" for="email">Email Address</label>
+                            <input ngModel type="email" name="email" class="form-control" placeholder="Enter your email" required>
+                        </div>
+                        <div class="form-outline mb-4">
+                            <label for="password" class="form-label">Password</label>
+                            <input ngModel type="password" name="password" class="form-control" placeholder="Enter your password" required>
+                        </div>
+                        <div class="d-flex justify-content-center mb-4">
+                            <button type="submit" class="btn btn-primary">
+                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                <span>Loading...</span>
+                                <span>Log in</span>
+                            </button>
+                        </div>
+                    </form>
+                    <div class="row mb-4">
+                        <div class="col d-flex justify-content-center">
+                            <a routerLink="/register">Create an Account</a>
+                        </div>
+                        <div class="col d-flex justify-content-center">
+                            <a routerLink="/resetpassword">Forgot password?</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success screen -->
+    <div class="container">
+        <div class="row justify-content-center my-5">
+            <div class="col-md-6" style="margin-top: 50px;">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="text-center">
+                            <h2><i style="margin-right: 5px;" class="bi bi-safe"></i>ClearBalance</h2>
+                            <h5 class="card-title mt-4 mb-4">Verification Code Sent To ...123</h5>
+                            <i class="bi bi-check-circle-fill" style="font-size: 30px;color: green;"></i>
+                            <p class="mt-2" style="font-size: 20px;">Please access your SMS and enter the code.</p>
+                        </div>
+                        <div class="alert alert-danger bg-danger text-light border-0 alert-dismissible fade show"
+                            role="alert"
+                        >
+                            error message
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"
+                                aria-label="Close"></button>
+                        </div>
+                        <form>
+                            <div class="form-outline mb-4">
+                                <label class="form-label" for="code">Verirfication Code</label>
+                                <input ngModel type="text" name="code" class="form-control" placeholder="Enter verification code" required>
+                            </div>
+                            <div class="d-flex justify-content-center mb-4">
+                                <button type="submit" class="btn btn-primary">
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"
+                                        style="margin-right: 5px;"></span>
+                                    <span>Loading...</span>
+                                    <span>Verify Code</span>
+                                </button>
+                            </div>
+                        </form>
+                        <div class="row mb-4">
+                            <div class="col d-flex justify-content-center">
+                                <a routerLink="/login">Account Login</a>
+                            </div>
+                            <div class="col d-flex justify-content-center">
+                                <a routerLink="/register">Create an account</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
