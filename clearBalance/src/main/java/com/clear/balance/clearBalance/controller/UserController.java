@@ -314,37 +314,77 @@ public class UserController {
         return ResponseEntity.ok().body(response);
 	}
 	
+	/**
+	 * Handles the refresh token request and generates a new refresh token if the provided
+	 * Authorization header contains a valid token.
+	 *
+	 * <p>This endpoint extracts the token from the request header, validates it, retrieves
+	 * the associated user, and returns a new refresh token. If the token is missing or invalid,
+	 * an error response is returned.</p>
+	 *
+	 * @param request the incoming HTTP servlet request containing the Authorization header
+	 * @return a {@link ResponseEntity} containing an {@link HttpResponse} with user data and a new refresh token,
+	 *         or an error message if validation fails
+	 */
 	@GetMapping("/refresh/token")
 	public ResponseEntity<HttpResponse> refreshToken(HttpServletRequest request) {
-		log.info("Received token refresh request");
-		HttpResponse response = null;
-		String token = request.getHeader(HttpHeaders.AUTHORIZATION).substring(TOKEN_PREFIX.length());
+	    log.info("Received /refresh/token request");
 
-		if(isHeaderTokenValid(request, token)) {
-			UserDto user = this.userService.getUserDtoByEmail(this.tokenProvider.getSubject(token, request));
-			response = HttpResponse.builder()
+	    HttpResponse response = null;
+	    String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+
+	    if (authorizationHeader == null || !authorizationHeader.startsWith(TOKEN_PREFIX)) {
+	        log.warn("Authorization header missing or does not start with expected prefix");
+	        response = HttpResponse.builder()
+	                .timeStamp(LocalDateTime.now().toString())
+	                .reason("Authorization header missing or invalid format")
+	                .developerMessage("Authorization header missing or invalid format")
+	                .status(HttpStatus.BAD_REQUEST)
+	                .statusCode(HttpStatus.BAD_REQUEST.value())
+	                .build();
+	        return ResponseEntity.badRequest().body(response);
+	    }
+
+	    String token = authorizationHeader.substring(TOKEN_PREFIX.length());
+	    log.debug("Extracted token from header");
+
+	    if (isHeaderTokenValid(request, token)) {
+	        log.info("Token is valid. Proceeding to generate new refresh token.");
+
+	        String userEmail = tokenProvider.getSubject(token, request);
+	        log.debug("Extracted user email from token: {}", userEmail);
+
+	        UserDto user = this.userService.getUserDtoByEmail(userEmail);
+	        log.debug("User retrieved successfully for email: {}", userEmail);
+
+	        String newRefreshToken = tokenProvider.createRefreshToken(getUserPrincipal(user));
+	        log.debug("New refresh token generated");
+
+	        response = HttpResponse.builder()
 	                .timeStamp(LocalDateTime.now().toString())
 	                .data(
-	                		Map.of(
-	                				"user", user,
-	                				"refresh_token", tokenProvider.createRefreshToken(getUserPrincipal(user))
-            				)
-            		)
+	                        Map.of(
+	                                "user", user,
+	                                "refresh_token", newRefreshToken
+	                        )
+	                )
 	                .message("Token refreshed successfully")
 	                .status(HttpStatus.OK)
 	                .statusCode(HttpStatus.OK.value())
 	                .build();
-		} else {
-			response = HttpResponse.builder()
+	    } else {
+	        log.warn("Token validation failed. Refresh token is missing or invalid.");
+	        response = HttpResponse.builder()
 	                .timeStamp(LocalDateTime.now().toString())
 	                .reason("Refresh token missing or invalid")
 	                .developerMessage("Refresh token missing or invalid")
 	                .status(HttpStatus.BAD_REQUEST)
 	                .statusCode(HttpStatus.BAD_REQUEST.value())
 	                .build();
-		}
-		
-        return ResponseEntity.ok().body(response);
+	    }
+
+	    log.info("Returning refresh token response");
+	    return ResponseEntity.ok().body(response);
 	}
 
 	/**
