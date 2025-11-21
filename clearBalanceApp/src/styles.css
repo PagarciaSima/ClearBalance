@@ -1,8 +1,110 @@
-/* You can add global styles to this file, and also import other style files */
+/* ================================================
+   Global Styles
+   ================================================ */
+
+/* CSS Custom Properties (Variables) */
+:root {
+    --color-success: #96f380;
+    --color-link: #0D6EFD;
+    
+    /* Space Theme Color Gradients */
+    --primary-gradient-start: #5d42e6;
+    --primary-gradient-mid: #8e34e8;
+    --primary-gradient-end: #d32985;
+    
+    --warning-gradient-start: #ff9500;
+    --warning-gradient-mid: #ffb347;
+    --warning-gradient-end: #ffd700;
+    
+    --danger-gradient-start: #e63946;
+    --danger-gradient-mid: #f72585;
+    --danger-gradient-end: #b5179e;
+    
+    --success-gradient-start: #00d084;
+    --success-gradient-mid: #00e89f;
+    --success-gradient-end: #7affc5;
+    
+    --info-gradient-start: #1e90ff;
+    --info-gradient-mid: #4da6ff;
+    --info-gradient-end: #87ceeb;
+    
+    /* Typography */
+    --font-primary: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+}
+
+/* ================================================
+   Base Layout Styles
+   ================================================ */
+
+* {
+    font-family: var(--font-primary);
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    position: relative;
+    background-image: url('assets/img/background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(51, 7, 90, 0.4);
+    pointer-events: none;
+    z-index: -1;
+}
+
+app-root {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+}
+
+router-outlet {
+    display: none;
+}
+
+/* ================================================
+   Particles.js Container
+   ================================================ */
+
+#particles-js {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 0;
+    pointer-events: none;
+}
+
+#particles-js canvas {
+    display: block;
+    pointer-events: auto;
+}
+
+/* ================================================
+   Link Styles
+   ================================================ */
 
 a {
     text-decoration: none !important;
-    color: #0D6EFD;
+    color: var(--color-link);
     transition: color 0.3s ease, opacity 0.3s ease;
 }
 
@@ -12,31 +114,35 @@ a:hover {
 }
 
 a:focus {
-    outline: 2px solid #0D6EFD;
+    outline: 2px solid var(--color-link);
     outline-offset: 2px;
 }
+
+/* ================================================
+   Card Styles
+   ================================================ */
 
 .card {
     padding-left: 15px;
     padding-right: 15px;
-    border: solid 1px #1f034a !important;
+    border: solid 2px rgba(138, 94, 180, 0.6) !important;
     border-radius: 16px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
     overflow: hidden;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    background: linear-gradient(135deg, #b6c3ff 0%, #36499b 100%);
+    background: linear-gradient(135deg, #220d46 0%, #3d185e 50%, #235eac 100%);
 }
 
 .card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 32px rgba(13, 110, 253, 0.4);
+    box-shadow: 0 12px 32px rgba(138, 94, 180, 0.5);
 }
 
 .card-body {
     padding: 2rem;
 }
 
-/* Títulos dentro de cards con color blanco */
+/* Card Typography */
 .card h2, 
 .card h5,
 .card .card-title {
@@ -45,18 +151,29 @@ a:focus {
     color: white;
 }
 
-/* Labels y texto en blanco */
 .card label,
 .card p {
     color: white;
 }
 
-/* Iconos en blanco */
 .card i {
     color: white;
 }
 
-/* Mejora para los formularios dentro de cards */
+/* Card Links */
+.card a {
+    color: white !important;
+    font-weight: 500;
+}
+
+.card a:hover {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* ================================================
+   Form Control Styles
+   ================================================ */
+
 .card .form-control {
     border-radius: 8px;
     border: 1px solid rgba(255, 255, 255, 0.3);
@@ -76,7 +193,21 @@ a:focus {
     color: #666;
 }
 
-/* Mejora para los botones dentro de cards */
+/* Disabled States */
+input:disabled,
+textarea:disabled,
+select:disabled,
+button:disabled,
+.btn:disabled,
+.form-control:disabled {
+    cursor: not-allowed !important;
+    opacity: 0.6 !important;
+}
+
+/* ================================================
+   Button Styles
+   ================================================ */
+
 .card .btn {
     border-radius: 8px;
     padding: 0.75rem 2rem;
@@ -84,26 +215,160 @@ a:focus {
     transition: all 0.3s ease;
 }
 
+/* Primary Button */
 .card .btn-primary {
-    background: rgba(255, 255, 255, 0.95);
-    color: #667eea;
     border: none;
     font-weight: 600;
+    background: linear-gradient(135deg, var(--primary-gradient-start) 0%, var(--primary-gradient-mid) 50%, var(--primary-gradient-end) 100%);
+    color: white;
 }
 
 .card .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    background: white;
-    color: #764ba2;
+    box-shadow: 0 4px 12px rgba(93, 66, 230, 0.4);
+    background: linear-gradient(135deg, #6e53f7 0%, #9f45f9 50%, #e43a96 100%);
 }
 
-/* Enlaces dentro de cards en blanco */
-.card a {
-    color: white !important;
+/* Warning Button */
+.card .btn-warning {
+    border: none;
+    font-weight: 600;
+    background: linear-gradient(135deg, var(--warning-gradient-start) 0%, var(--warning-gradient-mid) 50%, var(--warning-gradient-end) 100%);
+    color: #1a0033;
+}
+
+.card .btn-warning:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 149, 0, 0.5);
+    background: linear-gradient(135deg, #ffa520 0%, #ffc458 50%, #ffe120 100%);
+}
+
+/* Danger Button */
+.card .btn-danger {
+    border: none;
+    font-weight: 600;
+    background: linear-gradient(135deg, var(--danger-gradient-start) 0%, var(--danger-gradient-mid) 50%, var(--danger-gradient-end) 100%);
+    color: white;
+}
+
+.card .btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(230, 57, 70, 0.5);
+    background: linear-gradient(135deg, #f74a57 0%, #ff3696 50%, #c628af 100%);
+}
+
+/* ================================================
+   Alert Styles
+   ================================================ */
+
+.alert {
+    animation: slideIn 0.4s ease-out;
+    border-radius: 12px !important;
+    border: none !important;
     font-weight: 500;
+    backdrop-filter: blur(10px);
 }
 
-.card a:hover {
-    color: rgba(255, 255, 255, 0.8) !important;
+.alert.fade:not(.show) {
+    animation: slideOut 0.3s ease-in;
+}
+
+/* Danger Alert */
+.alert-danger {
+    background: linear-gradient(135deg, var(--danger-gradient-start) 0%, var(--danger-gradient-mid) 50%, var(--danger-gradient-end) 100%) !important;
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(230, 57, 70, 0.4);
+}
+
+.alert-danger .btn-close,
+.alert-danger .btn-close-white {
+    filter: brightness(0) invert(1);
+}
+
+/* Warning Alert */
+.alert-warning {
+    background: linear-gradient(135deg, var(--warning-gradient-start) 0%, var(--warning-gradient-mid) 50%, var(--warning-gradient-end) 100%) !important;
+    color: #1a0033 !important;
+    box-shadow: 0 4px 12px rgba(255, 149, 0, 0.4);
+}
+
+/* Success Alert */
+.alert-success {
+    background: linear-gradient(135deg, var(--success-gradient-start) 0%, var(--success-gradient-mid) 50%, var(--success-gradient-end) 100%) !important;
+    color: #1a0033 !important;
+    box-shadow: 0 4px 12px rgba(0, 208, 132, 0.4);
+}
+
+/* Info Alert */
+.alert-info {
+    background: linear-gradient(135deg, var(--info-gradient-start) 0%, var(--info-gradient-mid) 50%, var(--info-gradient-end) 100%) !important;
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(30, 144, 255, 0.4);
+}
+
+.alert-info .btn-close,
+.alert-info .btn-close-white {
+    filter: brightness(0) invert(1);
+}
+
+/* ================================================
+   Utility Classes
+   ================================================ */
+
+.success-color {
+    color: var(--color-success) !important;
+}
+
+/* ================================================
+   Animations
+   ================================================ */
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px) rotate(-5deg);
+    }
+    50% {
+        transform: translateY(-20px) rotate(5deg);
+    }
+}
+
+/* ================================================
+   Decorative Elements (UFO)
+   ================================================ */
+
+.ufo-container {
+    position: fixed;
+    z-index: 1;
+    pointer-events: none;
+    transition: all 3s ease-in-out;
+}
+
+.ufo-container img {
+    width: 100px;
+    height: auto;
+    opacity: 0.4;
+    filter: drop-shadow(0 0 10px rgba(138, 94, 180, 0.6));
+    animation: float 3s ease-in-out infinite;
 }

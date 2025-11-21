@@ -1,0 +1,47 @@
+/* UFO Animation Container */
+.ufo-animation-container {
+    height: 120px;
+    position: relative;
+    margin: 20px 0;
+    overflow: visible;
+}
+
+/* Error Number */
+.error-number {
+    font-size: 6rem;
+    font-weight: 700;
+    color: white;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    animation: errorFloat 3s ease-in-out infinite;
+    margin: 10px 0;
+}
+
+@keyframes errorFloat {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .error-number {
+        font-size: 4rem;
+    }
+    
+    .ufo-animation-container {
+        height: 100px;
+    }
+}
+
+@media (max-width: 576px) {
+    .error-number {
+        font-size: 3rem;
+    }
+    
+    .ufo-animation-container {
+        height: 80px;
+    }
+}
