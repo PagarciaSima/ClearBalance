@@ -1,1 +1,50 @@
-<p>stats works!</p>
+<section class="stats-section" role="region" aria-label="Statistics Overview">
+  <div class="container mt-4">
+    <div class="row g-4">
+      <!-- Customers Statistics -->
+      <div class="col-md-4 col-sm-6 col-xs-12">
+        <article class="card stat-card" role="article" aria-labelledby="stat-customers-label">
+          <div class="card-body">
+            <div class="stat-icon-wrapper customers-stat" aria-hidden="true">
+              <i class="bi bi-people-fill stat-icon"></i>
+            </div>
+            <div class="stat-content">
+              <h3 class="stat-number" aria-live="polite">0</h3>
+              <p class="stat-label" id="stat-customers-label">Total Customers</p>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <!-- Invoices Statistics -->
+      <div class="col-md-4 col-sm-6 col-xs-12">
+        <article class="card stat-card" role="article" aria-labelledby="stat-invoices-label">
+          <div class="card-body">
+            <div class="stat-icon-wrapper invoices-stat" aria-hidden="true">
+              <i class="bi bi-receipt-cutoff stat-icon"></i>
+            </div>
+            <div class="stat-content">
+              <h3 class="stat-number" aria-live="polite">0</h3>
+              <p class="stat-label" id="stat-invoices-label">Total Invoices</p>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <!-- Billed Statistics -->
+      <div class="col-md-4 col-sm-6 col-xs-12">
+        <article class="card stat-card" role="article" aria-labelledby="stat-billed-label">
+          <div class="card-body">
+            <div class="stat-icon-wrapper billed-stat" aria-hidden="true">
+              <i class="bi bi-currency-dollar stat-icon"></i>
+            </div>
+            <div class="stat-content">
+              <h3 class="stat-number" aria-live="polite">$0.00</h3>
+              <p class="stat-label" id="stat-billed-label">Total Billed</p>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>

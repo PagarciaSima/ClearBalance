@@ -1,1 +1,148 @@
-<p>navbar works!</p>
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark galactic-navbar" role="navigation" aria-label="Main navigation">
+  <div class="container">
+    <a 
+      class="navbar-brand" 
+      [routerLink]="['/']"
+      data-bs-toggle="tooltip" 
+      data-bs-placement="bottom" 
+      title="Go to home"
+      aria-label="Clear Balance - Go to home page">
+      <i class="bi bi-safe me-3" aria-hidden="true"></i>
+      Clear Balance
+      <img src="assets/img/ufo.png" alt="" class="ufo-hover-icon" aria-hidden="true">
+    </a>
+    <button 
+      class="navbar-toggler" 
+      type="button" 
+      data-bs-toggle="collapse" 
+      data-bs-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent" 
+      aria-expanded="false" 
+      aria-label="Toggle navigation menu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <!-- Customers dropdown -->
+        <li class="nav-item dropdown">
+          <a 
+            class="nav-link dropdown-toggle" 
+            id="navbarDropdownCustomers" 
+            href="#" 
+            role="button"
+            data-bs-toggle="dropdown" 
+            aria-expanded="false"
+            aria-haspopup="true"
+            aria-label="Customers menu">
+            <i class="bi bi-people-fill me-2" aria-hidden="true"></i>Customers
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownCustomers">
+            <li>
+              <a 
+                class="dropdown-item" 
+                [routerLink]="['/customers/new']"
+                data-bs-toggle="tooltip" 
+                data-bs-placement="left" 
+                title="Create a new customer"
+                aria-label="Create a new customer">
+                <i class="bi bi-person-plus-fill me-2" aria-hidden="true"></i>New Customer
+              </a>
+            </li>
+            <li>
+              <a 
+                class="dropdown-item" 
+                [routerLink]="['/customers']"
+                data-bs-toggle="tooltip" 
+                data-bs-placement="left" 
+                title="View all customers"
+                aria-label="View all customers">
+                <i class="bi bi-people-fill me-2" aria-hidden="true"></i>All Customers
+              </a>
+            </li>
+          </ul>
+        </li>
+        <!-- Invoices dropdown -->
+        <li class="nav-item dropdown">
+          <a 
+            class="nav-link dropdown-toggle" 
+            id="navbarDropdownInvoices" 
+            href="#" 
+            role="button"
+            data-bs-toggle="dropdown" 
+            aria-expanded="false"
+            aria-haspopup="true"
+            aria-label="Invoices menu">
+            <i class="bi bi-receipt-cutoff me-2" aria-hidden="true"></i>Invoices
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownInvoices">
+            <li>
+              <a 
+                class="dropdown-item" 
+                [routerLink]="['/invoices/new']"
+                data-bs-toggle="tooltip" 
+                data-bs-placement="left" 
+                title="Create a new invoice"
+                aria-label="Create a new invoice">
+                <i class="bi bi-receipt me-2" aria-hidden="true"></i>New Invoice
+              </a>
+            </li>
+            <li>
+              <a 
+                class="dropdown-item" 
+                [routerLink]="['/invoices']"
+                data-bs-toggle="tooltip" 
+                data-bs-placement="left" 
+                title="View all invoices"
+                aria-label="View all invoices">
+                <i class="bi bi-receipt-cutoff me-2" aria-hidden="true"></i>All Invoices
+              </a>
+            </li>
+          </ul>
+        </li>
+        <!-- User dropdown -->
+        <li class="nav-item dropdown">
+          <a 
+            class="nav-link dropdown-toggle" 
+            id="navbarDropdownUser" 
+            href="#" 
+            role="button"
+            data-bs-toggle="dropdown" 
+            aria-expanded="false"
+            aria-haspopup="true"
+            aria-label="User menu">
+            <img src="assets/img/astronaut.png" alt="User avatar" class="user-avatar-md rounded-circle">
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownUser">
+            <li>
+              <a 
+                class="dropdown-item" 
+                [routerLink]="['/profile']"
+                data-bs-toggle="tooltip" 
+                data-bs-placement="left" 
+                title="View your profile"
+                aria-label="View profile for john doe">
+                <i class="bi bi-person-circle me-2" aria-hidden="true"></i>john doe
+              </a>
+            </li>
+            <li>
+              <a 
+                class="dropdown-item" 
+                (click)="logOut()"
+                role="button"
+                tabindex="0"
+                (keydown.enter)="logOut()"
+                (keydown.space)="logOut()"
+                data-bs-toggle="tooltip" 
+                data-bs-placement="left" 
+                title="Sign out from your account"
+                aria-label="Logout from application">
+                <i class="bi bi-box-arrow-in-right me-2" aria-hidden="true"></i>Logout
+              </a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
