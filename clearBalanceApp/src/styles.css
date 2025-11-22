@@ -257,6 +257,20 @@ button:disabled,
     background: linear-gradient(135deg, #f74a57 0%, #ff3696 50%, #c628af 100%);
 }
 
+/* Info Button */
+.card .btn-info {
+    border: none;
+    font-weight: 600;
+    background: linear-gradient(135deg, var(--info-gradient-start) 0%, var(--info-gradient-mid) 50%, var(--info-gradient-end) 100%);
+    color: white;
+}
+
+.card .btn-info:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(30, 144, 255, 0.5);
+    background: linear-gradient(135deg, #3a9aff 0%, #6db5ff 50%, #a0d8ff 100%);
+}
+
 /* ================================================
    Alert Styles
    ================================================ */
@@ -371,4 +385,194 @@ button:disabled,
     opacity: 0.4;
     filter: drop-shadow(0 0 10px rgba(138, 94, 180, 0.6));
     animation: float 3s ease-in-out infinite;
+}
+
+/* ================================================
+   Modern Galactic Table Styles
+   ================================================ */
+
+.table {
+    background: linear-gradient(135deg, #220d46 0%, #3d185e 50%, #235eac 100%) !important;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(93, 66, 230, 0.3);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(138, 94, 180, 0.6) !important;
+}
+
+.table thead {
+    background: linear-gradient(135deg, #2d1b4e 0%, #1e3a5f 100%) !important;
+    border-bottom: 3px solid rgba(138, 94, 180, 0.8) !important;
+}
+
+.table thead tr {
+    background: transparent !important;
+}
+
+.table thead th {
+    color: white !important;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.85rem;
+    padding: 1rem;
+    border: none !important;
+    border-right: 1px solid rgba(138, 94, 180, 0.5) !important;
+    position: relative;
+    background: transparent !important;
+}
+
+.table thead th:last-child {
+    border-right: none !important;
+}
+
+.table thead th::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(138, 94, 180, 0.6), transparent);
+}
+
+.table tbody {
+    background: transparent !important;
+}
+
+.table tbody tr {
+    background: rgba(20, 10, 40, 0.6) !important;
+    border-bottom: 1px solid rgba(138, 94, 180, 0.4) !important;
+    transition: all 0.3s ease;
+}
+
+.table tbody tr:hover {
+    background: rgba(61, 33, 206, 0.3) !important;
+    box-shadow: 0 4px 12px rgba(93, 66, 230, 0.3);
+}
+
+.table tbody tr:last-child {
+    border-bottom: none !important;
+}
+
+.table tbody td,
+.table tbody th {
+    color: white !important;
+    padding: 1rem;
+    vertical-align: middle;
+    border: none !important;
+    border-right: 1px solid rgba(138, 94, 180, 0.3) !important;
+    background: transparent !important;
+}
+
+.table tbody td:last-child,
+.table tbody th:last-child {
+    border-right: none !important;
+}
+
+.table tbody td img {
+    border: 2px solid rgba(138, 94, 180, 0.5);
+    box-shadow: 0 0 15px rgba(93, 66, 230, 0.4);
+    transition: all 0.3s ease;
+}
+
+.table tbody td img:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 25px rgba(93, 66, 230, 0.6);
+}
+
+/* Badge Enhancements */
+.table .badge {
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Button Enhancements in Tables */
+.table .btn {
+    padding: 0.5rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    transition: all 0.3s ease;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.table .btn-info {
+    background: linear-gradient(135deg, var(--info-gradient-start) 0%, var(--info-gradient-mid) 50%, var(--info-gradient-end) 100%);
+    color: white;
+}
+
+.table .btn-info:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(30, 144, 255, 0.4);
+}
+
+/* Pagination Galactic Style */
+.pagination {
+    margin-top: 1.5rem;
+}
+
+.pagination .page-item {
+    margin: 0 0.25rem;
+}
+
+.pagination .page-link {
+    background: rgba(93, 66, 230, 0.3);
+    border: 1px solid rgba(138, 94, 180, 0.5);
+    color: white;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.pagination .page-link:hover {
+    background: rgba(93, 66, 230, 0.5);
+    border-color: rgba(138, 94, 180, 0.8);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(93, 66, 230, 0.4);
+    color: white;
+}
+
+.pagination .page-item.active .page-link {
+    background: linear-gradient(135deg, var(--info-gradient-start) 0%, var(--info-gradient-mid) 50%, var(--info-gradient-end) 100%) !important;
+    border-color: var(--info-gradient-mid) !important;
+    box-shadow: 0 4px 16px rgba(93, 66, 230, 0.5);
+    color: white !important;
+    font-weight: 600;
+}
+
+.pagination .page-item.disabled .page-link {
+    background: rgba(93, 66, 230, 0.1);
+    border-color: rgba(138, 94, 180, 0.2);
+    color: rgba(255, 255, 255, 0.4);
+}
+
+/* Responsive Table */
+@media (max-width: 768px) {
+    .table {
+        font-size: 0.85rem;
+    }
+    
+    .table thead th,
+    .table tbody td,
+    .table tbody th {
+        padding: 0.75rem 0.5rem;
+    }
+}
+
+.success-icon {
+    cursor: pointer; 
+    color: #00e89f !important; 
+    font-size: 30px; 
+    filter: drop-shadow(0 0 8px rgba(0, 232, 159, 0.6));
 }

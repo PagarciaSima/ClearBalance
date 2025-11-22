@@ -76,12 +76,16 @@ export class UfoComponent implements OnInit, OnDestroy {
     const personX = personRect.left + personRect.width / 2;
     const personY = personRect.top;
 
+    // Get the UFO element to calculate its actual width
+    const ufoElement = document.querySelector('.ufo-container img') as HTMLElement;
+    const ufoWidth = ufoElement ? ufoElement.offsetWidth : 100;
+
     // Mark as abducting to prevent movement
     this.isAbducting = true;
 
-    // Position UFO above the person
+    // Position UFO above the person, centered properly
     this.ufoStyle = {
-      left: `${personX - 50}px`,
+      left: `${personX - (ufoWidth / 2)}px`,  // centered above person
       top: `${personY - 150}px`,
       transition: 'all 2s ease-in-out'
     };

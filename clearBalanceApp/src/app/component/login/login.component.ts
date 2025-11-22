@@ -1,14 +1,13 @@
-import { Component, AfterViewInit } from '@angular/core';
+import { Component, AfterViewInit, OnDestroy } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
-import { BehaviorSubject, catchError, map, Observable, of, startWith, using } from 'rxjs';
+import { BehaviorSubject, catchError, map, Observable, of, startWith } from 'rxjs';
 import { DataState } from 'src/app/enum/datastate.enum';
 import { Key } from 'src/app/enum/key.enum';
 import { LoginState } from 'src/app/interface/appState';
 import { UserService } from 'src/app/service/user.service';
+import { TooltipService } from 'src/app/service/tooltip.service';
 import { slideBlur } from 'src/app/animations/animations'; 
-
-declare var bootstrap: any;
 
 @Component({
   selector: 'app-login',
@@ -18,7 +17,7 @@ declare var bootstrap: any;
     slideBlur
   ]
 })
-export class LoginComponent implements AfterViewInit {
+export class LoginComponent implements AfterViewInit, OnDestroy {
 
   loginState$: Observable<LoginState> = of({ dataState: DataState.LOADED});
   private phoneSubject = new BehaviorSubject<string | null>(null);
@@ -28,17 +27,16 @@ export class LoginComponent implements AfterViewInit {
 
   constructor(
     private router: Router,
-    private userService: UserService
-  ) { }
+    private userService: UserService,
+    private tooltipService: TooltipService
+  ) {}
 
   ngAfterViewInit(): void {
-    // Inicializar tooltips de Bootstrap
-    const tooltipTriggerList = Array.from(
-      document.querySelectorAll('[data-bs-toggle="tooltip"]')
-    );
-    tooltipTriggerList.forEach((tooltipTriggerEl) => {
-      new bootstrap.Tooltip(tooltipTriggerEl);
-    });
+    this.tooltipService.initialize();
+  }
+
+  ngOnDestroy(): void {
+    this.tooltipService.hideAll();
   }
 
   /**
@@ -90,6 +88,12 @@ export class LoginComponent implements AfterViewInit {
   private handleMfaRequired(response: any): LoginState {
     this.phoneSubject.next(response.data.user.phone ?? null);
     this.emailSubject.next(response.data.user.email ?? null);
+    
+    // Reinitialize tooltips after view updates for MFA screen
+    setTimeout(() => {
+      this.tooltipService.hideAll();
+      this.tooltipService.initialize();
+    }, 100);
     
     return {
       dataState: DataState.LOADED,
@@ -206,6 +210,11 @@ export class LoginComponent implements AfterViewInit {
    */
   loginPage(): void {
     this.loginState$ = of({ dataState: DataState.LOADED });
+    // Reinitialize tooltips after view returns to login screen
+    setTimeout(() => {
+      this.tooltipService.hideAll();
+      this.tooltipService.initialize();
+    }, 100);
   }
 
 }

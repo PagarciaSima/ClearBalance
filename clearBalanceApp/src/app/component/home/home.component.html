@@ -1,0 +1,103 @@
+<ng-container>
+    <ng-container>
+        <app-navbar></app-navbar>
+        <app-stats></app-stats>
+        <section>
+            <div class="container mt-5">
+                <div class="row mt-3 card">
+                <div class="col-12 mt-5">
+                    <div class="progress">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: 5%;" aria-valuenow="5" aria-valuemin="0" aria-valuemax="100">
+                            5%
+                        </div>
+                    </div>
+                </div>
+                <div class="col mt-3">
+                    <h4 class="fw-bold text-start text-white">
+                        <i class="bi bi-people-fill me-2"></i>Customers
+                    </h4>
+                </div>
+                <div class="col">
+                    <h4 class="fw-bold text-end">
+                        <i class="bi bi-file-earmark-excel success-icon"
+                            data-bs-toggle="tooltip" 
+                            data-bs-placement="top" 
+                            title="Export to Excel">
+                        </i>
+                    </h4>
+                </div>
+                <div class="col-xm-12">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                            <th class="text-center" scope="col">
+                                <i class="bi bi-hash me-2"></i>ID
+                            </th>
+                            <th scope="col">
+                                <i class="bi bi-person-circle me-2"></i>Photo
+                            </th>
+                            <th scope="col">
+                                <i class="bi bi-person me-2"></i>Name
+                            </th>
+                            <th scope="col">
+                                <i class="bi bi-envelope me-2"></i>Email
+                            </th>
+                            <th scope="col">
+                                <i class="bi bi-telephone me-2"></i>Phone
+                            </th>
+                            <th scope="col">
+                                <i class="bi bi-circle-fill me-2"></i>Status
+                            </th>
+                            <th scope="col">
+                                <i class="bi bi-star me-2"></i>Type
+                            </th>
+                            <th scope="col">
+                                <i class="bi bi-gear me-2"></i>Action
+                            </th>
+                            </tr>
+                        </thead>
+                        <tbody class="table-body">
+                            <tr class="cell-1">
+                            <th class="text-center">1</th>
+                            <td><img src="https://via.placeholder.com/42" width="42" height="42" class="rounded-circle" alt="Customer Photo"></td>
+                            <td>John Doe</td>
+                            <td>john.doe@example.com</td>                          
+                            <td>+1 234 567 8900</td>
+                            <td>
+                                <span class="badge bg-success">
+                                    ACTIVE
+                                </span>
+                            </td>
+                            <td>Premium</td>
+                            <td>
+                                <button type="button" 
+                                        class="btn btn-primary"
+                                        data-bs-toggle="tooltip" 
+                                        data-bs-placement="top" 
+                                        title="View customer details">
+                                    View
+                                </button>
+                            </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <nav aria-label="Page navigation example">
+                        <ul class="pagination justify-content-end">
+                            <li class="page-item pointer">
+                            <a class="page-link">&laquo; Prev</a>
+                            </li>
+                            <li class="page-item pointer active">
+                            <a class="page-link">1</a>
+                            </li>
+                            <li class="page-item pointer">
+                            <a class="page-link">Next &raquo;</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                </div>
+            </div>
+        </section>
+    </ng-container>
+ </ng-container>

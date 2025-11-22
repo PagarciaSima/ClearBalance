@@ -5,6 +5,10 @@ import { RegisterComponent } from './component/register/register.component';
 import { ResetpasswordComponent } from './component/resetpassword/resetpassword.component';
 import { VerifyComponent } from './component/verify/verify.component';
 import { PageNotFoundComponent } from './component/page-not-found/page-not-found.component';
+import { CustomerComponent } from './component/customer/customer.component';
+import { ProfileComponent } from './component/profile/profile.component';
+import { CustomersComponent } from './component/customers/customers.component';
+import { HomeComponent } from './component/home/home.component';
 
 /**
  *  set up the routes for the application
@@ -15,6 +19,9 @@ const routes: Routes = [
   { path: 'resetpassword', component: ResetpasswordComponent },
   { path: 'user/verify/account/:key', component: VerifyComponent },
   { path: 'user/verify/password/:key', component: VerifyComponent },
+  { path: 'customers', component: CustomersComponent },
+  { path: 'profile', component: ProfileComponent },
+  { path: '', component: HomeComponent },
   { path: '**', component: PageNotFoundComponent},
 ];
 

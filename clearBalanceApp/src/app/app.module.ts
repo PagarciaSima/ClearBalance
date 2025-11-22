@@ -13,6 +13,12 @@ import { UfoComponent } from './component/ufo/ufo.component';
 import { ShootingStarComponent } from './component/shooting-star/shooting-star.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { PageNotFoundComponent } from './component/page-not-found/page-not-found.component';
+import { CustomerComponent } from './component/customer/customer.component';
+import { ProfileComponent } from './component/profile/profile.component';
+import { HomeComponent } from './component/home/home.component';
+import { CustomersComponent } from './component/customers/customers.component';
+import { NavbarComponent } from './component/navbar/navbar.component';
+import { StatsComponent } from './component/stats/stats.component';
 
 @NgModule({
   declarations: [
@@ -23,7 +29,13 @@ import { PageNotFoundComponent } from './component/page-not-found/page-not-found
     VerifyComponent,
     UfoComponent,
     ShootingStarComponent,
-    PageNotFoundComponent
+    PageNotFoundComponent,
+    CustomerComponent,
+    ProfileComponent,
+    HomeComponent,
+    CustomersComponent,
+    NavbarComponent,
+    StatsComponent
   ],
   imports: [
     AppRoutingModule,

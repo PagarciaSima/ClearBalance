@@ -62,7 +62,7 @@
                                             [attr.aria-pressed]="showPassword"
                                             data-bs-toggle="tooltip" 
                                             data-bs-placement="top" 
-                                            [attr.title]="showPassword ? 'Hide password' : 'Show password'">
+                                            [attr.title]="'Show / hide password'">
                                         <i [class]="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'" aria-hidden="true"></i>
                                     </button>
                                 </div>
@@ -71,7 +71,10 @@
                                 <button [disabled]="state.dataState === DataState.LOADING || loginForm.invalid || loginForm.pristine" 
                                         type="submit" 
                                         class="btn btn-primary w-100"
-                                        [attr.aria-busy]="state.dataState === DataState.LOADING">
+                                        [attr.aria-busy]="state.dataState === DataState.LOADING"
+                                        data-bs-toggle="tooltip" 
+                                        data-bs-placement="top" 
+                                        title="Submit login credentials">
                                     <span *ngIf="state.dataState === DataState.LOADING" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                                     <span *ngIf="state.dataState === DataState.LOADING" class="me-2">Loading...</span>
                                     <span *ngIf="state.dataState !== DataState.LOADING">Log in</span>
@@ -83,7 +86,10 @@
                                 <a class="d-flex align-items-center" 
                                    [ngStyle]="{'pointer-events': state.dataState === DataState.LOADING ? 'none': ''}" 
                                    [attr.aria-disabled]="state.dataState === DataState.LOADING"
-                                   routerLink="/register">
+                                   routerLink="/register"
+                                   data-bs-toggle="tooltip" 
+                                   data-bs-placement="top" 
+                                   title="Sign up for a new account">
                                     <i class="bi bi-person-plus fs-5 me-2" aria-hidden="true"></i>
                                     <span>Create an Account</span>
                                 </a>
@@ -92,7 +98,10 @@
                                 <a class="d-flex align-items-center" 
                                    [ngStyle]="{'pointer-events': state.dataState === DataState.LOADING ? 'none': ''}" 
                                    [attr.aria-disabled]="state.dataState === DataState.LOADING"
-                                   routerLink="/resetpassword">
+                                   routerLink="/resetpassword"
+                                   data-bs-toggle="tooltip" 
+                                   data-bs-placement="top" 
+                                   title="Reset your password via email">
                                     <i class="bi bi-key fs-5 me-2" aria-hidden="true"></i>
                                     <span>Forgot password?</span>
                                 </a>
@@ -106,14 +115,14 @@
 
     <!-- Success screen -->
     <div *ngIf="state.usingMfa" class="container">
-        <div class="row justify-content-center my-5">
+        <div class="row justify-content-center my-5" @slideBlur>
             <div class="col-md-6" style="margin-top: 50px;">
                 <div class="card">
                     <div class="card-body">
                         <div class="text-center">
                             <h2><i style="margin-right: 5px;" class="bi bi-safe me-3" aria-hidden="true"></i>ClearBalance</h2>
                             <h5 class="card-title mt-4 mb-4" id="verification-heading">Verification Code Sent To {{ state.phone }}</h5>
-                            <i class="bi bi-check-circle-fill text-success" style="font-size: 30px;" role="img" aria-label="Success"></i>
+                            <i class="bi bi-check-circle-fill" style="cursor: pointer; color: #00e89f; font-size: 30px; filter: drop-shadow(0 0 8px rgba(0, 232, 159, 0.6));" role="img" aria-label="Success"></i>
                             <p class="mt-2" style="font-size: 20px;">Please access your SMS and enter the code.</p>
                         </div>
                         <div *ngIf="state.dataState === DataState.ERROR" class="alert alert-danger bg-danger text-light border-0 alert-dismissible fade show"
@@ -143,7 +152,10 @@
                                 <button [disabled]="state.dataState === DataState.LOADING || verifyCodeForm.invalid || verifyCodeForm.pristine" 
                                         type="submit" 
                                         class="btn btn-primary w-100"
-                                        [attr.aria-busy]="state.dataState === DataState.LOADING">
+                                        [attr.aria-busy]="state.dataState === DataState.LOADING"
+                                        data-bs-toggle="tooltip" 
+                                        data-bs-placement="top" 
+                                        title="Verify the code sent to your phone">
                                     <span *ngIf="state.dataState === DataState.LOADING" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                                     <span *ngIf="state.dataState === DataState.LOADING" class="me-2">Loading...</span>
                                     <span *ngIf="state.dataState !== DataState.LOADING">Verify Code</span>
@@ -152,13 +164,22 @@
                         </form>
                         <nav class="row mb-4" aria-label="Navigation options">
                             <div class="col d-flex justify-content-center">
-                                <a class="d-flex align-items-center" (click)="loginPage()" routerLink="/login">
+                                <a class="d-flex align-items-center" 
+                                   (click)="loginPage()" 
+                                   routerLink="/login"
+                                   data-bs-toggle="tooltip" 
+                                   data-bs-placement="top" 
+                                   title="Return to login page">
                                     <i class="bi bi-box-arrow-in-right fs-5 me-2" aria-hidden="true"></i>
                                     <span>Account Login</span>
                                 </a>
                             </div>
                             <div class="col d-flex justify-content-center">
-                                <a class="d-flex align-items-center" routerLink="/register">
+                                <a class="d-flex align-items-center" 
+                                   routerLink="/register"
+                                   data-bs-toggle="tooltip" 
+                                   data-bs-placement="top" 
+                                   title="Sign up for a new account">
                                     <i class="bi bi-person-plus fs-5 me-2" aria-hidden="true"></i>
                                     <span>Create an account</span>
                                 </a>
