@@ -45,6 +45,8 @@ html, body {
     padding: 0;
     height: 100%;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 body {
@@ -69,7 +71,8 @@ body::before {
 }
 
 app-root {
-    display: block;
+    display: flex;
+    flex-direction: column;
     width: 100%;
     height: 100%;
     overflow-y: auto;
@@ -79,18 +82,23 @@ router-outlet {
     display: none;
 }
 
+router-outlet + * {
+    flex: 1 0 auto;
+}
+
 /* ================================================
    Particles.js Container
    ================================================ */
 
 #particles-js {
     position: fixed;
-    width: 100%;
+    width: calc(100% - 20px);
     height: 100%;
     top: 0;
     left: 0;
-    z-index: 0;
-    pointer-events: none;
+    right: 20px;
+    z-index: 1;
+    pointer-events: auto;
 }
 
 #particles-js canvas {
@@ -123,6 +131,8 @@ a:focus {
    ================================================ */
 
 .card {
+    position: relative;
+    z-index: 10;
     padding-left: 15px;
     padding-right: 15px;
     border: solid 2px rgba(138, 94, 180, 0.6) !important;
@@ -131,6 +141,7 @@ a:focus {
     overflow: hidden;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     background: linear-gradient(135deg, #220d46 0%, #3d185e 50%, #235eac 100%);
+    pointer-events: auto;
 }
 
 .card:hover {
@@ -191,6 +202,30 @@ a:focus {
 
 .card .form-control::placeholder {
     color: #666;
+}
+
+/* Select Dropdown Styles */
+.card select.form-control {
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+    cursor: pointer;
+}
+
+.card select.form-control option {
+    background: #2d1b4e !important;
+    color: white !important;
+    padding: 0.5rem;
+}
+
+.card select.form-control option:hover {
+    background: #5d42e6 !important;
+    color: white !important;
+}
+
+.card select.form-control option:checked {
+    background: #8e34e8 !important;
+    color: white !important;
+    font-weight: 600;
 }
 
 /* Disabled States */
@@ -269,6 +304,23 @@ button:disabled,
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(30, 144, 255, 0.5);
     background: linear-gradient(135deg, #3a9aff 0%, #6db5ff 50%, #a0d8ff 100%);
+}
+
+/* Secondary Button */
+.card .btn-secondary {
+    border: 2px solid rgba(138, 94, 180, 0.5);
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    backdrop-filter: blur(10px);
+}
+
+.card .btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(138, 94, 180, 0.4);
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(138, 94, 180, 0.7);
+    color: white;
 }
 
 /* ================================================
@@ -493,6 +545,106 @@ button:disabled,
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
+/* Global Badge Styles */
+.badge {
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Badge Variants */
+.badge.bg-warning {
+    background: linear-gradient(135deg, var(--warning-gradient-start) 0%, var(--warning-gradient-mid) 50%, var(--warning-gradient-end) 100%) !important;
+    color: #1a0033 !important;
+    border-color: rgba(255, 179, 71, 0.5) !important;
+}
+
+.badge.bg-success {
+    background: linear-gradient(135deg, var(--success-gradient-start) 0%, var(--success-gradient-mid) 50%, var(--success-gradient-end) 100%) !important;
+    color: #1a0033 !important;
+    border-color: rgba(122, 255, 197, 0.5) !important;
+}
+
+.badge.bg-danger {
+    background: linear-gradient(135deg, var(--danger-gradient-start) 0%, var(--danger-gradient-mid) 50%, var(--danger-gradient-end) 100%) !important;
+    color: white !important;
+    border-color: rgba(247, 37, 133, 0.5) !important;
+}
+
+.badge.bg-info {
+    background: linear-gradient(135deg, var(--info-gradient-start) 0%, var(--info-gradient-mid) 50%, var(--info-gradient-end) 100%) !important;
+    color: white !important;
+    border-color: rgba(77, 166, 255, 0.5) !important;
+}
+
+.badge.bg-primary {
+    background: linear-gradient(135deg, var(--primary-gradient-start) 0%, var(--primary-gradient-mid) 50%, var(--primary-gradient-end) 100%) !important;
+    color: white !important;
+    border-color: rgba(142, 52, 232, 0.5) !important;
+}
+
+/* Form Switch/Radio Styles */
+.form-check-input[type="radio"],
+.form-switch .form-check-input {
+    cursor: pointer;
+    width: 2.5rem;
+    height: 1.25rem;
+    background-color: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(138, 94, 180, 0.5);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.form-check-input[type="radio"]:checked,
+.form-switch .form-check-input:checked {
+    background-color: #5d42e6;
+    border-color: #8e34e8;
+    box-shadow: 0 0 10px rgba(93, 66, 230, 0.6);
+}
+
+/* UFO indicator for checked state */
+.form-check-input[type="radio"]:checked::after,
+.form-check-input[type="checkbox"]:checked::after,
+.form-switch .form-check-input:checked::after {
+    content: '';
+    position: absolute;
+    right: -35px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 30px;
+    height: 30px;
+    background-image: url('assets/img/ufo.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    animation: ufoFloat 2s ease-in-out infinite;
+    filter: drop-shadow(0 0 8px rgba(138, 94, 180, 0.8));
+}
+
+@keyframes ufoFloat {
+    0%, 100% {
+        transform: translateY(-50%) translateX(0px) rotate(-5deg);
+    }
+    50% {
+        transform: translateY(-55%) translateX(3px) rotate(5deg);
+    }
+}
+
+.form-check-input[type="radio"]:focus,
+.form-switch .form-check-input:focus {
+    border-color: rgba(138, 94, 180, 0.8);
+    box-shadow: 0 0 0 0.2rem rgba(93, 66, 230, 0.25);
+}
+
+.form-switch .form-check-input:checked {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+}
+
 /* Button Enhancements in Tables */
 .table .btn {
     padding: 0.5rem 1.5rem;
@@ -570,9 +722,164 @@ button:disabled,
     }
 }
 
+/* ================================================
+   Breadcrumb Styles
+   ================================================ */
+
+.breadcrumb {
+  background: transparent;
+  padding: 0.5rem 0;
+  margin-bottom: 0;
+  display: flex;
+  flex-wrap: wrap;
+  list-style: none;
+}
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+  content: "/" !important;
+  padding: 0 0.5rem !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-weight: 600 !important;
+}
+
+.breadcrumb-item a {
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+}
+
+.breadcrumb-item a:hover {
+  color: white;
+  text-shadow: 0 0 10px rgba(138, 94, 180, 0.8);
+}
+
+.breadcrumb-item a i {
+  color: rgba(138, 94, 180, 0.8);
+  transition: all 0.3s ease;
+}
+
+.breadcrumb-item a:hover i {
+  color: #d32985;
+  filter: drop-shadow(0 0 8px rgba(211, 41, 133, 0.8));
+}
+
+.breadcrumb-item.active {
+  color: white;
+  font-weight: 600;
+}
+
+/* ================================================
+   End Breadcrumb Styles
+   ================================================ */
+
 .success-icon {
     cursor: pointer; 
     color: #00e89f !important; 
     font-size: 30px; 
     filter: drop-shadow(0 0 8px rgba(0, 232, 159, 0.6));
+}
+
+/* ================================================
+   Bootstrap Tooltip Customization
+   ================================================ */
+
+/* Tooltip container */
+.tooltip {
+  font-family: var(--font-primary);
+  z-index: 9999 !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  display: block !important;
+}
+
+.tooltip.show {
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  transition: opacity 0.15s ease-in 0.15s !important;
+}
+
+/* Ensure tooltip arrows are also hidden initially */
+.tooltip .tooltip-arrow {
+  visibility: hidden !important;
+}
+
+.tooltip.show .tooltip-arrow {
+  visibility: visible !important;
+}
+
+/* Force tooltip to stay in place while positioning */
+.tooltip:not(.show) {
+  transform: translate(0, 0) !important;
+  top: -9999px !important;
+  left: -9999px !important;
+}/* Tooltip inner content */
+.tooltip .tooltip-inner {
+    background: linear-gradient(135deg, #2d1b4e 0%, #4a2c6d 50%, #6a3d8f 100%);
+    color: white;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(42, 27, 78, 0.6),
+                0 0 20px rgba(106, 61, 143, 0.4);
+    border: 1px solid rgba(138, 94, 180, 0.4);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Tooltip arrows */
+.tooltip .tooltip-arrow::before {
+    border-top-color: #2d1b4e;
+    border-bottom-color: #6a3d8f;
+    border-left-color: #2d1b4e;
+    border-right-color: #6a3d8f;
+}
+
+/* Top arrow */
+.bs-tooltip-top .tooltip-arrow::before,
+.bs-tooltip-auto[data-popper-placement^="top"] .tooltip-arrow::before {
+    border-top-color: #2d1b4e;
+}
+
+/* Bottom arrow */
+.bs-tooltip-bottom .tooltip-arrow::before,
+.bs-tooltip-auto[data-popper-placement^="bottom"] .tooltip-arrow::before {
+    border-bottom-color: #6a3d8f;
+}
+
+/* Left arrow */
+.bs-tooltip-start .tooltip-arrow::before,
+.bs-tooltip-auto[data-popper-placement^="left"] .tooltip-arrow::before {
+    border-left-color: #3d2658;
+}
+
+/* Right arrow */
+.bs-tooltip-end .tooltip-arrow::before,
+.bs-tooltip-auto[data-popper-placement^="right"] .tooltip-arrow::before {
+    border-right-color: #5a3578;
+}
+
+/* Tooltip animation */
+.tooltip.hide {
+  display: none !important;
+  opacity: 0 !important;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

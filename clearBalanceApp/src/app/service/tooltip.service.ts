@@ -33,15 +33,28 @@ export class TooltipService implements OnDestroy {
    * Should be called in AfterViewInit or after dynamic content is loaded.
    */
   initialize(): void {
-    // Small delay to ensure DOM is ready
+    // Clean up any existing tooltips first
+    this.hideAll();
+    
+    // Small delay to ensure DOM is ready and cleanup is complete
     setTimeout(() => {
       const tooltipTriggerList = Array.from(
         document.querySelectorAll('[data-bs-toggle="tooltip"]')
       );
       tooltipTriggerList.forEach((tooltipTriggerEl) => {
-        new bootstrap.Tooltip(tooltipTriggerEl);
+        // Dispose existing tooltip instance if it exists
+        const existingTooltip = bootstrap.Tooltip.getInstance(tooltipTriggerEl);
+        if (existingTooltip) {
+          existingTooltip.dispose();
+        }
+        // Create new tooltip instance
+        new bootstrap.Tooltip(tooltipTriggerEl, {
+          trigger: 'hover',
+          animation: false,
+          delay: { show: 500, hide: 0 }
+        });
       });
-    }, 0);
+    }, 100);
   }
 
   /**
@@ -49,6 +62,18 @@ export class TooltipService implements OnDestroy {
    * Useful for cleanup and preventing orphaned tooltips during navigation.
    */
   hideAll(): void {
+    // First, dispose all tooltip instances
+    const tooltipTriggerList = Array.from(
+      document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    );
+    tooltipTriggerList.forEach((element) => {
+      const tooltip = bootstrap.Tooltip.getInstance(element);
+      if (tooltip) {
+        tooltip.dispose();
+      }
+    });
+    
+    // Then remove any orphaned tooltip elements from DOM
     const tooltips = document.querySelectorAll('.tooltip');
     tooltips.forEach(tooltip => tooltip.remove());
   }

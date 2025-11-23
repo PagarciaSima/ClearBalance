@@ -1,0 +1,406 @@
+/* ================================================
+   Galactic Footer Styles
+   ================================================ */
+
+.galactic-footer {
+  background: linear-gradient(135deg, rgba(34, 13, 70, 0.98) 0%, rgba(61, 24, 94, 0.98) 50%, rgba(30, 58, 95, 0.98) 100%);
+  border-top: 3px solid rgba(138, 94, 180, 0.8);
+  box-shadow: 0 -8px 32px rgba(93, 66, 230, 0.6), 
+              inset 0 1px 0 rgba(138, 94, 180, 0.4);
+  backdrop-filter: blur(15px);
+  padding: 3rem 0 1.5rem;
+  margin-top: auto;
+  position: relative;
+  z-index: 100;
+  color: white;
+  overflow: hidden;
+  border-radius: 0;
+  flex-shrink: 0;
+}
+
+.galactic-footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(93, 66, 230, 0.8) 25%, 
+    rgba(138, 94, 180, 0.8) 50%, 
+    rgba(93, 66, 230, 0.8) 75%, 
+    transparent
+  );
+}
+
+/* ================================================
+   Brand Section
+   ================================================ */
+
+.footer-brand {
+  padding-right: 2rem;
+}
+
+.footer-title {
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: 0.5px;
+  color: white;
+  margin-bottom: 1rem;
+  text-shadow: 0 0 20px rgba(138, 94, 180, 0.8), 
+               0 2px 4px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+}
+
+.footer-title i {
+  background: linear-gradient(135deg, #5d42e6 0%, #8e34e8 50%, #d32985 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 10px rgba(93, 66, 230, 0.6));
+  font-size: 1.5rem;
+}
+
+.footer-description {
+  color: rgba(255, 255, 255, 0.95);
+  line-height: 1.6;
+  font-size: 0.95rem;
+  margin: 0;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* ================================================
+   Footer Links
+   ================================================ */
+
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-links li {
+  margin-bottom: 0.75rem;
+}
+
+.footer-links a {
+  color: rgba(255, 255, 255, 0.95);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  font-weight: 500;
+  font-size: 0.95rem;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.footer-links a:hover {
+  color: white;
+  transform: translateX(5px);
+  text-shadow: 0 0 15px rgba(138, 94, 180, 0.8);
+}
+
+.footer-links a i {
+  color: rgba(138, 94, 180, 0.8);
+  transition: all 0.3s ease;
+}
+
+.footer-links a:hover i {
+  color: #d32985;
+  filter: drop-shadow(0 0 10px rgba(211, 41, 133, 0.8));
+}
+
+/* ================================================
+   Social Links
+   ================================================ */
+
+.footer-social {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.social-icon {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background: rgba(93, 66, 230, 0.4);
+  border: 2px solid rgba(138, 94, 180, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.25rem;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(93, 66, 230, 0.3);
+}
+
+.social-icon:hover {
+  background: linear-gradient(135deg, #5d42e6 0%, #8e34e8 50%, #d32985 100%);
+  border-color: rgba(211, 41, 133, 0.8);
+  transform: translateY(-5px) rotate(10deg);
+  box-shadow: 0 8px 20px rgba(93, 66, 230, 0.6);
+  color: white;
+}
+
+.social-icon i {
+  transition: all 0.3s ease;
+}
+
+.social-icon:hover i {
+  transform: scale(1.2);
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
+}
+
+/* ================================================
+   Footer Bottom
+   ================================================ */
+
+.footer-bottom {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(138, 94, 180, 0.4);
+  text-align: center;
+}
+
+.copyright-text {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.9rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.copyright-text .divider {
+  color: rgba(138, 94, 180, 0.6);
+  margin: 0 0.5rem;
+}
+
+.copyright-text i.bi-heart-fill {
+  color: #d32985;
+  animation: heartbeat 1.5s ease-in-out infinite;
+  filter: drop-shadow(0 0 8px rgba(211, 41, 133, 0.6));
+}
+
+@keyframes heartbeat {
+  0%, 100% {
+    transform: scale(1);
+  }
+  10%, 30% {
+    transform: scale(1.2);
+  }
+  20%, 40% {
+    transform: scale(1);
+  }
+}
+
+/* ================================================
+   Decorative Stars
+   ================================================ */
+
+.footer-stars {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.star {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+  animation: twinkle 3s ease-in-out infinite;
+}
+
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.5);
+  }
+}
+
+/* ================================================
+   Decorative Planets
+   ================================================ */
+
+/* Saturn */
+.planet.saturn {
+  position: absolute;
+  bottom: 10%;
+  right: 5%;
+  width: 120px;
+  height: 120px;
+  animation: floatPlanet 6s ease-in-out infinite;
+}
+
+.planet.saturn .planet-body {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f5e6d3 0%, #e8c4a0 30%, #d9a574 50%, #c98e5a 70%, #b67d4a 100%);
+  box-shadow: 0 0 30px rgba(245, 230, 211, 0.5),
+              inset -10px -10px 20px rgba(0, 0, 0, 0.3),
+              inset 5px 5px 15px rgba(255, 255, 255, 0.2);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+
+.planet.saturn .ring {
+  position: absolute;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotateX(75deg);
+  border: 3px solid transparent;
+}
+
+.planet.saturn .ring-1 {
+  width: 130px;
+  height: 130px;
+  border-color: rgba(232, 196, 160, 0.7);
+  z-index: 1;
+}
+
+.planet.saturn .ring-2 {
+  width: 150px;
+  height: 150px;
+  border-color: rgba(217, 165, 116, 0.5);
+  z-index: 1;
+}
+
+/* Moon */
+.planet.moon {
+  position: absolute;
+  top: 15%;
+  left: 8%;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e8e8e8 0%, #c0c0c0 50%, #a8a8a8 100%);
+  box-shadow: 0 0 40px rgba(255, 255, 255, 0.4),
+              inset -15px -15px 30px rgba(0, 0, 0, 0.4);
+  animation: floatPlanet 8s ease-in-out infinite;
+  animation-delay: -2s;
+}
+
+.planet.moon .crater {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.2);
+  box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.planet.moon .crater-1 {
+  width: 20px;
+  height: 20px;
+  top: 20%;
+  left: 30%;
+}
+
+.planet.moon .crater-2 {
+  width: 15px;
+  height: 15px;
+  top: 50%;
+  left: 55%;
+}
+
+.planet.moon .crater-3 {
+  width: 12px;
+  height: 12px;
+  top: 65%;
+  left: 25%;
+}
+
+@keyframes floatPlanet {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-15px) rotate(5deg);
+  }
+}
+
+/* ================================================
+   Responsive Styles
+   ================================================ */
+
+@media (max-width: 767.98px) {
+  .galactic-footer {
+    padding: 2rem 0 1rem;
+    margin-top: 2rem;
+  }
+
+  .footer-brand {
+    padding-right: 0;
+    margin-bottom: 1.5rem;
+  }
+
+  .footer-title {
+    font-size: 1.1rem;
+  }
+
+  .footer-description {
+    font-size: 0.9rem;
+  }
+
+  .footer-social {
+    justify-content: flex-start;
+  }
+
+  .social-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1.1rem;
+  }
+
+  .copyright-text {
+    font-size: 0.85rem;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .copyright-text .divider {
+    display: none;
+  }
+
+  /* Hide planets on mobile */
+  .planet.saturn,
+  .planet.moon {
+    display: none;
+  }
+}
+
+@media (max-width: 991.98px) {
+  .footer-brand {
+    text-align: center;
+    padding-right: 0;
+  }
+
+  .footer-title {
+    justify-content: center;
+  }
+
+  .footer-social {
+    justify-content: center;
+  }
+}

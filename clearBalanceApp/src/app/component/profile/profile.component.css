@@ -1,0 +1,383 @@
+/* ================================================
+   Profile Section Styles
+   ================================================ */
+
+.profile-section {
+  position: relative;
+  z-index: 10;
+  padding: 1rem 0 2rem 0;
+  min-height: 100vh;
+  pointer-events: none;
+}
+
+.profile-section * {
+  pointer-events: auto;
+}
+
+/* ================================================
+   Profile Card Styles
+   ================================================ */
+
+.profile-card {
+  overflow: visible;
+}
+
+/* ================================================
+   Sidebar Styles
+   ================================================ */
+
+.profile-sidebar {
+  min-width: 280px;
+  background: linear-gradient(180deg, #220d46 0%, #2d1b4e 100%);
+  border-right: 2px solid rgba(138, 94, 180, 0.3);
+}
+
+/* ================================================
+   Avatar Styles
+   ================================================ */
+
+.profile-avatar-wrapper {
+  position: relative;
+}
+
+.profile-avatar-container {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.profile-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 4px solid transparent;
+  background: linear-gradient(#220d46, #220d46) padding-box,
+              linear-gradient(135deg, #5d42e6 0%, #8e34e8 50%, #d32985 100%) border-box;
+  box-shadow: 0 0 30px rgba(93, 66, 230, 0.6),
+              inset 0 0 20px rgba(138, 94, 180, 0.2);
+  transition: all 0.3s ease;
+}
+
+.avatar-upload-overlay {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  width: 35px;
+  height: 35px;
+  background: linear-gradient(135deg, #5d42e6 0%, #d32985 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  opacity: 0.8;
+}
+
+.profile-avatar-container:hover .profile-avatar {
+  transform: scale(1.05);
+  box-shadow: 0 0 40px rgba(93, 66, 230, 1),
+              inset 0 0 25px rgba(138, 94, 180, 0.3);
+}
+
+.profile-avatar-container:hover .avatar-upload-overlay {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* ================================================
+   Profile Name & Info
+   ================================================ */
+
+.profile-name {
+  color: white;
+  font-weight: 700;
+  font-size: 1.5rem;
+  margin: 0;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.profile-since {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  margin: 0.5rem 0 0 0;
+}
+
+/* ================================================
+   Navigation Pills Styles
+   ================================================ */
+
+.profile-nav {
+  padding: 0 1rem 1rem 1rem;
+}
+
+.profile-nav .nav-link {
+  color: rgba(255, 255, 255, 0.8);
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  border: 1px solid transparent;
+  cursor: pointer;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  display: flex;
+  align-items: center;
+}
+
+.profile-nav .nav-link:hover {
+  background: rgba(93, 66, 230, 0.2);
+  color: white;
+  border-color: rgba(138, 94, 180, 0.3);
+  transform: translateX(5px);
+}
+
+.profile-nav .nav-link.active {
+  background: linear-gradient(90deg, rgba(93, 66, 230, 0.4), rgba(211, 41, 133, 0.4));
+  color: white;
+  border-color: rgba(138, 94, 180, 0.6);
+  box-shadow: 0 4px 12px rgba(93, 66, 230, 0.3);
+}
+
+.profile-nav .nav-link i {
+  filter: drop-shadow(0 0 5px rgba(138, 94, 180, 0.5));
+}
+
+/* ================================================
+   Tab Content Styles
+   ================================================ */
+
+.profile-content {
+  flex: 1;
+  padding: 2rem;
+  min-height: 600px;
+}
+
+.content-title {
+  color: white;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid rgba(138, 94, 180, 0.3);
+}
+
+.content-title i {
+  background: linear-gradient(135deg, #5d42e6 0%, #d32985 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 8px rgba(93, 66, 230, 0.6));
+}
+
+/* ================================================
+   Form Styles
+   ================================================ */
+
+.profile-content .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.profile-content label {
+  color: white;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.profile-content .form-control {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(138, 94, 180, 0.3);
+  color: white;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.profile-content .form-control:focus {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(138, 94, 180, 0.6);
+  box-shadow: 0 0 0 0.2rem rgba(93, 66, 230, 0.25);
+  color: white;
+}
+
+.profile-content .form-control::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.profile-content .form-control:disabled {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.5);
+  border-color: rgba(138, 94, 180, 0.2);
+}
+
+.profile-content select.form-control {
+  cursor: pointer;
+  color: white !important;
+}
+
+.profile-content select.form-control option {
+  background: #2d1b4e !important;
+  color: white !important;
+  padding: 0.5rem;
+}
+
+.profile-content select.form-control option:disabled {
+  color: rgba(255, 255, 255, 0.7) !important;
+  background: #2d1b4e !important;
+}
+
+.profile-content select.form-control option:checked {
+  background: #5d42e6 !important;
+  color: white !important;
+}
+
+.profile-content textarea.form-control {
+  resize: vertical;
+}
+
+/* ================================================
+   Checkbox Styles
+   ================================================ */
+
+.profile-content .form-check {
+  margin-bottom: 1rem;
+}
+
+.profile-content .form-check-label {
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.profile-content .form-check-input {
+  cursor: pointer;
+  width: 1.2rem;
+  height: 1.2rem;
+  margin-right: 0.5rem;
+}
+
+.profile-content .form-check-input:checked {
+  background-color: #5d42e6;
+  border-color: #5d42e6;
+}
+
+.profile-content .form-check-input:focus {
+  border-color: rgba(138, 94, 180, 0.6);
+  box-shadow: 0 0 0 0.2rem rgba(93, 66, 230, 0.25);
+}
+
+/* ================================================
+   Settings List Styles
+   ================================================ */
+
+.settings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.setting-item {
+  background: rgba(93, 66, 230, 0.1);
+  border: 1px solid rgba(138, 94, 180, 0.3);
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.setting-item:hover {
+  background: rgba(93, 66, 230, 0.15);
+  border-color: rgba(138, 94, 180, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(93, 66, 230, 0.2);
+}
+
+.setting-title {
+  color: white;
+  font-size: 1.1rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.setting-description {
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* ================================================
+   Badge Styles
+   ================================================ */
+
+.setting-item .badge {
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+}
+
+/* ================================================
+   Responsive Design
+   ================================================ */
+
+@media (max-width: 768px) {
+  .profile-sidebar {
+    min-width: 100%;
+    border-right: none;
+    border-bottom: 2px solid rgba(138, 94, 180, 0.3);
+  }
+
+  .profile-content {
+    padding: 1.5rem;
+  }
+
+  .profile-nav .nav-link:hover {
+    transform: translateX(0);
+  }
+
+  .content-title {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .profile-content {
+    padding: 1rem;
+  }
+
+  .profile-avatar-container {
+    width: 100px;
+    height: 100px;
+  }
+
+  .profile-name {
+    font-size: 1.25rem;
+  }
+
+  .setting-item {
+    padding: 1rem;
+  }
+
+  .setting-item .row {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .setting-item .col-auto {
+    width: 100%;
+  }
+
+  .setting-item .btn {
+    width: 100%;
+  }
+}

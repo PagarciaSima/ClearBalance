@@ -1,194 +1,287 @@
+<!-- ========================= UFO ANIMATION COMPONENT ========================= -->
 <app-ufo></app-ufo>
-<section *ngIf="(loginState$ | async) as state" [ngSwitch]="state.dataState">
-    <!-- Login -->
-    <div class="container" *ngIf="!state.loginSuccess && !state.usingMfa" @slideBlur>
-        <div class="row justify-content-center my-5">
-            <div class="col-md-6 mt-3">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="text-center">
-                            <h2><i style="margin-right: 5px;" class="bi bi-safe me-3" aria-hidden="true"></i>ClearBalance</h2>
-                            <h5 class="card-title mt-4 mb-5" id="login-heading">Account Login</h5>
-                            <!-- Person icon for abduction -->
-                            <div class="person-icon-container" role="img" aria-label="Decorative animation">
-                                <i class="bi bi-person-standing person-icon" aria-hidden="true"></i>
-                                <div class="help-bubble" aria-hidden="true">HELP!</div>
-                            </div>
-                        </div>
-                        <!-- Error message -->
-                        <div *ngIf="state.dataState === DataState.ERROR" class="alert alert-danger bg-danger text-light border-0 alert-dismissible fade show"
-                            role="alert"
-                        >
-                            {{ state.error }}
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"
-                                aria-label="Close">
-                            </button>
-                        </div>
 
-                        <!-- Login form -->
-                        <form #loginForm="ngForm" (ngSubmit)="login(loginForm)" aria-labelledby="login-heading">
-                            <div class="form-outline mb-4">
-                                <label class="form-label" for="email">Email Address</label>
-                                <input [disabled]="state.dataState === DataState.LOADING" 
-                                       ngModel 
-                                       type="email" 
-                                       id="email" 
-                                       name="email" 
-                                       class="form-control" 
-                                       placeholder="Enter your email" 
-                                       autocomplete="email"
-                                       aria-required="true"
-                                       required>
-                            </div>
-                            <div class="form-outline mb-4">
-                                <label for="password" class="form-label">Password</label>
-                                <div class="input-group">
-                                    <input [disabled]="state.dataState === DataState.LOADING" 
-                                           ngModel 
-                                           [type]="showPassword ? 'text' : 'password'" 
-                                           id="password" 
-                                           name="password" 
-                                           class="form-control" 
-                                           placeholder="Enter your password" 
-                                           autocomplete="current-password"
-                                           aria-required="true"
-                                           aria-describedby="password-toggle"
-                                           required>
-                                    <button class="btn btn-primary" 
-                                            type="button" 
-                                            id="password-toggle"
-                                            (click)="showPassword = !showPassword" 
-                                            [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
-                                            [attr.aria-pressed]="showPassword"
-                                            data-bs-toggle="tooltip" 
-                                            data-bs-placement="top" 
-                                            [attr.title]="'Show / hide password'">
-                                        <i [class]="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'" aria-hidden="true"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="d-flex justify-content-center mb-4">
-                                <button [disabled]="state.dataState === DataState.LOADING || loginForm.invalid || loginForm.pristine" 
-                                        type="submit" 
-                                        class="btn btn-primary w-100"
-                                        [attr.aria-busy]="state.dataState === DataState.LOADING"
-                                        data-bs-toggle="tooltip" 
-                                        data-bs-placement="top" 
-                                        title="Submit login credentials">
-                                    <span *ngIf="state.dataState === DataState.LOADING" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                                    <span *ngIf="state.dataState === DataState.LOADING" class="me-2">Loading...</span>
-                                    <span *ngIf="state.dataState !== DataState.LOADING">Log in</span>
-                                </button>
-                            </div>
-                        </form>
-                        <nav class="row mb-4" aria-label="Account actions">
-                            <div class="col d-flex justify-content-center">
-                                <a class="d-flex align-items-center" 
-                                   [ngStyle]="{'pointer-events': state.dataState === DataState.LOADING ? 'none': ''}" 
-                                   [attr.aria-disabled]="state.dataState === DataState.LOADING"
-                                   routerLink="/register"
-                                   data-bs-toggle="tooltip" 
-                                   data-bs-placement="top" 
-                                   title="Sign up for a new account">
-                                    <i class="bi bi-person-plus fs-5 me-2" aria-hidden="true"></i>
-                                    <span>Create an Account</span>
-                                </a>
-                            </div>
-                            <div class="col d-flex justify-content-center">
-                                <a class="d-flex align-items-center" 
-                                   [ngStyle]="{'pointer-events': state.dataState === DataState.LOADING ? 'none': ''}" 
-                                   [attr.aria-disabled]="state.dataState === DataState.LOADING"
-                                   routerLink="/resetpassword"
-                                   data-bs-toggle="tooltip" 
-                                   data-bs-placement="top" 
-                                   title="Reset your password via email">
-                                    <i class="bi bi-key fs-5 me-2" aria-hidden="true"></i>
-                                    <span>Forgot password?</span>
-                                </a>
-                            </div>
-                        </nav>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>  
+<!-- ========================= LOGIN SECTION ========================= -->
+<section *ngIf="(loginState$ | async) as state" [ngSwitch]="state.dataState" aria-label="Authentication section">
 
-    <!-- Success screen -->
-    <div *ngIf="state.usingMfa" class="container">
-        <div class="row justify-content-center my-5" @slideBlur>
-            <div class="col-md-6" style="margin-top: 50px;">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="text-center">
-                            <h2><i style="margin-right: 5px;" class="bi bi-safe me-3" aria-hidden="true"></i>ClearBalance</h2>
-                            <h5 class="card-title mt-4 mb-4" id="verification-heading">Verification Code Sent To {{ state.phone }}</h5>
-                            <i class="bi bi-check-circle-fill" style="cursor: pointer; color: #00e89f; font-size: 30px; filter: drop-shadow(0 0 8px rgba(0, 232, 159, 0.6));" role="img" aria-label="Success"></i>
-                            <p class="mt-2" style="font-size: 20px;">Please access your SMS and enter the code.</p>
-                        </div>
-                        <div *ngIf="state.dataState === DataState.ERROR" class="alert alert-danger bg-danger text-light border-0 alert-dismissible fade show"
-                            role="alert"
-                        >
-                            {{ state.error }}
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"
-                                aria-label="Close"></button>
-                        </div>
-                        <form #verifyCodeForm="ngForm" (ngSubmit)="verifyCode(verifyCodeForm)" aria-labelledby="verification-heading">
-                            <div class="form-outline mb-4">
-                                <label class="form-label" for="code">Verification Code</label>
-                                <input [disabled]="state.dataState === DataState.LOADING" 
-                                       ngModel 
-                                       type="text" 
-                                       id="code" 
-                                       name="code" 
-                                       class="form-control" 
-                                       placeholder="Enter verification code" 
-                                       autocomplete="one-time-code"
-                                       inputmode="numeric"
-                                       pattern="[0-9]*"
-                                       aria-required="true"
-                                       required>
-                            </div>
-                            <div class="d-flex justify-content-center mb-4">
-                                <button [disabled]="state.dataState === DataState.LOADING || verifyCodeForm.invalid || verifyCodeForm.pristine" 
-                                        type="submit" 
-                                        class="btn btn-primary w-100"
-                                        [attr.aria-busy]="state.dataState === DataState.LOADING"
-                                        data-bs-toggle="tooltip" 
-                                        data-bs-placement="top" 
-                                        title="Verify the code sent to your phone">
-                                    <span *ngIf="state.dataState === DataState.LOADING" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                                    <span *ngIf="state.dataState === DataState.LOADING" class="me-2">Loading...</span>
-                                    <span *ngIf="state.dataState !== DataState.LOADING">Verify Code</span>
-                                </button>
-                            </div>
-                        </form>
-                        <nav class="row mb-4" aria-label="Navigation options">
-                            <div class="col d-flex justify-content-center">
-                                <a class="d-flex align-items-center" 
-                                   (click)="loginPage()" 
-                                   routerLink="/login"
-                                   data-bs-toggle="tooltip" 
-                                   data-bs-placement="top" 
-                                   title="Return to login page">
-                                    <i class="bi bi-box-arrow-in-right fs-5 me-2" aria-hidden="true"></i>
-                                    <span>Account Login</span>
-                                </a>
-                            </div>
-                            <div class="col d-flex justify-content-center">
-                                <a class="d-flex align-items-center" 
-                                   routerLink="/register"
-                                   data-bs-toggle="tooltip" 
-                                   data-bs-placement="top" 
-                                   title="Sign up for a new account">
-                                    <i class="bi bi-person-plus fs-5 me-2" aria-hidden="true"></i>
-                                    <span>Create an account</span>
-                                </a>
-                            </div>
-                        </nav>
-                    </div>
-                </div>
+  <!-- ========================= LOGIN FORM SCREEN ========================= -->
+  <div class="container" *ngIf="!state.loginSuccess && !state.usingMfa" @slideBlur>
+    <div class="row justify-content-center my-5">
+      <div class="col-md-6 mt-3">
+        <div class="card">
+          <div class="card-body">
+            
+            <!-- ========================= HEADER ========================= -->
+            <div class="text-center">
+              <h2>
+                <i class="bi bi-safe me-3" aria-hidden="true"></i>
+                ClearBalance
+              </h2>
+              <h5 class="card-title mt-4 mb-5" id="login-heading">Account Login</h5>
+              
+              <!-- ========================= DECORATIVE ANIMATION ========================= -->
+              <div class="person-icon-container" role="img" aria-label="Decorative person being abducted animation">
+                <i class="bi bi-person-standing person-icon" aria-hidden="true"></i>
+                <div class="help-bubble" aria-hidden="true">HELP!</div>
+              </div>
             </div>
+
+            <!-- ========================= ERROR MESSAGE ========================= -->
+            <div 
+              *ngIf="state.dataState === DataState.ERROR" 
+              class="alert alert-danger bg-danger text-light border-0 alert-dismissible fade show"
+              role="alert">
+              {{ state.error }}
+              <button 
+                type="button" 
+                class="btn-close btn-close-white" 
+                data-bs-dismiss="alert"
+                aria-label="Close error message">
+              </button>
+            </div>
+
+            <!-- ========================= LOGIN FORM ========================= -->
+            <form 
+              #loginForm="ngForm" 
+              (ngSubmit)="login(loginForm)" 
+              aria-labelledby="login-heading"
+              novalidate>
+              
+              <!-- Email field -->
+              <div class="form-outline mb-4">
+                <label class="form-label" for="email">Email Address</label>
+                <input 
+                  [disabled]="state.dataState === DataState.LOADING" 
+                  ngModel 
+                  type="email" 
+                  id="email" 
+                  name="email" 
+                  class="form-control" 
+                  placeholder="Enter your email" 
+                  autocomplete="email"
+                  aria-required="true"
+                  aria-invalid="false"
+                  required>
+              </div>
+
+              <!-- Password field -->
+              <div class="form-outline mb-4">
+                <label for="password" class="form-label">Password</label>
+                <div class="input-group">
+                  <input 
+                    [disabled]="state.dataState === DataState.LOADING" 
+                    ngModel 
+                    [type]="showPassword ? 'text' : 'password'" 
+                    id="password" 
+                    name="password" 
+                    class="form-control" 
+                    placeholder="Enter your password" 
+                    autocomplete="current-password"
+                    aria-required="true"
+                    aria-invalid="false"
+                    aria-describedby="password-toggle"
+                    required>
+                  <button 
+                    class="btn btn-primary" 
+                    type="button" 
+                    id="password-toggle"
+                    (click)="showPassword = !showPassword" 
+                    [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+                    [attr.aria-pressed]="showPassword"
+                    data-bs-toggle="tooltip" 
+                    data-bs-placement="top" 
+                    title="Toggle password visibility">
+                    <i 
+                      [class]="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'" 
+                      aria-hidden="true">
+                    </i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Submit button -->
+              <div class="d-flex justify-content-center mb-4">
+                <button 
+                  [disabled]="state.dataState === DataState.LOADING || loginForm.invalid || loginForm.pristine" 
+                  type="submit" 
+                  class="btn btn-primary w-100"
+                  [attr.aria-busy]="state.dataState === DataState.LOADING"
+                  data-bs-toggle="tooltip" 
+                  data-bs-placement="top" 
+                  title="Submit login credentials">
+                  <span 
+                    *ngIf="state.dataState === DataState.LOADING" 
+                    class="spinner-border spinner-border-sm me-2" 
+                    role="status" 
+                    aria-hidden="true">
+                  </span>
+                  <span *ngIf="state.dataState === DataState.LOADING">Loading...</span>
+                  <span *ngIf="state.dataState !== DataState.LOADING">Log in</span>
+                </button>
+              </div>
+            </form>
+
+            <!-- ========================= NAVIGATION LINKS ========================= -->
+            <nav class="row mb-4" aria-label="Account actions">
+              <div class="col d-flex justify-content-center">
+                <a 
+                  class="d-flex align-items-center" 
+                  [class.disabled]="state.dataState === DataState.LOADING"
+                  [attr.aria-disabled]="state.dataState === DataState.LOADING"
+                  [attr.tabindex]="state.dataState === DataState.LOADING ? -1 : 0"
+                  routerLink="/register"
+                  data-bs-toggle="tooltip" 
+                  data-bs-placement="top" 
+                  title="Sign up for a new account">
+                  <i class="bi bi-person-plus fs-5 me-2" aria-hidden="true"></i>
+                  <span>Create an Account</span>
+                </a>
+              </div>
+              <div class="col d-flex justify-content-center">
+                <a 
+                  class="d-flex align-items-center" 
+                  [class.disabled]="state.dataState === DataState.LOADING"
+                  [attr.aria-disabled]="state.dataState === DataState.LOADING"
+                  [attr.tabindex]="state.dataState === DataState.LOADING ? -1 : 0"
+                  routerLink="/resetpassword"
+                  data-bs-toggle="tooltip" 
+                  data-bs-placement="top" 
+                  title="Reset your password via email">
+                  <i class="bi bi-key fs-5 me-2" aria-hidden="true"></i>
+                  <span>Forgot password?</span>
+                </a>
+              </div>
+            </nav>
+
+          </div>
         </div>
+      </div>
     </div>
-    
+  </div>
+
+  <!-- ========================= MFA VERIFICATION SCREEN ========================= -->
+  <div *ngIf="state.usingMfa" class="container">
+    <div class="row justify-content-center my-5" @slideBlur>
+      <div class="col-md-6 mt-5">
+        <div class="card">
+          <div class="card-body">
+            
+            <!-- ========================= HEADER ========================= -->
+            <div class="text-center">
+              <h2>
+                <i class="bi bi-safe me-3" aria-hidden="true"></i>
+                ClearBalance
+              </h2>
+              <h5 class="card-title mt-4 mb-4" id="verification-heading">
+                Verification Code Sent To {{ state.phone }}
+              </h5>
+              <i 
+                class="bi bi-check-circle-fill success-icon" 
+                role="img" 
+                aria-label="Verification code sent successfully">
+              </i>
+              <p class="mt-3 verification-message">Please access your SMS and enter the code.</p>
+            </div>
+
+            <!-- ========================= ERROR MESSAGE ========================= -->
+            <div 
+              *ngIf="state.dataState === DataState.ERROR" 
+              class="alert alert-danger bg-danger text-light border-0 alert-dismissible fade show"
+              role="alert">
+              {{ state.error }}
+              <button 
+                type="button" 
+                class="btn-close btn-close-white" 
+                data-bs-dismiss="alert"
+                aria-label="Close error message">
+              </button>
+            </div>
+
+            <!-- ========================= VERIFICATION FORM ========================= -->
+            <form 
+              #verifyCodeForm="ngForm" 
+              (ngSubmit)="verifyCode(verifyCodeForm)" 
+              aria-labelledby="verification-heading"
+              novalidate>
+              
+              <!-- Verification code field -->
+              <div class="form-outline mb-4">
+                <label class="form-label" for="code">Verification Code</label>
+                <input 
+                  [disabled]="state.dataState === DataState.LOADING" 
+                  ngModel 
+                  type="text" 
+                  id="code" 
+                  name="code" 
+                  class="form-control" 
+                  placeholder="Enter verification code" 
+                  autocomplete="one-time-code"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
+                  aria-required="true"
+                  aria-invalid="false"
+                  aria-describedby="code-description"
+                  required>
+                <div id="code-description" class="visually-hidden">
+                  Enter the numeric verification code sent to your phone
+                </div>
+              </div>
+
+              <!-- Submit button -->
+              <div class="d-flex justify-content-center mb-4">
+                <button 
+                  [disabled]="state.dataState === DataState.LOADING || verifyCodeForm.invalid || verifyCodeForm.pristine" 
+                  type="submit" 
+                  class="btn btn-primary w-100"
+                  [attr.aria-busy]="state.dataState === DataState.LOADING"
+                  data-bs-toggle="tooltip" 
+                  data-bs-placement="top" 
+                  title="Verify the code sent to your phone">
+                  <span 
+                    *ngIf="state.dataState === DataState.LOADING" 
+                    class="spinner-border spinner-border-sm me-2" 
+                    role="status" 
+                    aria-hidden="true">
+                  </span>
+                  <span *ngIf="state.dataState === DataState.LOADING">Loading...</span>
+                  <span *ngIf="state.dataState !== DataState.LOADING">Verify Code</span>
+                </button>
+              </div>
+            </form>
+
+            <!-- ========================= NAVIGATION LINKS ========================= -->
+            <nav class="row mb-4" aria-label="Navigation options">
+              <div class="col d-flex justify-content-center">
+                <a 
+                  class="d-flex align-items-center" 
+                  (click)="loginPage()" 
+                  routerLink="/login"
+                  role="button"
+                  tabindex="0"
+                  data-bs-toggle="tooltip" 
+                  data-bs-placement="top" 
+                  title="Return to login page">
+                  <i class="bi bi-box-arrow-in-right fs-5 me-2" aria-hidden="true"></i>
+                  <span>Account Login</span>
+                </a>
+              </div>
+              <div class="col d-flex justify-content-center">
+                <a 
+                  class="d-flex align-items-center" 
+                  routerLink="/register"
+                  data-bs-toggle="tooltip" 
+                  data-bs-placement="top" 
+                  title="Sign up for a new account">
+                  <i class="bi bi-person-plus fs-5 me-2" aria-hidden="true"></i>
+                  <span>Create an account</span>
+                </a>
+              </div>
+            </nav>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </section>

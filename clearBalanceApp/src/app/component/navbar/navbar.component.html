@@ -145,4 +145,21 @@
       </ul>
     </div>
   </div>
+
+  <!-- Decorative Stars -->
+  <div class="navbar-stars" aria-hidden="true">
+    <div 
+      class="navbar-star" 
+      *ngFor="let star of stars"
+      [style.top]="star.top"
+      [style.left]="star.left"
+      [style.animation-delay]="star.delay">
+    </div>
+  </div>
+
+  <!-- Decorative Moon -->
+  <div class="navbar-planet moon-small" aria-hidden="true">
+    <div class="crater-small crater-small-1"></div>
+    <div class="crater-small crater-small-2"></div>
+  </div>
 </nav>

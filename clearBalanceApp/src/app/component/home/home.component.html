@@ -1,116 +1,145 @@
+<!-- ========================= HOME COMPONENT TEMPLATE ========================= -->
 <ng-container>
-  <ng-container>
-    <app-navbar></app-navbar>
-    <app-stats></app-stats>
-    <section>
-      <div class="container mt-5">
-        <div class="row card">
-          <div class="col-12 mt-5">
-            <div class="progress">
-              <div 
-                class="progress-bar bg-success" 
-                role="progressbar" 
-                style="width: 5%;" 
-                aria-valuenow="5" 
-                aria-valuemin="0" 
-                aria-valuem5ax="100">
-                5%
-              </div>
+  <!-- ========================= NAVIGATION BAR ========================= -->
+  <app-navbar></app-navbar>
+
+  <!-- ========================= STATISTICS SECTION ========================= -->
+  <app-stats></app-stats>
+
+  <!-- ========================= MAIN CONTENT SECTION ========================= -->
+  <section aria-labelledby="customers-title">
+    <div class="container mt-5">
+      <!-- ========================= CUSTOMERS CARD ========================= -->
+      <div class="row card" [@slideBlur]>
+        
+        <!-- ========================= PROGRESS BAR ========================= -->
+        <div class="col-12 mt-5">
+          <div class="progress" role="progressbar" aria-label="Customer data loading progress" aria-valuenow="5" aria-valuemin="0" aria-valuemax="100">
+            <div 
+              class="progress-bar bg-success" 
+              style="width: 5%;">
+              <span class="visually-hidden">5% Complete</span>
+              5%
             </div>
           </div>
-          <div class="col mt-3">
-            <h4 class="fw-bold text-start text-white">
-              <i class="bi bi-people-fill me-2"></i>Customers
-            </h4>
-          </div>
-          <div class="col">
-            <h4 class="fw-bold text-end">
-              <i 
-                class="bi bi-file-earmark-excel success-icon"
-                data-bs-toggle="tooltip" 
-                data-bs-placement="top" 
-                title="Export to Excel">
-              </i>
-            </h4>
-          </div>
-          <div class="col-xm-12">
-            <table class="table table-hover">
-              <thead>
-                <tr>
-                  <th class="text-center" scope="col">
-                    <i class="bi bi-hash me-2"></i>ID
-                  </th>
-                  <th scope="col">
-                    <i class="bi bi-person-circle me-2"></i>Photo
-                  </th>
-                  <th scope="col">
-                    <i class="bi bi-person me-2"></i>Name
-                  </th>
-                  <th scope="col">
-                    <i class="bi bi-envelope me-2"></i>Email
-                  </th>
-                  <th scope="col">
-                    <i class="bi bi-telephone me-2"></i>Phone
-                  </th>
-                  <th scope="col">
-                    <i class="bi bi-circle-fill me-2"></i>Status
-                  </th>
-                  <th scope="col">
-                    <i class="bi bi-star me-2"></i>Type
-                  </th>
-                  <th scope="col">
-                    <i class="bi bi-gear me-2"></i>Action
-                  </th>
-                </tr>
-              </thead>
-              <tbody class="table-body">
-                <tr class="cell-1">
-                  <th class="text-center">1</th>
-                  <td>
-                    <img 
-                      src="assets/img/astronaut.png" 
-                      width="42" 
-                      height="42" 
-                      class="rounded-circle" 
-                      alt="Customer Photo">
-                  </td>
-                  <td>John Doe</td>
-                  <td>john.doe@example.com</td>                          
-                  <td>+1 234 567 8900</td>
-                  <td>
-                    <span class="badge bg-success">ACTIVE</span>
-                  </td>
-                  <td>Premium</td>
-                  <td>
-                    <button 
-                      type="button" 
-                      class="btn btn-primary"
-                      data-bs-toggle="tooltip" 
-                      data-bs-placement="top" 
-                      title="View customer details">
-                      View
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            
-            <nav aria-label="Page navigation example">
-              <ul class="pagination justify-content-end">
-                <li class="page-item pointer">
-                  <a class="page-link">&laquo; Prev</a>
-                </li>
-                <li class="page-item pointer active">
-                  <a class="page-link">1</a>
-                </li>
-                <li class="page-item pointer">
-                  <a class="page-link">Next &raquo;</a>
-                </li>
-              </ul>
-            </nav>
+        </div>
+
+        <!-- ========================= HEADER ROW ========================= -->
+        <div class="col mt-3">
+          <h4 id="customers-title" class="fw-bold text-start text-white">
+            <i class="bi bi-people-fill me-2" aria-hidden="true"></i>Customers
+          </h4>
+        </div>
+        <div class="col">
+          <div class="fw-bold text-end">
+            <button 
+              type="button"
+              class="btn btn-link p-0 border-0 bg-transparent"
+              data-bs-toggle="tooltip" 
+              data-bs-placement="top" 
+              title="Export customers to Excel"
+              aria-label="Export customers to Excel">
+              <i class="bi bi-file-earmark-excel success-icon h4 mb-0" aria-hidden="true"></i>
+            </button>
           </div>
         </div>
+
+        <!-- ========================= CUSTOMERS TABLE ========================= -->
+        <div class="col-12">
+          <table class="table table-hover" aria-label="Customers list">
+            <thead>
+              <tr>
+                <th class="text-center" scope="col">
+                  <i class="bi bi-hash me-2" aria-hidden="true"></i>ID
+                </th>
+                <th scope="col">
+                  <i class="bi bi-person-circle me-2" aria-hidden="true"></i>Photo
+                </th>
+                <th scope="col">
+                  <i class="bi bi-person me-2" aria-hidden="true"></i>Name
+                </th>
+                <th scope="col">
+                  <i class="bi bi-envelope me-2" aria-hidden="true"></i>Email
+                </th>
+                <th scope="col">
+                  <i class="bi bi-telephone me-2" aria-hidden="true"></i>Phone
+                </th>
+                <th scope="col">
+                  <i class="bi bi-circle-fill me-2" aria-hidden="true"></i>Status
+                </th>
+                <th scope="col">
+                  <i class="bi bi-star me-2" aria-hidden="true"></i>Type
+                </th>
+                <th scope="col">
+                  <i class="bi bi-gear me-2" aria-hidden="true"></i>Action
+                </th>
+              </tr>
+            </thead>
+            <tbody class="table-body">
+              <tr class="cell-1">
+                <th class="text-center" scope="row">1</th>
+                <td>
+                  <img 
+                    src="assets/img/astronaut.png" 
+                    width="42" 
+                    height="42" 
+                    class="rounded-circle" 
+                    alt="Profile picture of John Doe">
+                </td>
+                <td>John Doe</td>
+                <td>john.doe@example.com</td>                          
+                <td>+1 234 567 8900</td>
+                <td>
+                  <span class="badge bg-success" role="status" aria-label="Customer status: Active">ACTIVE</span>
+                </td>
+                <td>Premium</td>
+                <td>
+                  <button 
+                    type="button" 
+                    class="btn btn-primary"
+                    data-bs-toggle="tooltip" 
+                    data-bs-placement="top" 
+                    title="View customer details"
+                    aria-label="View details for John Doe">
+                    View
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          
+          <!-- ========================= PAGINATION ========================= -->
+          <nav aria-label="Customers table pagination">
+            <ul class="pagination justify-content-end">
+              <li class="page-item pointer disabled">
+                <button 
+                  class="page-link" 
+                  type="button"
+                  aria-label="Go to previous page"
+                  disabled>
+                  &laquo; Prev
+                </button>
+              </li>
+              <li class="page-item pointer active" aria-current="page">
+                <button 
+                  class="page-link" 
+                  type="button"
+                  aria-label="Page 1, current page">
+                  1
+                </button>
+              </li>
+              <li class="page-item pointer">
+                <button 
+                  class="page-link" 
+                  type="button"
+                  aria-label="Go to next page">
+                  Next &raquo;
+                </button>
+              </li>
+            </ul>
+          </nav>
+        </div>
       </div>
-    </section>
-  </ng-container>
+    </div>
+  </section>
 </ng-container>

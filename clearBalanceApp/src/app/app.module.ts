@@ -19,6 +19,7 @@ import { HomeComponent } from './component/home/home.component';
 import { CustomersComponent } from './component/customers/customers.component';
 import { NavbarComponent } from './component/navbar/navbar.component';
 import { StatsComponent } from './component/stats/stats.component';
+import { FooterComponent } from './component/footer/footer.component';
 
 @NgModule({
   declarations: [
@@ -35,7 +36,8 @@ import { StatsComponent } from './component/stats/stats.component';
     HomeComponent,
     CustomersComponent,
     NavbarComponent,
-    StatsComponent
+    StatsComponent,
+    FooterComponent
   ],
   imports: [
     AppRoutingModule,

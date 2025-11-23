@@ -1,0 +1,138 @@
+<!-- Footer -->
+<footer class="galactic-footer" role="contentinfo" aria-label="Site footer">
+  <div class="container">
+    <div class="row">
+      <!-- Brand Section -->
+      <div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
+        <div class="footer-brand">
+          <h5 class="footer-title">
+            <i class="bi bi-safe me-2" aria-hidden="true"></i>
+            Clear Balance
+          </h5>
+          <p class="footer-description">
+            Navigate your finances through the cosmos. Manage customers and invoices with stellar precision.
+          </p>
+        </div>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
+        <h5 class="footer-title">Quick Links</h5>
+        <ul class="footer-links">
+          <li>
+            <a 
+              [routerLink]="['/customers']" 
+              data-bs-toggle="tooltip" 
+              data-bs-placement="top" 
+              title="View all customers"
+              aria-label="Navigate to customers page">
+              <i class="bi bi-people-fill me-2" aria-hidden="true"></i>Customers
+            </a>
+          </li>
+          <li>
+            <a 
+              [routerLink]="['/invoices']" 
+              data-bs-toggle="tooltip" 
+              data-bs-placement="top" 
+              title="View all invoices"
+              aria-label="Navigate to invoices page">
+              <i class="bi bi-receipt-cutoff me-2" aria-hidden="true"></i>Invoices
+            </a>
+          </li>
+          <li>
+            <a 
+              [routerLink]="['/profile']" 
+              data-bs-toggle="tooltip" 
+              data-bs-placement="top" 
+              title="View your profile"
+              aria-label="Navigate to profile page">
+              <i class="bi bi-person-circle me-2" aria-hidden="true"></i>Profile
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Contact Info -->
+      <div class="col-lg-4 col-md-12">
+        <h5 class="footer-title">Connect</h5>
+        <div class="footer-social">
+          <a 
+            href="https://github.com/PagarciaSima?tab=repositories" 
+            target="_blank"
+            rel="noopener noreferrer"
+            class="social-icon" 
+            data-bs-toggle="tooltip" 
+            data-bs-placement="top" 
+            title="Follow me on GitHub"
+            aria-label="Visit my GitHub page">
+            <i class="bi bi-github" aria-hidden="true"></i>
+          </a>
+          <a 
+            href="https://www.linkedin.com/in/pablo-garc%C3%ADa-simavilla-756469222/" 
+            target="_blank"
+            rel="noopener noreferrer"
+            class="social-icon" 
+            data-bs-toggle="tooltip" 
+            data-bs-placement="top" 
+            title="Connect on LinkedIn"
+            aria-label="Visit my LinkedIn profile">
+            <i class="bi bi-linkedin" aria-hidden="true"></i>
+          </a>
+          <a 
+            href="https://www.youtube.com/@pablogarciasimavilla5072" 
+            target="_blank"
+            rel="noopener noreferrer"
+            class="social-icon" 
+            data-bs-toggle="tooltip" 
+            data-bs-placement="top" 
+            title="Subscribe to my YouTube channel"
+            aria-label="Visit my YouTube channel">
+            <i class="bi bi-youtube" aria-hidden="true"></i>
+          </a>
+          <a 
+            href="mailto:pablo.garciasimavilla@gmail.com" 
+            class="social-icon" 
+            data-bs-toggle="tooltip" 
+            data-bs-placement="top" 
+            title="Send me an email"
+            aria-label="Send me an email">
+            <i class="bi bi-envelope-fill" aria-hidden="true"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Copyright -->
+    <div class="footer-bottom">
+      <p class="copyright-text" aria-label="Copyright information">
+        &copy; {{ currentYear }} Clear Balance. All rights reserved.
+        <span class="divider" aria-hidden="true">|</span>
+        Made with <i class="bi bi-heart-fill text-danger" aria-hidden="true"></i> in the galaxy
+      </p>
+    </div>
+  </div>
+
+  <!-- Decorative Stars -->
+  <div class="footer-stars" aria-hidden="true">
+    <div 
+      class="star" 
+      *ngFor="let star of stars"
+      [style.top]="star.top"
+      [style.left]="star.left"
+      [style.animation-delay]="star.delay">
+    </div>
+  </div>
+
+  <!-- Decorative Planets -->
+  <div class="planet saturn" aria-hidden="true">
+    <div class="planet-body"></div>
+    <div class="ring ring-1"></div>
+    <div class="ring ring-2"></div>
+  </div>
+  
+  <div class="planet moon" aria-hidden="true">
+    <div class="crater crater-1"></div>
+    <div class="crater crater-2"></div>
+    <div class="crater crater-3"></div>
+  </div>
+</footer>

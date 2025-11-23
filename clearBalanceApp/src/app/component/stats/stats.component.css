@@ -71,7 +71,7 @@
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
 }
 
-/* Animación de rotación completa con rebote */
+/* Full rotation animation with bounce */
 @keyframes spinBounce {
   0% {
     transform: rotate(0deg) scale(1);
@@ -122,7 +122,7 @@
   animation: iconGlow 3s ease-in-out infinite;
 }
 
-/* Animación de brillo sutil */
+/* Subtle glow animation */
 @keyframes iconGlow {
   0%, 100% {
     filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3)) brightness(1);
