@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -43,8 +42,8 @@ public class TokenProvider {
 	private static final String CLEAR_BALANCE_LLC = "CLEAR_BALANCE_LLC";
 	public static final String CUSTOMER_MANAGEMENT_SERVICE = "CUSTOMER_MANAGEMENT_SERVICE";
 	public static final String AUTHORITIES = "authorities";
-	public static final long ACCESS_TOKEN_EXPIRATION_TIME = 1 * 60 * 60 * 1000; // 1 hour
-	private static final long REFRESH_TOKEN_EXPIRATION_TIME = 24 * 60 * 60 * 1000; // 24 hours
+	public static final long ACCESS_TOKEN_EXPIRATION_TIME = 24 * 60 * 60 * 1000; // 24 hour
+	private static final long REFRESH_TOKEN_EXPIRATION_TIME = 24 * 60 * 60 * 1000 * 3; // 3 days
 	private static final String TOKEN_CANNOT_BE_VERIFIED = "Token cannot be verified";
 	private final UserService userService;
 
@@ -52,7 +51,7 @@ public class TokenProvider {
 	private String secret;
 
 	/**
-	 * Generates a signed JWT access token containing user authorities.
+	 * Generates a signed JWT access token containing user authorities (during login or mfa auth).
 	 *
 	 * @param userPrincipal The authenticated user's principal
 	 * @return A signed JWT access token string
@@ -62,7 +61,8 @@ public class TokenProvider {
 		try {
 			String[] roles = getRolesFromUser(userPrincipal);
 			String token = JWT.create().withIssuer(CLEAR_BALANCE_LLC).withAudience(CUSTOMER_MANAGEMENT_SERVICE)
-					.withIssuedAt(new Date()).withSubject(String.valueOf(userPrincipal.getUsername()))
+					.withIssuedAt(new Date())
+					.withSubject(String.valueOf(userPrincipal.getUser().getId()))
 					.withArrayClaim(AUTHORITIES, roles)
 					.withExpiresAt(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION_TIME))
 					.sign(Algorithm.HMAC512(secret.getBytes()));
@@ -85,7 +85,8 @@ public class TokenProvider {
 		log.info("Creating refresh token for user: {}", userPrincipal.getUsername());
 		try {
 			String token = JWT.create().withIssuer(CLEAR_BALANCE_LLC).withAudience(CUSTOMER_MANAGEMENT_SERVICE)
-					.withIssuedAt(new Date()).withSubject(String.valueOf(userPrincipal.getUsername()))
+					.withIssuedAt(new Date())
+					.withSubject(String.valueOf(userPrincipal.getUser().getId()))
 					.withExpiresAt(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION_TIME))
 					.sign(Algorithm.HMAC512(secret.getBytes()));
 			log.debug("Refresh token successfully created for user: {}", userPrincipal.getUsername());
@@ -97,38 +98,38 @@ public class TokenProvider {
 	}
 	
 	/**
-	 * Extracts the subject (typically the user's email or identifier) from the provided JWT token.
+	 * Extracts and returns the subject from a JWT token.
 	 * <p>
-	 * This method verifies the token using the configured JWT verifier. If verification succeeds,
-	 * it retrieves and returns the subject from the token. The following exceptions are handled:
-	 * <ul>
-	 *     <li>{@link TokenExpiredException} – if the token has expired, it is logged and re-thrown for higher-level handling.</li>
-	 *     <li>{@link InvalidClaimException} – if the token contains invalid claims, it is logged and re-thrown.</li>
-	 *     <li>{@link Exception} – any other unexpected errors during verification are logged and wrapped in a {@link RuntimeException}.</li>
-	 * </ul>
-	 * <p>
-	 * Logs are generated at debug and info levels for tracing the token verification and subject extraction process.
+	 * This method verifies the provided JWT token using the configured verifier and
+	 * retrieves the token's subject, which in this implementation represents the
+	 * user's unique identifier (ID). The subject is then converted from a string
+	 * to a {@link Long} before being returned.
+	 * </p>
 	 *
-	 * @param token the JWT token string to verify and extract the subject from
-	 * @param request the {@link HttpServletRequest} associated with the current request (used for context if needed)
-	 * @return the subject extracted from the JWT token
-	 * @throws TokenExpiredException if the token has expired
-	 * @throws InvalidClaimException if the token contains invalid claims
-	 * @throws RuntimeException for any other unexpected errors during token verification
+	 * <p>
+	 * If the token is expired, contains invalid claims, or fails verification for any
+	 * other reason, the appropriate exception is logged and rethrown.
+	 * </p>
+	 *
+	 * @param token   the JWT token from which the subject should be extracted
+	 * @param request the current HTTP request (included for consistency and potential future use)
+	 * @return the subject of the token as a {@link Long} representing the user ID
+	 *
+	 * @throws com.auth0.jwt.exceptions.TokenExpiredException if the token has expired
+	 * @throws com.auth0.jwt.exceptions.InvalidClaimException if the token contains invalid or unexpected claims
+	 * @throws RuntimeException if any other error occurs during token verification
 	 */
-
-	public String getSubject(String token, HttpServletRequest request) {
+	public Long getSubject(String token, HttpServletRequest request) {
 	    log.debug("Attempting to extract subject from token.");
 	    try {
 	        DecodedJWT decodedJWT = this.getJWTVerifier().verify(token);
 	        String subject = decodedJWT.getSubject();
 	        log.info("Successfully retrieved subject '{}' from token.", subject);
-	        return subject;
+	        return Long.valueOf(subject);
 
 	    } catch (TokenExpiredException e) {
 	        log.error("Token has expired: {}", e.getMessage());
-	        throw e; // relanzar para que se maneje en el filtro
-
+	        throw e; 
 	    } catch (InvalidClaimException e) {
 	        log.error("Invalid claim in token: {}", e.getMessage());
 	        throw e;
@@ -158,57 +159,68 @@ public class TokenProvider {
 		return authorities;
 	}
 	
-    /**
-     * Builds a Spring Security {@link Authentication} token for a given user email and authorities.
-     * <p>
-     * This method fetches the user by email, creates a {@link UsernamePasswordAuthenticationToken},
-     * and attaches extra request details like IP address and session ID.
-     *
-     * @param email       The email of the user to authenticate.
-     * @param authorities List of {@link GrantedAuthority} granted to the user.
-     * @param request     The {@link HttpServletRequest} containing request-specific information.
-     * @return An {@link Authentication} token ready to be used in the Spring Security context.
-     */
-    public Authentication getAuthentication(String email, List<GrantedAuthority> authorities,
-                                            HttpServletRequest request) {
+	/**
+	 * Builds a Spring Security {@link Authentication} token for a given user ID and authorities.
+	 * <p>
+	 * This method fetches the user by ID, creates a {@link UsernamePasswordAuthenticationToken},
+	 * and attaches extra request details like IP address and session ID.
+	 *
+	 * @param userId      The ID of the user to authenticate.
+	 * @param authorities List of {@link GrantedAuthority} granted to the user.
+	 * @param request     The {@link HttpServletRequest} containing request-specific information.
+	 * @return An {@link Authentication} token ready to be used in the Spring Security context.
+	 */
+	public Authentication getAuthentication(Long userId, List<GrantedAuthority> authorities,
+	                                        HttpServletRequest request) {
 
-        log.debug("Building authentication token for user: {}", email);
+	    log.debug("Building authentication token for userId: {}", userId);
 
-        UsernamePasswordAuthenticationToken userPasswordAuthToken =
-                new UsernamePasswordAuthenticationToken(userService.getUserByEmail(email), null, authorities);
+	    // Fetch the user entity by ID
+	    var user = userService.getUserById(userId);
 
-        // Set extra data like IP address, session ID, etc.
-        userPasswordAuthToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+	    UsernamePasswordAuthenticationToken userPasswordAuthToken =
+	            new UsernamePasswordAuthenticationToken(user, null, authorities);
 
-        log.info("Authentication token successfully created for user: {} with {} authorities",
-                email, authorities.size());
+	    // Set extra data like IP address, session ID, etc.
+	    userPasswordAuthToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-        return userPasswordAuthToken;
-    }
+	    log.info("Authentication token successfully created for userId: {} with {} authorities",
+	            userId, authorities.size());
+
+	    return userPasswordAuthToken;
+	}
 	
     /**
-     * Validates if a JWT token is valid for a given email.
+     * Validates if a JWT token is valid for a given user ID.
+     * <p>
+     * This method checks if the provided token is non-null, properly signed,
+     * and not expired for the specified user.
      *
-     * @param email the user's email
+     * @param userId the ID of the user to validate the token against
      * @param token the JWT token to validate
-     * @return true if the email is not empty and the token has not expired, false otherwise
+     * @return {@code true} if the token is valid for the given user ID and not expired, {@code false} otherwise
      */
-    public boolean isTokenValid(String email, String token) {
-        log.debug("Validating token for email: {}", email);
+    public boolean isTokenValid(Long userId, String token) {
+        log.debug("Validating token for userId: {}", userId);
 
-        if (StringUtils.isEmpty(email)) {
-            log.warn("Email is empty. Token is invalid.");
+        if (userId == null) {
+            log.warn("User ID is null. Token is invalid.");
+            return false;
+        }
+
+        if (token == null || token.isBlank()) {
+            log.warn("Token is null or empty. Token is invalid for userId: {}", userId);
             return false;
         }
 
         JWTVerifier verifier = getJWTVerifier();
 
         if (isTokenExpired(verifier, token)) {
-            log.warn("Token for email {} has expired.", email);
+            log.warn("Token for userId {} has expired.", userId);
             return false;
         }
 
-        log.info("Token for email {} is valid.", email);
+        log.info("Token for userId {} is valid.", userId);
         return true;
     }
 

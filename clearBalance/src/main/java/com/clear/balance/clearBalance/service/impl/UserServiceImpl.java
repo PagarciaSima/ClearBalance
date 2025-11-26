@@ -19,6 +19,7 @@ import com.clear.balance.clearBalance.domain.Role;
 import com.clear.balance.clearBalance.domain.TwoFactorVerification;
 import com.clear.balance.clearBalance.domain.User;
 import com.clear.balance.clearBalance.domain.UserRole;
+import com.clear.balance.clearBalance.dto.UpdateFormDto;
 import com.clear.balance.clearBalance.dto.UserDto;
 import com.clear.balance.clearBalance.dtoMapper.UserDtoMapper;
 import com.clear.balance.clearBalance.enumeration.RoleType;
@@ -32,6 +33,7 @@ import com.clear.balance.clearBalance.repository.UserRepository;
 import com.clear.balance.clearBalance.service.EmailService;
 import com.clear.balance.clearBalance.service.UserService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -48,7 +50,6 @@ public class UserServiceImpl implements UserService {
 	private final TwoFactorVerificationRepository twoFactorVerificationRepository;
 	private final ResetPasswordVerificationRepository resetPasswordVerificationRepository;
 	private final SmsUtils smsUtils;
-    private static final String DATE_FORMAT = "yyyy-MM-dd hh:mm:ss";
 
 	/**
 	 * Creates a new user in the system.
@@ -156,7 +157,7 @@ public class UserServiceImpl implements UserService {
 	 * @throws ApiException if no user is found with the provided ID
 	 */
 	@Override
-	public User get(Long id) {
+	public User getUserById(Long id) {
 		log.info("Fetching user with ID: {}", id);
 
 		User user = userRepository.findById(id).orElseThrow(() -> {
@@ -566,4 +567,57 @@ public class UserServiceImpl implements UserService {
 	    log.info("Account successfully verified and activated for user: {}", user.getEmail());
 	    return UserDtoMapper.fromUser(user);
 	}
+
+	/**
+	 * Updates the details of an existing user.
+	 *
+	 * <p>This method retrieves the user by the provided ID, validates whether the incoming
+	 * email is already in use (if it was modified), updates the allowed user fields, and
+	 * persists the changes in the database. The updated user is then mapped and returned
+	 * as a {@link UserDto}.</p>
+	 *
+	 * <p>The method is executed within a transactional context to ensure that all operations
+	 * are applied atomically. If any validation fails (such as attempting to use an email
+	 * that already exists), an {@link ApiException} is thrown.</p>
+	 *
+	 * @param updateFormDto the DTO containing updated user information; must be valid and not null
+	 * @return the updated user mapped as a {@link UserDto}
+	 *
+	 * @throws ApiException if the provided email is already associated with another user
+	 * @throws jakarta.validation.ConstraintViolationException if validation of the DTO fails
+	 * @throws InstanceNotFoundException if the user with the given ID does not exist
+	 *
+	 * @see UpdateFormDto
+	 * @see UserDto
+	 * @see UserDtoMapper
+	 */
+	@Override
+	@Transactional
+	public UserDto updateUserDetails(@Valid UpdateFormDto updateFormDto) {
+	    log.info("Updating user with ID {}", updateFormDto.getId());
+
+	    User existingUser = this.getUserById(updateFormDto.getId());
+
+	    String incomingEmail = updateFormDto.getEmail().trim().toLowerCase();
+	    if (!incomingEmail.equalsIgnoreCase(existingUser.getEmail())) {
+	        if (userRepository.existsByEmail(incomingEmail)) {
+	            throw new ApiException("Email already in use");
+	        }
+	        existingUser.setEmail(incomingEmail);
+	    }
+
+	    existingUser.setFirstName(updateFormDto.getFirstName());
+	    existingUser.setLastName(updateFormDto.getLastName());
+	    existingUser.setPhone(updateFormDto.getPhone());
+	    existingUser.setAddress(updateFormDto.getAddress());
+	    existingUser.setTitle(updateFormDto.getTitle());
+	    existingUser.setBio(updateFormDto.getBio());
+
+	    User savedUser = userRepository.save(existingUser);
+
+	    log.info("User updated successfully with ID {}", savedUser.getId());
+
+	    return UserDtoMapper.fromUser(savedUser);
+	}
+
 }

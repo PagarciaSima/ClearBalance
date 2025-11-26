@@ -98,12 +98,28 @@ router-outlet + * {
     left: 0;
     right: 20px;
     z-index: 1;
-    pointer-events: auto;
+    pointer-events: none;
 }
 
 #particles-js canvas {
     display: block;
-    pointer-events: auto;
+    pointer-events: none;
+}
+
+/* ================================================
+   Accessibility Utilities
+   ================================================ */
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
 }
 
 /* ================================================
@@ -800,13 +816,14 @@ button:disabled,
   opacity: 0 !important;
   pointer-events: none !important;
   display: block !important;
+  position: absolute !important;
 }
 
 .tooltip.show {
   visibility: visible !important;
   opacity: 1 !important;
   pointer-events: auto !important;
-  transition: opacity 0.15s ease-in 0.15s !important;
+  transition: opacity 0.15s linear !important;
 }
 
 /* Ensure tooltip arrows are also hidden initially */
@@ -818,11 +835,12 @@ button:disabled,
   visibility: visible !important;
 }
 
-/* Force tooltip to stay in place while positioning */
-.tooltip:not(.show) {
-  transform: translate(0, 0) !important;
-  top: -9999px !important;
-  left: -9999px !important;
+/* Prevent multiple tooltips from appearing */
+.tooltip:not(.show),
+.tooltip.hiding {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
 }/* Tooltip inner content */
 .tooltip .tooltip-inner {
     background: linear-gradient(135deg, #2d1b4e 0%, #4a2c6d 50%, #6a3d8f 100%);

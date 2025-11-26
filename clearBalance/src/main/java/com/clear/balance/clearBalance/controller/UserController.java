@@ -22,10 +22,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.clear.balance.clearBalance.Utils.ExceptionUtils;
+import com.clear.balance.clearBalance.Utils.UserUtils;
 import com.clear.balance.clearBalance.domain.HttpResponse;
 import com.clear.balance.clearBalance.domain.User;
 import com.clear.balance.clearBalance.domain.UserPrincipal;
 import com.clear.balance.clearBalance.dto.LoginRequestDto;
+import com.clear.balance.clearBalance.dto.UpdateFormDto;
 import com.clear.balance.clearBalance.dto.UserDto;
 import com.clear.balance.clearBalance.dtoMapper.UserDtoMapper;
 import com.clear.balance.clearBalance.exeception.ApiException;
@@ -80,7 +82,7 @@ public class UserController {
         Authentication authentication = authenticate(loginRequestDto.getEmail(), loginRequestDto.getPassword());
         log.debug("Authentication object created for user: {}", loginRequestDto.getEmail());
 
-        UserDto userDto = getAuthenticatedUserDto(authentication);
+        UserDto userDto = UserUtils.getLoggedInUserDto(authentication);
         if (userDto == null) {
             log.warn("Authenticated UserDto is null for user: {}", loginRequestDto.getEmail());
             return ResponseEntity.status(500).body("Failed to retrieve authenticated user information.");
@@ -142,7 +144,7 @@ public class UserController {
     public ResponseEntity<HttpResponse> profile(Authentication authentication) {
         log.info("Profile request received for user: {}", authentication.getName());
 
-        UserDto user = userService.getUserDtoByEmail(authentication.getName());
+        UserDto user = userService.getUserDtoByEmail(UserUtils.getAuthenticatedUserDto(authentication).getEmail());
         log.debug("User retrieved from service: {}", user);
 
         HttpResponse response = HttpResponse.builder()
@@ -158,6 +160,50 @@ public class UserController {
     }
     
     /**
+     * Updates the details of an existing user.
+     *
+     * <p>This endpoint receives a {@link UpdateFormDto} containing the user fields
+     * to be updated. Validation is applied to ensure all required fields meet the
+     * specified constraints. If the update is successful, a {@link HttpResponse}
+     * object containing the updated user data is returned.</p>
+     *
+     * <p>In case of any exception during the update process, the error is logged and
+     * rethrown for centralized exception handling.</p>
+     *
+     * @param user the DTO containing the updated user information; must be valid and not null
+     * @return a {@link ResponseEntity} containing a {@link HttpResponse} with the updated user
+     * @throws RuntimeException if an unexpected error occurs during the update process
+     *
+     * @see UpdateFormDto
+     * @see UserDto
+     * @see UserService#updateUserDetails(UpdateFormDto)
+     */
+    @PatchMapping("/update")
+    public ResponseEntity<HttpResponse> updateUser(
+            @RequestBody @Valid UpdateFormDto user
+    ) {
+        log.info("Received request to update user with ID: {}", user.getId());
+        try {
+            UserDto updatedUser = userService.updateUserDetails(user);
+            log.debug("User updated successfully: {}", updatedUser);
+
+            HttpResponse response = HttpResponse.builder()
+                    .timeStamp(LocalDateTime.now().toString())
+                    .data(Map.of("user", updatedUser))
+                    .message("User updated successfully")
+                    .status(HttpStatus.OK)
+                    .statusCode(HttpStatus.OK.value())
+                    .build();
+
+            return ResponseEntity.ok().body(response);
+
+        } catch (Exception e) {
+        	log.error("Error updating user with ID {}: {}", user.getId(), e.getMessage(), e);
+            throw e; 
+        }
+    }
+
+     /**
      * Handles password reset requests for a given user email.
      * <p>
      * This endpoint triggers the password reset process by delegating to the
@@ -351,11 +397,11 @@ public class UserController {
 	    if (isHeaderTokenValid(request, token)) {
 	        log.info("Token is valid. Proceeding to generate new refresh token.");
 
-	        String userEmail = tokenProvider.getSubject(token, request);
-	        log.debug("Extracted user email from token: {}", userEmail);
+	        Long userId = tokenProvider.getSubject(token, request);
+	        log.debug("Extracted user id from token: {}", userId);
 
-	        UserDto user = this.userService.getUserDtoByEmail(userEmail);
-	        log.debug("User retrieved successfully for email: {}", userEmail);
+	        UserDto user = UserDtoMapper.fromUser(this.userService.getUserById(userId));
+	        log.debug("User retrieved successfully with id: {}", userId);
 
 	        String newRefreshToken = tokenProvider.createRefreshToken(getUserPrincipal(user));
 	        log.debug("New refresh token generated");
@@ -544,30 +590,5 @@ public class UserController {
         return authentication;
     }
     
-    /**
-     * Retrieves the authenticated user's {@link UserDto} from the given {@link Authentication} object.
-     * <p>
-     * If the {@link Authentication} principal is not an instance of {@link UserPrincipal} or is null,
-     * this method returns {@code null}.
-     *
-     * @param authentication the {@link Authentication} object containing the authenticated principal
-     * @return the {@link UserDto} of the authenticated user, or {@code null} if not available
-     */
-    private UserDto getAuthenticatedUserDto(Authentication authentication) {
-        if (authentication == null || authentication.getPrincipal() == null) {
-            log.warn("Authentication or principal is null. Cannot retrieve UserDto.");
-            return null;
-        }
 
-        Object principal = authentication.getPrincipal();
-
-        if (principal instanceof UserPrincipal) {
-            UserDto userDto = ((UserPrincipal) principal).getUser();
-            log.debug("Retrieved UserDto for authenticated user: {}", userDto.getEmail());
-            return userDto;
-        } else {
-            log.warn("Authentication principal is not an instance of UserPrincipal. Found: {}", principal.getClass().getName());
-            return null;
-        }
-    }
 }

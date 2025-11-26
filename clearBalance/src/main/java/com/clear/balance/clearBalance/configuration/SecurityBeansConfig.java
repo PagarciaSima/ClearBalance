@@ -16,12 +16,12 @@ public class SecurityBeansConfig {
     private static final int STRENGTH = 12;
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
+    PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(STRENGTH);
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(
+    AuthenticationManager authenticationManager(
             CustomUserDetailsServiceImpl customUserDetailsServiceImpl,
             PasswordEncoder passwordEncoder) {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();

@@ -330,6 +330,37 @@
    Responsive Design
    ================================================ */
 
+/* ================================================
+   Custom Button Styles
+   ================================================ */
+
+/* Map button in address field */
+.btn-outline-info {
+  background: rgba(93, 66, 230, 0.1);
+  border: 1px solid rgba(138, 94, 180, 0.3);
+  color: rgba(138, 94, 180, 0.9);
+  transition: all 0.3s ease;
+}
+
+.btn-outline-info:hover {
+  background: rgba(93, 66, 230, 0.2);
+  border-color: rgba(138, 94, 180, 0.6);
+  color: white;
+  box-shadow: 0 0 12px rgba(93, 66, 230, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-outline-info:focus {
+  background: rgba(93, 66, 230, 0.2);
+  border-color: rgba(138, 94, 180, 0.6);
+  box-shadow: 0 0 0 0.2rem rgba(93, 66, 230, 0.25);
+  color: white;
+}
+
+.btn-outline-info i {
+  filter: drop-shadow(0 0 4px rgba(138, 94, 180, 0.4));
+}
+
 @media (max-width: 768px) {
   .profile-sidebar {
     min-width: 100%;

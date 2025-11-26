@@ -48,10 +48,18 @@ export class TooltipService implements OnDestroy {
           existingTooltip.dispose();
         }
         // Create new tooltip instance
-        new bootstrap.Tooltip(tooltipTriggerEl, {
+        const tooltip = new bootstrap.Tooltip(tooltipTriggerEl, {
           trigger: 'hover',
           animation: false,
-          delay: { show: 500, hide: 0 }
+          delay: { show: 500, hide: 100 }
+        });
+        
+        // Force hide tooltip on mouseout
+        tooltipTriggerEl.addEventListener('mouseleave', () => {
+          const tooltipInstance = bootstrap.Tooltip.getInstance(tooltipTriggerEl);
+          if (tooltipInstance) {
+            tooltipInstance.hide();
+          }
         });
       });
     }, 100);
@@ -69,6 +77,17 @@ export class TooltipService implements OnDestroy {
     tooltipTriggerList.forEach((element) => {
       const tooltip = bootstrap.Tooltip.getInstance(element);
       if (tooltip) {
+        tooltip.hide();
+        tooltip.dispose();
+      }
+    });
+    
+    // Also check for pill tooltips
+    const pillButtons = document.querySelectorAll('[data-bs-toggle="pill"][title]');
+    pillButtons.forEach((element) => {
+      const tooltip = bootstrap.Tooltip.getInstance(element);
+      if (tooltip) {
+        tooltip.hide();
         tooltip.dispose();
       }
     });

@@ -1,4 +1,4 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { catchError, Observable, tap, throwError } from 'rxjs';
 import { CustomHttpResponse } from '../interface/customhttpresponse';
@@ -44,6 +44,22 @@ export class UserService {
    */
   verifyCode$(email: string, code: string): Observable<CustomHttpResponse<Profile>> {
     return this.http.get<CustomHttpResponse<Profile>>(`${this.server}/user/verify/code/${email}/${code}`)
+      .pipe(
+        tap(console.log),
+        catchError(this.handleError)
+      );
+  }
+
+  /**
+   * Retrieves the profile information of the user from the server.
+   * @returns An Observable emitting a CustomHttpResponse containing the user's Profile
+   * 
+   * @remarks
+   * - Utilizes HttpClient to send a GET request to the server's /user/profile endpoint
+   * - Pipes the response to log it and handle any potential errors using handleError method
+   */
+  profile$(): Observable<CustomHttpResponse<Profile>> {
+    return this.http.get<CustomHttpResponse<Profile>>(`${this.server}/user/profile`, { headers: new HttpHeaders().set('Authorization', 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJhdWQiOiJDVVNUT01FUl9NQU5BR0VNRU5UX1NFUlZJQ0UiLCJzdWIiOiJwYWJsby5nYXJjaWFzaW1hdmlsbGFAZ21haWwuY29tIiwiaXNzIjoiQ0xFQVJfQkFMQU5DRV9MTEMiLCJleHAiOjE3NjQxNzg1NzMsImlhdCI6MTc2NDA5MjE3MywiYXV0aG9yaXRpZXMiOlsiUkVBRDpVU0VSIiwiUkVBRDpDVVNUT01FUiJdfQ.xuyzGdn-9esnit0KqPjpZtIDTtUIsNDO0gHuYvg5VPisuSy5V18DfUuxJZDKZbfK0Ts2EaseQAqtstPXiYWc1w')})
       .pipe(
         tap(console.log),
         catchError(this.handleError)

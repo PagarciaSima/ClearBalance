@@ -33,8 +33,8 @@ platformBrowserDynamic().bootstrapModule(AppModule)
       interactivity: {
         detect_on: 'canvas',
         events: {
-          onhover: { enable: true, mode: 'repulse' },
-          onclick: { enable: true, mode: 'push' },
+          onhover: { enable: false, mode: 'repulse' },
+          onclick: { enable: false, mode: 'push' },
           resize: true
         },
         modes: {

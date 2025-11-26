@@ -4,7 +4,6 @@ package com.clear.balance.clearBalance.filter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.http.HttpHeaders;
@@ -32,7 +31,6 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
 	private static final String HTTP_OPTIONS_METHOD = "OPTIONS";
 	private static final String TOKEN_PREFIX = "Bearer ";
 	private final TokenProvider tokenProvider;
-	private static final String TOKEN_KEY = "token";
 	protected static final String EMAIL_KEY = "email";
 	private static final String [] PUBLIC_ROUTES = {
 			"/user/login",
@@ -43,56 +41,44 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
 	};
 	
 	/**
-	 * Filters incoming HTTP requests to handle JWT-based authentication.
+	 * Filters each HTTP request to authenticate the user via a token.
 	 * <p>
-	 * This method is invoked for every request (unless {@link #shouldNotFilter(HttpServletRequest)} returns true)
-	 * and performs the following steps:
-	 * <ol>
-	 *     <li>Extracts the JWT token and subject (email) from the request using {@link #getRequestValues(HttpServletRequest)}.</li>
-	 *     <li>Validates the token via {@link TokenProvider#isTokenValid(String, String)}.</li>
-	 *     <li>If valid, retrieves authorities from the token and sets the {@link Authentication} object
-	 *         in the {@link SecurityContextHolder}.</li>
-	 *     <li>If invalid or null, clears the security context.</li>
-	 *     <li>Delegates to the rest of the filter chain.</li>
-	 * </ol>
-	 * <p>
-	 * Any exceptions during token processing (invalid signature, expired token, null values, etc.) are logged
-	 * and processed using {@link ExceptionUtils#processError(HttpServletRequest, HttpServletResponse, Exception)}.
+	 * If the token is valid, sets authentication in the security context;
+	 * otherwise, clears the context and logs a warning. Errors are handled
+	 * via {@link ExceptionUtils#processError}.
+	 * </p>
 	 *
-	 * @param request the incoming {@link HttpServletRequest}
-	 * @param response the {@link HttpServletResponse} to write errors if needed
-	 * @param filterChain the {@link FilterChain} to pass control to the next filter
-	 * @throws ServletException if an exception occurs during filtering
-	 * @throws IOException if an I/O error occurs during filtering
+	 * @param request  the incoming HTTP request
+	 * @param response the HTTP response
+	 * @param filterChain the filter chain to continue
+	 * @throws ServletException if a servlet error occurs
+	 * @throws IOException if an I/O error occurs
 	 */
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 	        throws ServletException, IOException {
 
 	    try {
-	        Map<String, String> values = getRequestValues(request);
 	        String token = this.getToken(request);
+	        Long userId = getUserId(request);
 
 	        log.debug("Processing authentication for token: {}", token);
 
-	        if (this.tokenProvider.isTokenValid(values.get(EMAIL_KEY), token)) {
-	            List<GrantedAuthority> authorities = this.tokenProvider.getAuthoritiesFromToken(values.get(TOKEN_KEY));
-	            Authentication authentication = this.tokenProvider.getAuthentication(values.get(EMAIL_KEY), authorities, request);
+	        if (this.tokenProvider.isTokenValid(userId, token)) {
+	            List<GrantedAuthority> authorities = this.tokenProvider.getAuthoritiesFromToken(token);
+	            Authentication authentication = this.tokenProvider.getAuthentication(userId, authorities, request);
 	            SecurityContextHolder.getContext().setAuthentication(authentication);
-
-	            log.info("Authentication successful for email: {}", values.get(EMAIL_KEY));
+	            log.info("Authentication successful for user id: {}", userId);
 	        } else {
 	            SecurityContextHolder.clearContext();
 	            log.warn("Invalid or missing token for request to {}", request.getRequestURI());
 	        }
-
 	        filterChain.doFilter(request, response);
 	    } catch (Exception e) {
 	        log.error("Error processing authentication: {}", e.getMessage(), e);
 	        ExceptionUtils.processError(request, response, e);
 	    }
 	}
-
 
 	/**
 	 * Extracts the JWT token from the HTTP Authorization header if present and properly formatted.
@@ -154,26 +140,13 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
 	}
 	
 	/**
-	 * Extracts key values from the HTTP request related to authentication.
-	 * <p>
-	 * This method retrieves the JWT token from the request using {@link #getToken(HttpServletRequest)} 
-	 * and then extracts the subject (typically the user's email) from the token via the {@link TokenProvider}.
-	 * It returns a map containing:
-	 * <ul>
-	 *     <li>{@code "email"}: the subject extracted from the JWT token (may be null if the token is missing or invalid)</li>
-	 *     <li>{@code "token"}: the raw JWT token extracted from the Authorization header (may be null if missing)</li>
-	 * </ul>
-	 * <p>
-	 * Note: If the token is null or invalid, calling this method may result in a {@link NullPointerException} 
-	 * when the subject cannot be retrieved. Consider adding null checks or exception handling when using this method.
+	 * Extracts the user ID from the HTTP request token.
 	 *
-	 * @param request the {@link HttpServletRequest} containing the Authorization header
-	 * @return a {@link Map} with keys "email" and "token" containing the extracted values
+	 * @param request the incoming HTTP request
+	 * @return the user ID associated with the token
 	 */
-	Map<String, String> getRequestValues(HttpServletRequest request) {
-        return Map.of(
-    		EMAIL_KEY, tokenProvider.getSubject(getToken(request), request),
-    		TOKEN_KEY, getToken(request)
-		);
-    }
+	private Long getUserId(HttpServletRequest request) {
+	    String token = this.getToken(request);
+	    return this.tokenProvider.getSubject(token, request);
+	}
 }

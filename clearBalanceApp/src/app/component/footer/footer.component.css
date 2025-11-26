@@ -237,17 +237,20 @@
 }
 
 /* ================================================
-   Decorative Planets
+   Decorative Planets - Orbital Animation
    ================================================ */
 
-/* Saturn */
+/* Saturn - Orbiting clockwise around footer center */
 .planet.saturn {
   position: absolute;
-  bottom: 10%;
-  right: 5%;
   width: 120px;
   height: 120px;
-  animation: floatPlanet 6s ease-in-out infinite;
+  left: 50%;
+  top: 50%;
+  margin-left: -60px;
+  margin-top: -60px;
+  animation: orbitSaturn 30s linear infinite;
+  pointer-events: none;
 }
 
 .planet.saturn .planet-body {
@@ -270,8 +273,8 @@
   border-radius: 50%;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%) rotateX(75deg);
   border: 3px solid transparent;
+  transform-style: preserve-3d;
 }
 
 .planet.saturn .ring-1 {
@@ -279,6 +282,7 @@
   height: 130px;
   border-color: rgba(232, 196, 160, 0.7);
   z-index: 1;
+  transform: translate(-50%, -50%) rotateX(75deg);
 }
 
 .planet.saturn .ring-2 {
@@ -286,21 +290,24 @@
   height: 150px;
   border-color: rgba(217, 165, 116, 0.5);
   z-index: 1;
+  transform: translate(-50%, -50%) rotateX(75deg);
 }
 
-/* Moon */
+/* Moon - Orbiting counter-clockwise around footer center */
 .planet.moon {
   position: absolute;
-  top: 15%;
-  left: 8%;
   width: 90px;
   height: 90px;
   border-radius: 50%;
   background: linear-gradient(135deg, #e8e8e8 0%, #c0c0c0 50%, #a8a8a8 100%);
   box-shadow: 0 0 40px rgba(255, 255, 255, 0.4),
               inset -15px -15px 30px rgba(0, 0, 0, 0.4);
-  animation: floatPlanet 8s ease-in-out infinite;
-  animation-delay: -2s;
+  left: 50%;
+  top: 50%;
+  margin-left: -45px;
+  margin-top: -45px;
+  animation: orbitMoon 25s linear infinite;
+  pointer-events: none;
 }
 
 .planet.moon .crater {
@@ -331,12 +338,60 @@
   left: 25%;
 }
 
-@keyframes floatPlanet {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
+/* Orbital animations with scale for depth - Orbiting in outer area */
+@keyframes orbitSaturn {
+  0% {
+    transform: translate(-60px, -60px) rotate(0deg) translateX(650px) rotate(0deg) scale(1);
+    opacity: 1;
+    z-index: 10;
+  }
+  25% {
+    transform: translate(-60px, -60px) rotate(90deg) translateX(650px) rotate(-90deg) scale(0.6);
+    opacity: 0.6;
+    z-index: 5;
   }
   50% {
-    transform: translateY(-15px) rotate(5deg);
+    transform: translate(-60px, -60px) rotate(180deg) translateX(650px) rotate(-180deg) scale(1);
+    opacity: 1;
+    z-index: 10;
+  }
+  75% {
+    transform: translate(-60px, -60px) rotate(270deg) translateX(650px) rotate(-270deg) scale(0.6);
+    opacity: 0.6;
+    z-index: 5;
+  }
+  100% {
+    transform: translate(-60px, -60px) rotate(360deg) translateX(650px) rotate(-360deg) scale(1);
+    opacity: 1;
+    z-index: 10;
+  }
+}
+
+@keyframes orbitMoon {
+  0% {
+    transform: translate(-45px, -45px) rotate(0deg) translateX(700px) rotate(0deg) scale(1);
+    opacity: 1;
+    z-index: 10;
+  }
+  25% {
+    transform: translate(-45px, -45px) rotate(-90deg) translateX(700px) rotate(90deg) scale(0.6);
+    opacity: 0.6;
+    z-index: 5;
+  }
+  50% {
+    transform: translate(-45px, -45px) rotate(-180deg) translateX(700px) rotate(180deg) scale(1);
+    opacity: 1;
+    z-index: 10;
+  }
+  75% {
+    transform: translate(-45px, -45px) rotate(-270deg) translateX(700px) rotate(270deg) scale(0.6);
+    opacity: 0.6;
+    z-index: 5;
+  }
+  100% {
+    transform: translate(-45px, -45px) rotate(-360deg) translateX(700px) rotate(360deg) scale(1);
+    opacity: 1;
+    z-index: 10;
   }
 }
 
