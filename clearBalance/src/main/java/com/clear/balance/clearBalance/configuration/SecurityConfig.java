@@ -47,7 +47,7 @@ public class SecurityConfig {
 		};
 
 	public static final List<String> ALLOWED_METHODS =
-	            List.of("GET", "POST", "PUT", "DELETE", "OPTIONS");
+	            List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH");
 	private final CustomAccessDeniedHandler customAccessDeniedHandler;
 	private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final CustomAuthorizationFilter customAuthorizationFilter;

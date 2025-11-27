@@ -26,7 +26,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
   profileState$!: Observable<State<CustomHttpResponse<Profile>>>;
   private dataSubject = new BehaviorSubject<CustomHttpResponse<Profile> | null>(null);
   private isLoadingSubject = new BehaviorSubject<boolean>(false);
-  isLoadingSubject$: Observable<boolean> = this.isLoadingSubject.asObservable();
+  isLoading$: Observable<boolean> = this.isLoadingSubject.asObservable();
   
   readonly DataState = DataState;
   private routerSubscription?: Subscription;
@@ -39,7 +39,6 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
     // Subscribe to router events to clean tooltips before navigation
     this.routerSubscription = this.router.events.subscribe(event => {
       if (event instanceof NavigationStart) {
-        // Force hide and remove all tooltips
         this.forceCleanAllTooltips();
       }
     });
@@ -61,6 +60,38 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
         catchError((error: string) => {
           console.error('Error en profile$:', error);
           return of({ dataState: DataState.ERROR, appData: this.dataSubject.value || undefined, error });
+        })
+      );
+  }
+
+  /**
+   * Updates the user's profile with the provided form data.
+   * @param profileForm - The NgForm containing the user's updated profile information
+   * @remarks
+   * - Sets the loading state to true while the update is in progress
+   * - Calls the UserService's update$ method to send the updated profile data to the server
+   * - Updates the dataSubject with the new profile data on success
+   * - Handles errors by logging them and maintaining the previous profile data
+   */
+  updateProfile(profileForm: NgForm) {
+    this.isLoadingSubject.next(true);
+    this.profileState$ = this.userService.update$(profileForm.value)
+      .pipe(
+        map(response => {
+          console.log('Received response:', response);
+          this.dataSubject.next({ ...response, data: response.data });
+          this.isLoadingSubject.next(false);
+          return {
+            dataState: DataState.LOADED,
+            appData: this.dataSubject.value ?? undefined
+          };
+        }),
+        startWith({ dataState: DataState.LOADED, appData: this.dataSubject.value ?? undefined }),
+        catchError((error: string) => {
+          // add error trace here if needed
+          console.error('Error en updateProfile:', error);
+          this.isLoadingSubject.next(false);
+          return of({ dataState: DataState.LOADED, appData: this.dataSubject.value ?? undefined, error });
         })
       );
   }
@@ -150,9 +181,7 @@ throw new Error('Method not implemented.');
 updatePassword(_t85: NgForm) {
 throw new Error('Method not implemented.');
 }
-updateProfile(_t43: NgForm) {
-throw new Error('Method not implemented.');
-}
+
 toggleMfa() {
 throw new Error('Method not implemented.');
 }

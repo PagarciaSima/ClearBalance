@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { catchError, Observable, tap, throwError } from 'rxjs';
 import { CustomHttpResponse } from '../interface/customhttpresponse';
 import { Profile } from '../interface/profile';
+import { User } from '../interface/user';
 
 @Injectable({
   providedIn: 'root'
@@ -59,12 +60,40 @@ export class UserService {
    * - Pipes the response to log it and handle any potential errors using handleError method
    */
   profile$(): Observable<CustomHttpResponse<Profile>> {
-    return this.http.get<CustomHttpResponse<Profile>>(`${this.server}/user/profile`, { headers: new HttpHeaders().set('Authorization', 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJhdWQiOiJDVVNUT01FUl9NQU5BR0VNRU5UX1NFUlZJQ0UiLCJzdWIiOiJwYWJsby5nYXJjaWFzaW1hdmlsbGFAZ21haWwuY29tIiwiaXNzIjoiQ0xFQVJfQkFMQU5DRV9MTEMiLCJleHAiOjE3NjQxNzg1NzMsImlhdCI6MTc2NDA5MjE3MywiYXV0aG9yaXRpZXMiOlsiUkVBRDpVU0VSIiwiUkVBRDpDVVNUT01FUiJdfQ.xuyzGdn-9esnit0KqPjpZtIDTtUIsNDO0gHuYvg5VPisuSy5V18DfUuxJZDKZbfK0Ts2EaseQAqtstPXiYWc1w')})
+    return this.http.get<CustomHttpResponse<Profile>>(
+      `${this.server}/user/profile`,
+      { headers: new HttpHeaders().set('Authorization', 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJhdWQiOiJDVVNUT01FUl9NQU5BR0VNRU5UX1NFUlZJQ0UiLCJzdWIiOiIxMSIsImlzcyI6IkNMRUFSX0JBTEFOQ0VfTExDIiwiZXhwIjoxNzY0MjI1MTY2LCJpYXQiOjE3NjQxMzg3NjYsImF1dGhvcml0aWVzIjpbIlJFQUQ6VVNFUiIsIlJFQUQ6Q1VTVE9NRVIiLCJDUkVBVEU6VVNFUiIsIkNSRUFURTpDVVNUT01FUiIsIlVQREFURTpVU0VSIiwiVVBEQVRFOkNVU1RPTUVSIiwiREVMRVRFOlVTRVIiLCJERUxFVEU6Q1VTVE9NRVIiXX0.1lVP-_FrWqIAoM-Soz3Jy8SQPqJCJsp-mHrl-h4jiCIsTm9rcGKzBVEXDAhxgtvkiPmR8UyAefGQHr_zkUnjFw') }
+    )
       .pipe(
         tap(console.log),
         catchError(this.handleError)
       );
   }
+
+  /**
+   * Sends a request to update the user's profile information on the server.
+   * @param user - The user object containing updated profile information
+   * @returns An Observable emitting a CustomHttpResponse containing the updated user's Profile
+   * 
+   * @remarks
+   * - Utilizes HttpClient to send a PATCH request to the server's /user/update endpoint
+   * - Includes an Authorization header with a Bearer token for authentication
+   * - Pipes the response to log it and handle any potential errors using handleError method
+   */
+update$(user: User): Observable<CustomHttpResponse<Profile>> {
+  const headers = new HttpHeaders()
+    .set('Authorization', 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJhdWQiOiJDVVNUT01FUl9NQU5BR0VNRU5UX1NFUlZJQ0UiLCJzdWIiOiIxMSIsImlzcyI6IkNMRUFSX0JBTEFOQ0VfTExDIiwiZXhwIjoxNzY0MjUxNTc4LCJpYXQiOjE3NjQxNjUxNzgsImF1dGhvcml0aWVzIjpbIlJFQUQ6VVNFUiIsIlJFQUQ6Q1VTVE9NRVIiLCJDUkVBVEU6VVNFUiIsIkNSRUFURTpDVVNUT01FUiIsIlVQREFURTpVU0VSIiwiVVBEQVRFOkNVU1RPTUVSIiwiREVMRVRFOlVTRVIiLCJERUxFVEU6Q1VTVE9NRVIiXX0.8q5OfXn79lt828a5eQOuoQHh3oDRiz61QrK1lAPIrdymtv6B5g_Mko_7uaXTrPMQlHSnwsWY1wNTimh4KvFr-A')
+    .set('Content-Type', 'application/json'); 
+
+  return this.http.patch<CustomHttpResponse<Profile>>(
+    `${this.server}/user/update`,
+    user,
+    { headers }
+  ).pipe(
+    tap(console.log),
+    catchError(this.handleError)
+  );
+}
 
   /**
    * Handles HTTP errors from service requests.

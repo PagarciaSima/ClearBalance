@@ -58,11 +58,22 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 	        throws ServletException, IOException {
 
+	    String method = request.getMethod();
+	    String requestURI = request.getRequestURI();
+	    
+	    log.debug("Processing request: {} {}", method, requestURI);
+
 	    try {
 	        String token = this.getToken(request);
-	        Long userId = getUserId(request);
+	        
+	        if (token == null) {
+	            log.debug("No token found, proceeding with filter chain");
+	            filterChain.doFilter(request, response);
+	            return;
+	        }
 
-	        log.debug("Processing authentication for token: {}", token);
+	        Long userId = getUserId(request);
+	        log.debug("Processing authentication for user id: {}", userId);
 
 	        if (this.tokenProvider.isTokenValid(userId, token)) {
 	            List<GrantedAuthority> authorities = this.tokenProvider.getAuthoritiesFromToken(token);
@@ -71,11 +82,14 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
 	            log.info("Authentication successful for user id: {}", userId);
 	        } else {
 	            SecurityContextHolder.clearContext();
-	            log.warn("Invalid or missing token for request to {}", request.getRequestURI());
+	            log.warn("Invalid token for request to {}", request.getRequestURI());
 	        }
+	        
 	        filterChain.doFilter(request, response);
+	        
 	    } catch (Exception e) {
-	        log.error("Error processing authentication: {}", e.getMessage(), e);
+	        log.error("Error processing authentication for {} {}: {}", 
+	                 method, requestURI, e.getMessage(), e);
 	        ExceptionUtils.processError(request, response, e);
 	    }
 	}
@@ -95,9 +109,8 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
 	private String getToken(HttpServletRequest request) {
 	    return Optional.ofNullable(request.getHeader(HttpHeaders.AUTHORIZATION))
 	            .filter(header -> header.startsWith(TOKEN_PREFIX))
-	            // Replace prefix "Bearer " and trim whitespace
 	            .map(header -> header.replace(TOKEN_PREFIX, "").trim())
-	            .get();
+	            .orElse(null);
 	}
 
 	/**
@@ -119,24 +132,29 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
 	 */
 	@Override
 	protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-	    if (request.getHeader(HttpHeaders.AUTHORIZATION) == null) {
-	        return true;
+	    String method = request.getMethod();
+	    String requestURI = request.getRequestURI();
+	    String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+	    
+	    boolean shouldNotFilter = false;
+	    String reason = "Will filter";
+	    
+	    if (authHeader == null) {
+	        shouldNotFilter = true;
+	        reason = "No Authorization header";
+	    } else if (!authHeader.startsWith(TOKEN_PREFIX)) {
+	        shouldNotFilter = true;
+	        reason = "Authorization header without Bearer prefix";
+	    } else if (method.equalsIgnoreCase(HTTP_OPTIONS_METHOD)) {
+	        shouldNotFilter = true;
+	        reason = "OPTIONS method (CORS preflight)";
+	    } else if (Arrays.asList(PUBLIC_ROUTES).contains(requestURI)) {
+	        shouldNotFilter = true;
+	        reason = "Public route: " + requestURI;
 	    }
-
-	    if (!request.getHeader(HttpHeaders.AUTHORIZATION).startsWith(TOKEN_PREFIX)) {
-	        return true;
-	    }
-
-	    // Skip filtering for HTTP OPTIONS requests (used in CORS preflight checks)
-	    if (request.getMethod().equalsIgnoreCase(HTTP_OPTIONS_METHOD)) {
-	        return true;
-	    }
-
-	    if (Arrays.asList(PUBLIC_ROUTES).contains(request.getRequestURI())) {
-	        return true;
-	    }
-
-	    return false;
+	    
+	    log.debug("Filter decision for {} {}: {} - {}", method, requestURI, reason, shouldNotFilter ? "SKIP" : "PROCESS");
+	    return shouldNotFilter;
 	}
 	
 	/**

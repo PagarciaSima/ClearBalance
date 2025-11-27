@@ -73,37 +73,36 @@
                                  <i class="bi bi-person-circle me-3"></i>Profile Settings
                               </h3>
                               <form #profileForm="ngForm" (ngSubmit)="updateProfile(profileForm)">
-                                 <input type="hidden" name="id">
+                                 <input type="hidden" name="id" [ngModel]="state.appData?.data?.user?.id">
                                  <div class="row">
                                     <div class="col-md-6">
                                        <div class="form-group">
                                           <label><i class="bi bi-person me-2"></i>First Name</label>
-                                          <input type="text" name="firstName" [ngModel]="state.appData?.data?.user?.firstName" [disabled]="state.appData?.data?.user?.roleName === 'ROLE_USER'" class="form-control" placeholder="Enter first name">
-                                       </div>
+                                          <input type="text" name="firstName" [ngModel]="state.appData?.data?.user?.firstName" [disabled]="state.appData?.data?.user?.roleName === 'ROLE_USER' || ((isLoading$ | async) ?? false)" class="form-control" placeholder="Enter first name">                                       </div>
                                     </div>
                                     <div class="col-md-6">
                                        <div class="form-group">
                                           <label><i class="bi bi-person me-2"></i>Last Name</label>
-                                          <input type="text" name="lastName" [ngModel]="state.appData?.data?.user?.lastName" [disabled]="state.appData?.data?.user?.roleName === 'ROLE_USER'" class="form-control" placeholder="Enter last name">
+                                          <input type="text" name="lastName" [ngModel]="state.appData?.data?.user?.lastName" [disabled]="state.appData?.data?.user?.roleName === 'ROLE_USER' || ((isLoading$ | async) ?? false)" class="form-control" placeholder="Enter last name">
                                        </div>
                                     </div>
                                     <div class="col-md-6">
                                        <div class="form-group">
                                           <label for="email"><i class="bi bi-envelope me-2"></i>Email</label>
-                                          <input type="email" name="email" [ngModel]="state.appData?.data?.user?.email" [disabled]="state.appData?.data?.user?.roleName === 'ROLE_USER'" class="form-control" placeholder="Enter email">
+                                          <input type="email" name="email" [ngModel]="state.appData?.data?.user?.email" [disabled]="state.appData?.data?.user?.roleName === 'ROLE_USER' || ((isLoading$ | async) ?? false)" class="form-control" placeholder="Enter email">
                                        </div>
                                     </div>
                                     <div class="col-md-6">
                                        <div class="form-group">
                                           <label><i class="bi bi-telephone me-2"></i>Phone</label>
-                                          <input type="text" name="phone" [ngModel]="state.appData?.data?.user?.phone" [disabled]="state.appData?.data?.user?.roleName === 'ROLE_USER'" class="form-control" placeholder="Enter phone">
+                                          <input type="text" name="phone" [ngModel]="state.appData?.data?.user?.phone" [disabled]="state.appData?.data?.user?.roleName === 'ROLE_USER' || ((isLoading$ | async) ?? false)" class="form-control" placeholder="Enter phone">
                                        </div>
                                     </div>
                                     <div class="col-md-6">
                                        <div class="form-group">
                                           <label><i class="bi bi-geo-alt me-2"></i>Address</label>
                                           <div class="input-group">
-                                             <input type="text" name="address" [ngModel]="state.appData?.data?.user?.address" [disabled]="state.appData?.data?.user?.roleName === 'ROLE_USER'" class="form-control" placeholder="Enter address">
+                                             <input type="text" name="address" [ngModel]="state.appData?.data?.user?.address" [disabled]="state.appData?.data?.user?.roleName === 'ROLE_USER' || ((isLoading$ | async) ?? false)" class="form-control" placeholder="Enter address">
                                              <button type="button" 
                                                      class="btn btn-outline-info" 
                                                      *ngIf="state.appData?.data?.user?.address"
@@ -119,27 +118,27 @@
                                     <div class="col-md-6">
                                        <div class="form-group">
                                           <label><i class="bi bi-briefcase me-2"></i>Job Title</label>
-                                          <input type="text" name="title" [ngModel]="state.appData?.data?.user?.title" [disabled]="state.appData?.data?.user?.roleName === 'ROLE_USER'" class="form-control" placeholder="Enter job title">
+                                          <input type="text" name="title" [ngModel]="state.appData?.data?.user?.title" [disabled]="state.appData?.data?.user?.roleName === 'ROLE_USER' || ((isLoading$ | async) ?? false)" class="form-control" placeholder="Enter job title">
                                        </div>
                                     </div>
                                     <div class="col-md-12">
                                        <div class="form-group">
                                           <label><i class="bi bi-file-text me-2"></i>Bio</label>
-                                          <textarea name="bio" [ngModel]="state.appData?.data?.user?.bio" [disabled]="state.appData?.data?.user?.roleName === 'ROLE_USER'" class="form-control" rows="4" placeholder="Tell us about yourself..."></textarea>
+                                          <textarea name="bio" [ngModel]="state.appData?.data?.user?.bio" [disabled]="state.appData?.data?.user?.roleName === 'ROLE_USER' || ((isLoading$ | async) ?? false)" class="form-control" rows="4" placeholder="Tell us about yourself..."></textarea>
                                        </div>
                                     </div>
                                  </div>
                                  <div>
                                     <button type="submit" 
                                             class="btn btn-primary" 
-                                            [disabled]="state.appData?.data?.user?.roleName === 'ROLE_USER'"
+                                            [disabled]="state.appData?.data?.user?.roleName === 'ROLE_USER' || ((isLoading$ | async) ?? false)"
                                             data-bs-toggle="tooltip" 
                                             data-bs-placement="top" 
                                             title="Save your profile changes">
                                        <i class="bi bi-check-circle me-2"></i>
-                                       <span *ngIf="isLoadingSubject$ | async" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="margin-right: 5px;"></span>
-                                       <span *ngIf="isLoadingSubject$ | async" class="me-2">Loading...</span>
-                                       <span *ngIf="!(isLoadingSubject$ | async)">Update Profile</span>
+                                       <span *ngIf="isLoading$ | async" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="margin-right: 5px;"></span>
+                                       <span *ngIf="isLoading$ | async" class="me-2">Loading...</span>
+                                       <span *ngIf="!(isLoading$ | async)">Update Profile</span>
                                     </button>
                                  </div>
                               </form>
@@ -176,8 +175,8 @@
                                  <div>
                                     <button type="submit" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="Change your account password">
                                        <i class="bi bi-shield-check me-2"></i>
-                                       <span *ngIf="isLoadingSubject$ | async" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="margin-right: 5px;"></span>
-                                       <span *ngIf="isLoadingSubject$ | async" class="me-2">Loading...</span>
+                                       <span *ngIf="isLoading$ | async" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="margin-right: 5px;"></span>
+                                       <span *ngIf="isLoading$ | async" class="me-2">Loading...</span>
                                        <span>Update Password</span>
                                     </button>
                                  </div>
@@ -206,15 +205,15 @@
                                     <div class="col-md-6">
                                        <div class="form-group">
                                           <label><i class="bi bi-list-check me-2"></i>Role Permissions</label>
-                                          <input type="text" [ngModel]="state.appData?.data?.user?.permissions" [disabled]="true" class="form-control" placeholder="Permission list auto-filled" />
+                                             <input type="text" name="permissions" [ngModel]="state.appData?.data?.user?.permissions" [disabled]="true" class="form-control" placeholder="Permission list auto-filled" />
                                        </div>
                                     </div>
                                  </div>
                                  <div>
                                     <button type="submit" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="Update user role and permissions">
                                        <i class="bi bi-arrow-repeat me-2"></i>
-                                       <span *ngIf="isLoadingSubject$ | async" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="margin-right: 5px;"></span>
-                                       <span *ngIf="isLoadingSubject$ | async" class="me-2">Loading...</span>
+                                       <span *ngIf="isLoading$ | async" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="margin-right: 5px;"></span>
+                                       <span *ngIf="isLoading$ | async" class="me-2">Loading...</span>
                                        <span>Update Role</span>
                                     </button>
                                  </div>
@@ -245,8 +244,8 @@
                                  <div>
                                     <button type="submit" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="Save account settings">
                                        <i class="bi bi-save me-2"></i>
-                                       <span *ngIf="isLoadingSubject$ | async" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="margin-right: 5px;"></span>
-                                       <span *ngIf="isLoadingSubject$ | async"class="me-2">Loading...</span>
+                                       <span *ngIf="isLoading$ | async" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="margin-right: 5px;"></span>
+                                       <span *ngIf="isLoading$ | async"class="me-2">Loading...</span>
                                        <span>Update Settings</span>
                                     </button>
                                  </div>
@@ -272,7 +271,7 @@
                                        <div class="col-auto">
                                           <button (click)="toggleMfa()" class="btn btn-primary btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Toggle multi-factor authentication">
                                              <span>{{ state.appData?.data?.user?.usingMfa ? 'Disable' : 'Enable' }}</span>
-                                             <span *ngIf="isLoadingSubject$ | async" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="margin-left: 5px;"></span>
+                                             <span *ngIf="isLoading$ | async" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="margin-left: 5px;"></span>
                                           </button>
                                        </div>
                                     </div>
