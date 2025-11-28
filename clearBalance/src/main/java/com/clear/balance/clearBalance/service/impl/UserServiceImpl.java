@@ -20,6 +20,7 @@ import com.clear.balance.clearBalance.domain.TwoFactorVerification;
 import com.clear.balance.clearBalance.domain.User;
 import com.clear.balance.clearBalance.domain.UserRole;
 import com.clear.balance.clearBalance.dto.UpdateFormDto;
+import com.clear.balance.clearBalance.dto.UpdatePasswordFormDto;
 import com.clear.balance.clearBalance.dto.UserDto;
 import com.clear.balance.clearBalance.dtoMapper.UserDtoMapper;
 import com.clear.balance.clearBalance.enumeration.RoleType;
@@ -618,6 +619,33 @@ public class UserServiceImpl implements UserService {
 	    log.info("User updated successfully with ID {}", savedUser.getId());
 
 	    return UserDtoMapper.fromUser(savedUser);
+	}
+
+	@Override
+	@Transactional
+	public void updatePassword(Long id, @Valid UpdatePasswordFormDto form) {
+	    log.info("Updating password for user ID {}", id);
+
+	    // 1. Get user
+	    User user = this.getUserById(id);
+
+	    // 2. Validate old password
+	    if (!encoder.matches(form.getCurrentPassword(), user.getPassword())) {
+	        log.error("Current password does not match for user {}", user.getEmail());
+	        throw new ApiException("Current password is incorrect.");
+	    }
+
+	    // 3. Validate new password match
+	    if (!form.getNewPassword().equals(form.getConfirmNewPassword())) {
+	        log.error("New passwords do not match for user {}", user.getEmail());
+	        throw new ApiException("Passwords do not match.");
+	    }
+
+	    // 4. Update and encode password
+	    user.setPassword(encoder.encode(form.getNewPassword()));
+	    userRepository.save(user);
+
+	    log.info("Password updated successfully for user {}", user.getEmail());
 	}
 
 }

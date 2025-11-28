@@ -28,6 +28,7 @@ import com.clear.balance.clearBalance.domain.User;
 import com.clear.balance.clearBalance.domain.UserPrincipal;
 import com.clear.balance.clearBalance.dto.LoginRequestDto;
 import com.clear.balance.clearBalance.dto.UpdateFormDto;
+import com.clear.balance.clearBalance.dto.UpdatePasswordFormDto;
 import com.clear.balance.clearBalance.dto.UserDto;
 import com.clear.balance.clearBalance.dtoMapper.UserDtoMapper;
 import com.clear.balance.clearBalance.exeception.ApiException;
@@ -268,6 +269,19 @@ public class UserController {
         return ResponseEntity.ok().body(response);
     }
     
+    /**
+     * Resets the user's password using a password-reset key typically sent by email.
+     * <p>
+     * This endpoint validates the provided key and ensures the new password and its
+     * confirmation match. If the key is valid and the validation succeeds, the user's
+     * password is updated accordingly.
+     *
+     * @param key              Unique reset key associated with the user requesting the password reset.
+     * @param password         The new password to be assigned to the user.
+     * @param confirmPassword  Confirmation of the new password; must match {@code password}.
+     * @return A {@link ResponseEntity} containing an {@link HttpResponse} with the updated user information
+     *         and the status of the operation.
+     */
     @PatchMapping("/resetpassword/{key}/{password}/{confirmPassword}")
     public ResponseEntity<HttpResponse> resetPassword(
     		@PathVariable("key") String key,
@@ -353,6 +367,37 @@ public class UserController {
         HttpResponse response = HttpResponse.builder()
                 .timeStamp(LocalDateTime.now().toString())
                 .message("Account verified successfully")
+                .status(HttpStatus.OK)
+                .statusCode(HttpStatus.OK.value())
+                .build();
+
+        return ResponseEntity.ok().body(response);
+	}
+	
+	/**
+	 * Updates the password of the currently authenticated user.
+	 * <p>
+	 * This endpoint requires a valid authentication context and a request body
+	 * containing the current password and the new password fields. The service
+	 * verifies the current password, validates the new one, and persists the change
+	 * if the operation is valid.
+	 *
+	 * @param authentication             Authentication object containing the authenticated user's details.
+	 * @param updatePasswordFormDto      DTO containing the current password, new password, and confirmation.
+	 * @return A {@link ResponseEntity} containing an {@link HttpResponse} indicating the result
+	 *         of the password update operation.
+	 */
+	@PatchMapping("/update/password")
+	public ResponseEntity<HttpResponse> updatePassoword(
+			Authentication authentication,
+			@RequestBody @Valid UpdatePasswordFormDto updatePasswordFormDto
+	) {
+        UserDto userDto = UserUtils.getAuthenticatedUserDto(authentication);
+        log.debug("Updating password for user ID: {}", userDto.getId());
+        this.userService.updatePassword(userDto.getId(), updatePasswordFormDto);
+        HttpResponse response = HttpResponse.builder()
+                .timeStamp(LocalDateTime.now().toString())
+                .message("Password updated successfully")
                 .status(HttpStatus.OK)
                 .statusCode(HttpStatus.OK.value())
                 .build();

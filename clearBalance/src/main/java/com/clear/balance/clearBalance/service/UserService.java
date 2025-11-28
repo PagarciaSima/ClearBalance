@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import com.clear.balance.clearBalance.domain.User;
 import com.clear.balance.clearBalance.dto.UpdateFormDto;
+import com.clear.balance.clearBalance.dto.UpdatePasswordFormDto;
 import com.clear.balance.clearBalance.dto.UserDto;
 
 import jakarta.validation.Valid;
@@ -25,5 +26,6 @@ public interface UserService {
 	UserDto renewPassword(String key, String password, String confirmPassword);
 	UserDto verifyAccount(String key);
 	UserDto updateUserDetails(@Valid UpdateFormDto user);
+	void updatePassword(Long id, @Valid UpdatePasswordFormDto updatePasswordFormDto);
 
 }
