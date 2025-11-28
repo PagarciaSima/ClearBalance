@@ -23,6 +23,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.clear.balance.clearBalance.domain.HttpResponse;
 
 import lombok.extern.slf4j.Slf4j;
@@ -217,6 +219,68 @@ public class HandleException extends ResponseEntityExceptionHandler implements E
 
 	    return new ResponseEntity<>(httpResponse, HttpStatus.UNAUTHORIZED);
 	}
+	
+	  /**
+     * Handles {@link JWTDecodeException} thrown when a JWT token is malformed, empty, or invalid.
+     * <p>
+     * This typically occurs when:
+     * <ul>
+     *   <li>Token is empty or null</li>
+     *   <li>Token doesn't have the expected 3 parts (header.payload.signature)</li>
+     *   <li>Token contains invalid Base64 encoding</li>
+     *   <li>Token JSON structure is malformed</li>
+     * </ul>
+     *
+     * @param ex the {@link JWTDecodeException} thrown during JWT processing
+     * @return a {@link ResponseEntity} containing a standardized {@link HttpResponse} with 401 UNAUTHORIZED status
+     */
+    @ExceptionHandler(JWTDecodeException.class)
+    public ResponseEntity<HttpResponse> handleJWTDecodeException(JWTDecodeException ex) {
+        
+        String message = "Invalid authentication token format.";
+        
+        log.error("JWT decode error: {}", ex.getMessage());
+        log.debug("JWTDecodeException details:", ex);
+        log.info("Returning HTTP status: {}", HttpStatus.UNAUTHORIZED.value());
+
+        HttpResponse httpResponse = HttpResponse.builder()
+                .timeStamp(LocalDateTime.now().toString())
+                .reason(message)
+                .developerMessage("Token decoding failed: " + ex.getMessage())
+                .status(HttpStatus.UNAUTHORIZED)
+                .statusCode(HttpStatus.UNAUTHORIZED.value())
+                .build();
+
+        return new ResponseEntity<>(httpResponse, HttpStatus.UNAUTHORIZED);
+    }
+
+    /**
+     * Handles {@link TokenExpiredException} thrown when a JWT token has expired.
+     * <p>
+     * This occurs when the token's expiration time (exp claim) is in the past.
+     *
+     * @param ex the {@link TokenExpiredException} thrown during JWT validation
+     * @return a {@link ResponseEntity} containing a standardized {@link HttpResponse} with 401 UNAUTHORIZED status
+     */
+    @ExceptionHandler(TokenExpiredException.class)
+    public ResponseEntity<HttpResponse> handleTokenExpiredException(TokenExpiredException ex) {
+        
+        String message = "Your session has expired. Please log in again.";
+        
+        log.warn("Token expired: {}", ex.getMessage());
+        log.debug("TokenExpiredException details:", ex);
+
+        HttpResponse httpResponse = HttpResponse.builder()
+                .timeStamp(LocalDateTime.now().toString())
+                .reason(message)
+                .developerMessage("Token expired at: " + ex.getExpiredOn())
+                .status(HttpStatus.UNAUTHORIZED)
+                .statusCode(HttpStatus.UNAUTHORIZED.value())
+                .build();
+
+        return new ResponseEntity<>(httpResponse, HttpStatus.UNAUTHORIZED);
+    }
+
 
 	/**
 	 * Handles custom {@link com.clear.balance.clearBalance.exeception.ApiException}

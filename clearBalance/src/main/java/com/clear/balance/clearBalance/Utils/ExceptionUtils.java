@@ -48,11 +48,15 @@ public class ExceptionUtils {
 	    if (
 	        ex instanceof ApiException || ex instanceof DisabledException
 	        || ex instanceof LockedException || ex instanceof BadCredentialsException
-	        || ex instanceof InvalidClaimException || ex instanceof TokenExpiredException
+	        || ex instanceof InvalidClaimException
 	    ) {
 	        HttpResponse httpResponse = getHttpResponse(response, ex.getMessage(), HttpStatus.BAD_REQUEST);
 	        writeResponse(response, httpResponse);
-	    } else {
+	    } else if (ex instanceof TokenExpiredException) {
+	        HttpResponse httpResponse = getHttpResponse(response, ex.getMessage(), HttpStatus.UNAUTHORIZED);
+	        writeResponse(response, httpResponse);
+	    }
+	    else {
 	        HttpResponse httpResponse = getHttpResponse(response, GENERIC_ERROR_MSG, HttpStatus.INTERNAL_SERVER_ERROR);
 	        writeResponse(response, httpResponse);
 	    }
@@ -110,8 +114,8 @@ public class ExceptionUtils {
 	    HttpResponse httpResponse = HttpResponse.builder()
 	            .timeStamp(LocalDateTime.now().toString())
 	            .reason(message)
-	            .status(HttpStatus.INTERNAL_SERVER_ERROR)  // Consider using httpStatus here
-	            .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())  // Consider using httpStatus.value()
+	            .status(HttpStatus.INTERNAL_SERVER_ERROR)  
+	            .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())  
 	            .build();
 	    
 	    // Set the response content type and status code

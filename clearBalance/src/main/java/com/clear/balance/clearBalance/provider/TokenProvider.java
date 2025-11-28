@@ -42,7 +42,7 @@ public class TokenProvider {
 	private static final String CLEAR_BALANCE_LLC = "CLEAR_BALANCE_LLC";
 	public static final String CUSTOMER_MANAGEMENT_SERVICE = "CUSTOMER_MANAGEMENT_SERVICE";
 	public static final String AUTHORITIES = "authorities";
-	public static final long ACCESS_TOKEN_EXPIRATION_TIME = 24 * 60 * 60 * 1000; // 24 hour
+	public static final long ACCESS_TOKEN_EXPIRATION_TIME = 24 * 60 * 60 * 1000; // 30 seconds
 	private static final long REFRESH_TOKEN_EXPIRATION_TIME = 24 * 60 * 60 * 1000 * 3; // 3 days
 	private static final String TOKEN_CANNOT_BE_VERIFIED = "Token cannot be verified";
 	private final UserService userService;

@@ -4,6 +4,7 @@ import { catchError, Observable, tap, throwError } from 'rxjs';
 import { CustomHttpResponse } from '../interface/customhttpresponse';
 import { Profile } from '../interface/profile';
 import { User } from '../interface/user';
+import { Key } from '../enum/key.enum';
 
 @Injectable({
   providedIn: 'root'
@@ -61,8 +62,7 @@ export class UserService {
    */
   profile$(): Observable<CustomHttpResponse<Profile>> {
     return this.http.get<CustomHttpResponse<Profile>>(
-      `${this.server}/user/profile`,
-      { headers: new HttpHeaders().set('Authorization', 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJhdWQiOiJDVVNUT01FUl9NQU5BR0VNRU5UX1NFUlZJQ0UiLCJzdWIiOiIxMSIsImlzcyI6IkNMRUFSX0JBTEFOQ0VfTExDIiwiZXhwIjoxNzY0MjI1MTY2LCJpYXQiOjE3NjQxMzg3NjYsImF1dGhvcml0aWVzIjpbIlJFQUQ6VVNFUiIsIlJFQUQ6Q1VTVE9NRVIiLCJDUkVBVEU6VVNFUiIsIkNSRUFURTpDVVNUT01FUiIsIlVQREFURTpVU0VSIiwiVVBEQVRFOkNVU1RPTUVSIiwiREVMRVRFOlVTRVIiLCJERUxFVEU6Q1VTVE9NRVIiXX0.1lVP-_FrWqIAoM-Soz3Jy8SQPqJCJsp-mHrl-h4jiCIsTm9rcGKzBVEXDAhxgtvkiPmR8UyAefGQHr_zkUnjFw') }
+      `${this.server}/user/profile`
     )
       .pipe(
         tap(console.log),
@@ -80,20 +80,19 @@ export class UserService {
    * - Includes an Authorization header with a Bearer token for authentication
    * - Pipes the response to log it and handle any potential errors using handleError method
    */
-update$(user: User): Observable<CustomHttpResponse<Profile>> {
-  const headers = new HttpHeaders()
-    .set('Authorization', 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJhdWQiOiJDVVNUT01FUl9NQU5BR0VNRU5UX1NFUlZJQ0UiLCJzdWIiOiIxMSIsImlzcyI6IkNMRUFSX0JBTEFOQ0VfTExDIiwiZXhwIjoxNzY0MjUxNTc4LCJpYXQiOjE3NjQxNjUxNzgsImF1dGhvcml0aWVzIjpbIlJFQUQ6VVNFUiIsIlJFQUQ6Q1VTVE9NRVIiLCJDUkVBVEU6VVNFUiIsIkNSRUFURTpDVVNUT01FUiIsIlVQREFURTpVU0VSIiwiVVBEQVRFOkNVU1RPTUVSIiwiREVMRVRFOlVTRVIiLCJERUxFVEU6Q1VTVE9NRVIiXX0.8q5OfXn79lt828a5eQOuoQHh3oDRiz61QrK1lAPIrdymtv6B5g_Mko_7uaXTrPMQlHSnwsWY1wNTimh4KvFr-A')
-    .set('Content-Type', 'application/json'); 
+  update$(user: User): Observable<CustomHttpResponse<Profile>> {
+    const headers = new HttpHeaders()
+      .set('Content-Type', 'application/json'); 
 
-  return this.http.patch<CustomHttpResponse<Profile>>(
-    `${this.server}/user/update`,
-    user,
-    { headers }
-  ).pipe(
-    tap(console.log),
-    catchError(this.handleError)
-  );
-}
+    return this.http.patch<CustomHttpResponse<Profile>>(
+      `${this.server}/user/update`,
+      user,
+      { headers }
+    ).pipe(
+      tap(console.log),
+      catchError(this.handleError)
+    );
+  }
 
   /**
    * Handles HTTP errors from service requests.
@@ -108,21 +107,37 @@ update$(user: User): Observable<CustomHttpResponse<Profile>> {
    * - Falls back to standard HTTP error status and message if no custom reason exists
    */
   handleError(error: HttpErrorResponse): Observable<never> {
-    let errorMessage: string;
-    // Front end error
-    if(error.error instanceof ErrorEvent) {
-      errorMessage = `A client-side error occurred: ${error.error.message}`;
-    }
-    // Back end error
-    else {
-      if(error.error.reason) {
-        errorMessage = error.error.reason;
-      } else {
-        errorMessage = `A server-side error occurred. Error status: ${error.status}, ` +
-        `Error message: ${error.message}`;
+    return throwError(() => error);
+  }
+
+  /**
+   * Requests a new refresh token from the backend using the current Authorization header.
+   * @param token - The refresh token (Bearer ...)
+   * @returns An Observable emitting a CustomHttpResponse with the new refresh token and user data
+   * 
+   * @remarks
+   * - Utilizes HttpClient to send a GET request to the server's /user/refresh/token endpoint
+   * - Includes an Authorization header with the refresh token for authentication
+   * - Pipes the response to update localStorage with the new tokens and handle any potential errors using handleError method
+   */
+  refreshToken$(token: string): Observable<CustomHttpResponse<any>> {
+    return this.http.get<CustomHttpResponse<any>>(
+      `${this.server}/user/refresh/token`,
+      { 
+        headers: { 
+          Authorization: `Bearer ${token}`  
+        } 
       }
-      
-    }
-    return throwError(() => errorMessage);
+    ).pipe(
+      tap(response => {
+        console.log('Refresh Token Response:', response); 
+        localStorage.removeItem(Key.TOKEN);
+        localStorage.removeItem(Key.REFRESH_TOKEN);
+        
+        localStorage.setItem(Key.TOKEN, response.data.access_token);
+        localStorage.setItem(Key.REFRESH_TOKEN, response.data.refresh_token);
+      }),
+      catchError(this.handleError)
+    );
   }
 }

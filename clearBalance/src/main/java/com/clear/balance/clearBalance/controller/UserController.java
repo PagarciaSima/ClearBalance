@@ -374,63 +374,48 @@ public class UserController {
 	 */
 	@GetMapping("/refresh/token")
 	public ResponseEntity<HttpResponse> refreshToken(HttpServletRequest request) {
-	    log.info("Received /refresh/token request");
 
-	    HttpResponse response = null;
-	    String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+	    // Validación del header
+	    String authorizationHeader = request.getHeader(org.springframework.http.HttpHeaders.AUTHORIZATION);
+        String token = authorizationHeader.substring(TOKEN_PREFIX.length());
 
-	    if (authorizationHeader == null || !authorizationHeader.startsWith(TOKEN_PREFIX)) {
-	        log.warn("Authorization header missing or does not start with expected prefix");
-	        response = HttpResponse.builder()
-	                .timeStamp(LocalDateTime.now().toString())
-	                .reason("Authorization header missing or invalid format")
-	                .developerMessage("Authorization header missing or invalid format")
-	                .status(HttpStatus.BAD_REQUEST)
-	                .statusCode(HttpStatus.BAD_REQUEST.value())
-	                .build();
-	        return ResponseEntity.badRequest().body(response);
-	    }
+	    boolean headerValid = isHeaderTokenValid(request, token);
 
-	    String token = authorizationHeader.substring(TOKEN_PREFIX.length());
-	    log.debug("Extracted token from header");
-
-	    if (isHeaderTokenValid(request, token)) {
-	        log.info("Token is valid. Proceeding to generate new refresh token.");
+	    if (headerValid) {
 
 	        Long userId = tokenProvider.getSubject(token, request);
 	        log.debug("Extracted user id from token: {}", userId);
 
 	        UserDto user = UserDtoMapper.fromUser(this.userService.getUserById(userId));
 	        log.debug("User retrieved successfully with id: {}", userId);
+	        
+	        Map<String, Object> data = new java.util.HashMap<>();
+	        data.put("user", user);
+	        data.put("access_token", tokenProvider.createAccessToken(getUserPrincipal(user)));
+	        data.put("refresh_token", token);
 
-	        String newRefreshToken = tokenProvider.createRefreshToken(getUserPrincipal(user));
-	        log.debug("New refresh token generated");
-
-	        response = HttpResponse.builder()
-	                .timeStamp(LocalDateTime.now().toString())
-	                .data(
-	                        Map.of(
-	                                "user", user,
-	                                "refresh_token", newRefreshToken
-	                        )
-	                )
-	                .message("Token refreshed successfully")
-	                .status(HttpStatus.OK)
-	                .statusCode(HttpStatus.OK.value())
+	        HttpResponse responseBody = HttpResponse.builder()
+	                .timeStamp(java.time.LocalDateTime.now().toString())
+	                .data(data)
+	                .message("Token refreshed")
+	                .status(org.springframework.http.HttpStatus.OK)
+	                .statusCode(org.springframework.http.HttpStatus.OK.value())
 	                .build();
+
+	        return ResponseEntity.ok(responseBody);
+
 	    } else {
-	        log.warn("Token validation failed. Refresh token is missing or invalid.");
-	        response = HttpResponse.builder()
-	                .timeStamp(LocalDateTime.now().toString())
-	                .reason("Refresh token missing or invalid")
-	                .developerMessage("Refresh token missing or invalid")
-	                .status(HttpStatus.BAD_REQUEST)
-	                .statusCode(HttpStatus.BAD_REQUEST.value())
-	                .build();
-	    }
 
-	    log.info("Returning refresh token response");
-	    return ResponseEntity.ok().body(response);
+	        HttpResponse responseBody = HttpResponse.builder()
+	                .timeStamp(java.time.LocalDateTime.now().toString())
+	                .reason("Refresh Token missing or invalid")
+	                .developerMessage("Refresh Token missing or invalid")
+	                .status(org.springframework.http.HttpStatus.BAD_REQUEST)
+	                .statusCode(org.springframework.http.HttpStatus.BAD_REQUEST.value())
+	                .build();
+
+	        return ResponseEntity.badRequest().body(responseBody);
+	    }
 	}
 
 	/**

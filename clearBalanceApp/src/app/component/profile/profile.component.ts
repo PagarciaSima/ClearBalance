@@ -10,6 +10,7 @@ import { UserService } from 'src/app/service/user.service';
 import { State } from 'src/app/interface/state';
 import { Profile } from 'src/app/interface/profile';
 import { CustomHttpResponse } from 'src/app/interface/customhttpresponse';
+import { NotificationService } from 'src/app/service/notification.service';
 
 declare var bootstrap: any;
 
@@ -34,7 +35,8 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
   constructor(
     private tooltipService: TooltipService,
     private router: Router,
-    private userService: UserService
+    private userService: UserService,
+    private notificationService: NotificationService
   ) {
     // Subscribe to router events to clean tooltips before navigation
     this.routerSubscription = this.router.events.subscribe(event => {
@@ -50,15 +52,16 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
         map(response => {
           console.log('Received response:', response);
           this.dataSubject.next(response);
-
           return {
             dataState: DataState.LOADED,
             appData: response
           };
         }),
         startWith({ dataState: DataState.LOADING }),
-        catchError((error: string) => {
-          console.error('Error en profile$:', error);
+        catchError((error: any) => {
+          console.log('Error in profile$:', {error});
+          const reason = error?.error?.reason || error?.message || 'An unknown error occurred while loading the profile.';
+          this.notificationService.showError(reason, 'Profile Load Error');
           return of({ dataState: DataState.ERROR, appData: this.dataSubject.value || undefined, error });
         })
       );
@@ -87,10 +90,11 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
           };
         }),
         startWith({ dataState: DataState.LOADED, appData: this.dataSubject.value ?? undefined }),
-        catchError((error: string) => {
-          // add error trace here if needed
-          console.error('Error en updateProfile:', error);
+        catchError((error: any) => {
+          console.error('Error in updateProfile:', error);
           this.isLoadingSubject.next(false);
+          const reason = error?.error?.reason || error?.message || 'An unknown error occurred while updating the profile.';
+          this.notificationService.showError(reason, 'Profile Update Error');
           return of({ dataState: DataState.LOADED, appData: this.dataSubject.value ?? undefined, error });
         })
       );
