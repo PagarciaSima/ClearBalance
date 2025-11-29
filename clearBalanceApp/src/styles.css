@@ -40,13 +40,26 @@
     font-family: var(--font-primary);
 }
 
+
 html, body {
     margin: 0;
     padding: 0;
     height: 100%;
-    overflow: hidden;
+    min-height: 100vh;
+    width: 100%;
+}
+
+body {
     display: flex;
     flex-direction: column;
+    min-height: 100vh;
+    width: 100vw;
+    position: relative;
+    background-image: url('assets/img/background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
 }
 
 body {
@@ -73,17 +86,21 @@ body::before {
 app-root {
     display: flex;
     flex-direction: column;
-    width: 100%;
-    height: 100%;
-    overflow-y: auto;
+    min-height: 100vh;
+    width: 100vw;
+    flex: 1 0 auto;
 }
 
 router-outlet {
     display: none;
 }
 
-router-outlet + * {
+
+.content-wrapper {
     flex: 1 0 auto;
+    min-height: 1px;
+    display: flex;
+    flex-direction: column;
 }
 
 /* ================================================

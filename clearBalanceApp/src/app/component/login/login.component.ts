@@ -171,13 +171,22 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
    * @param withMfa - Whether the error occurred during MFA verification.
    * @returns A LoginState object with error state and optional masked phone number.
    */
-  private createErrorState(error: string, withMfa: boolean): LoginState {
+  private createErrorState(error: any, withMfa: boolean): LoginState {
+    let errorMsg = 'Ocurrió un error inesperado.';
+    if (error) {
+      if (typeof error === 'string') {
+        errorMsg = error;
+      } else if (error.error && typeof error.error === 'object' && error.error.reason) {
+        errorMsg = error.error.reason;
+      } else if (error.message) {
+        errorMsg = error.message;
+      }
+    }
     return {
       dataState: DataState.ERROR,
       usingMfa: withMfa,
       loginSuccess: false,
-      error,
-      // Spread operator to conditionally add phone property based on withMfa flag
+      error: errorMsg,
       ...(withMfa && { phone: this.getMaskedPhone(this.phoneSubject.value) })
     };
   }

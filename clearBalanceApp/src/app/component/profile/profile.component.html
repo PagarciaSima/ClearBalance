@@ -72,6 +72,12 @@
                               </h3>
                               <form #profileForm="ngForm" (ngSubmit)="updateProfile(profileForm)">
                                  <input type="hidden" name="id" [ngModel]="state.appData?.data?.user?.id">
+                                 <!-- Hidden field for username -->
+                                 <input type="text"
+                                        name="username"
+                                        [value]="state.appData?.data?.user?.email"
+                                        autocomplete="username"
+                                        style="display:none;">
                                  <div class="row">
                                     <div class="col-md-6">
                                        <div class="form-group">
@@ -87,7 +93,7 @@
                                     <div class="col-md-6">
                                        <div class="form-group">
                                           <label for="email"><i class="bi bi-envelope me-2"></i>Email</label>
-                                          <input type="email" name="email" [ngModel]="state.appData?.data?.user?.email" [disabled]="state.appData?.data?.user?.roleName === 'ROLE_USER' || ((isLoading$ | async) ?? false)" class="form-control" placeholder="Enter email">
+                                          <input type="email" id="email" name="email" [ngModel]="state.appData?.data?.user?.email" [disabled]="state.appData?.data?.user?.roleName === 'ROLE_USER' || ((isLoading$ | async) ?? false)" class="form-control" placeholder="Enter email">
                                        </div>
                                     </div>
                                     <div class="col-md-6">
@@ -148,11 +154,36 @@
                                  <i class="bi bi-key-fill me-3"></i>Password Settings
                               </h3>
                               <form #passwordForm="ngForm" (ngSubmit)="updatePassword(passwordForm)">
+                                 <input type="text"
+                                        name="username"
+                                        [value]="state.appData?.data?.user?.email"
+                                        autocomplete="username"
+                                        style="display:none;">
                                  <div class="row">
                                     <div class="col-md-6">
                                        <div class="form-group">
                                           <label><i class="bi bi-lock me-2"></i>Current password</label>
-                                          <input type="password" name="currentPassword" ngModel class="form-control" placeholder="Enter current password" required>
+                                          <div class="input-group">
+                                            <input [disabled]="(isLoading$ | async) ?? false"
+                                                   [type]="showCurrentPassword ? 'text' : 'password'"
+                                                   name="currentPassword"
+                                                   ngModel
+                                                   placeholder="Enter current password"
+                                                   required
+                                                   autocomplete="current-password"
+                                                   class="form-control">
+                                            <button type="button"
+                                                    class="btn btn-primary"
+                                                    tabindex="-1"
+                                                    (click)="showCurrentPassword = !showCurrentPassword"
+                                                    [attr.aria-label]="showCurrentPassword ? 'Hide password' : 'Show password'"
+                                                    [attr.aria-pressed]="showCurrentPassword"
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-placement="top"
+                                                    title="Toggle password visibility">
+                                              <i class="bi" [ngClass]="showCurrentPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+                                            </button>
+                                          </div>
                                        </div>
                                     </div>
                                  </div>
@@ -160,20 +191,62 @@
                                     <div class="col-md-6">
                                        <div class="form-group">
                                           <label><i class="bi bi-key me-2"></i>New password</label>
-                                          <input type="password" name="newPassword" ngModel class="form-control" placeholder="Enter new password" minlength="5" required>
+                                          <div class="input-group">
+                                            <input [disabled]="(isLoading$ | async) ?? false"
+                                                   [type]="showNewPassword ? 'text' : 'password'"
+                                                   name="newPassword"
+                                                   ngModel
+                                                   placeholder="Enter new password"
+                                                   minlength="5"
+                                                   required
+                                                   autocomplete="new-password"
+                                                   class="form-control">
+                                            <button type="button"
+                                                    class="btn btn-primary"
+                                                    tabindex="-1"
+                                                    (click)="showNewPassword = !showNewPassword"
+                                                    [attr.aria-label]="showNewPassword ? 'Hide password' : 'Show password'"
+                                                    [attr.aria-pressed]="showNewPassword"
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-placement="top"
+                                                    title="Toggle password visibility">
+                                              <i class="bi" [ngClass]="showNewPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+                                            </button>
+                                          </div>
                                        </div>
                                     </div>
                                     <div class="col-md-6">
                                        <div class="form-group">
                                           <label><i class="bi bi-check-circle me-2"></i>Confirm new password</label>
-                                          <input type="password" name="confirmNewPassword" ngModel class="form-control" placeholder="Confirm new password" minlength="5" required>
+                                          <div class="input-group">
+                                            <input [disabled]="(isLoading$ | async) ?? false"
+                                                   [type]="showConfirmPassword ? 'text' : 'password'"
+                                                   name="confirmNewPassword"
+                                                   ngModel
+                                                   placeholder="Confirm new password"
+                                                   minlength="5"
+                                                   required
+                                                   autocomplete="new-password"
+                                                   class="form-control">
+                                            <button type="button"
+                                                    class="btn btn-primary"
+                                                    tabindex="-1"
+                                                    (click)="showConfirmPassword = !showConfirmPassword"
+                                                    [attr.aria-label]="showConfirmPassword ? 'Hide password' : 'Show password'"
+                                                    [attr.aria-pressed]="showConfirmPassword"
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-placement="top"
+                                                    title="Toggle password visibility">
+                                              <i class="bi" [ngClass]="showConfirmPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+                                            </button>
+                                          </div>
                                        </div>
                                     </div>
                                  </div>
                                  <div>
                                     <button type="submit" 
                                             class="btn btn-primary" 
-                                            [disabled]="state.appData?.data?.user?.roleName === 'ROLE_USER' || ((isLoading$ | async) ?? false)"
+                                            [disabled]="passwordForm.invalid || state.appData?.data?.user?.roleName === 'ROLE_USER' || ((isLoading$ | async) ?? false)"
                                             data-bs-toggle="tooltip" 
                                             data-bs-placement="top" 
                                             title="Save your profile changes">

@@ -47,6 +47,15 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
   }
 
   ngOnInit(): void {
+    this.loadProfileData();
+  }
+
+  /**
+   * Loads the user's profile data from the server.
+   * Initializes the profileState$ observable with loading, loaded, and error states.
+   * Utilizes the UserService to fetch the profile data.
+   */
+  private loadProfileData(): void {
     this.profileState$ = this.userService.profile$()
       .pipe(
         map(response => {
@@ -59,10 +68,10 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
         }),
         startWith({ dataState: DataState.LOADING }),
         catchError((error: any) => {
-          console.log('Error in profile$:', {error});
+          console.log('Error in profile$:', { error });
           const reason = error?.error?.reason || error?.message || 'An unknown error occurred while loading the profile.';
           this.notificationService.showError(reason, 'Profile Load Error');
-          return of({ dataState: DataState.ERROR, appData: this.dataSubject.value || undefined, error });
+          return of({ dataState: DataState.ERROR, appData: this.dataSubject.value === null ? undefined : this.dataSubject.value, error });
         })
       );
   }
@@ -76,7 +85,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
    * - Updates the dataSubject with the new profile data on success
    * - Handles errors by logging them and maintaining the previous profile data
    */
-  updateProfile(profileForm: NgForm) {
+  updateProfile(profileForm: NgForm): void {
     this.isLoadingSubject.next(true);
     this.profileState$ = this.userService.update$(profileForm.value)
       .pipe(
@@ -86,18 +95,42 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
           this.isLoadingSubject.next(false);
           return {
             dataState: DataState.LOADED,
-            appData: this.dataSubject.value ?? undefined
+            appData: this.dataSubject.value === null ? undefined : this.dataSubject.value
           };
         }),
-        startWith({ dataState: DataState.LOADED, appData: this.dataSubject.value ?? undefined }),
+        startWith({ dataState: DataState.LOADED, appData: this.dataSubject.value === null ? undefined : this.dataSubject.value }),
         catchError((error: any) => {
           console.error('Error in updateProfile:', error);
           this.isLoadingSubject.next(false);
           const reason = error?.error?.reason || error?.message || 'An unknown error occurred while updating the profile.';
           this.notificationService.showError(reason, 'Profile Update Error');
-          return of({ dataState: DataState.LOADED, appData: this.dataSubject.value ?? undefined, error });
+          return of({ dataState: DataState.LOADED, appData: this.dataSubject.value === null ? undefined : this.dataSubject.value, error });
         })
       );
+  }
+
+  updatePassword(passwordForm: NgForm) {
+    this.isLoadingSubject.next(true);
+    if (passwordForm.value.newPassword === passwordForm.value.confirmNewPassword) { 
+      this.profileState$ = this.userService.updatePassword$(passwordForm.value)
+      .pipe(
+        map(response => {
+          console.log(response);
+          passwordForm.reset();
+          this.isLoadingSubject.next(false);
+          return { dataState: DataState.LOADED, appData: this.dataSubject.value === null ? undefined : this.dataSubject.value };
+        }),
+        startWith({ dataState: DataState.LOADED, appData: this.dataSubject.value === null ? undefined : this.dataSubject.value }),
+        catchError((error: string) => {
+          console.error('Error in updatePassword:', error);
+          this.isLoadingSubject.next(false);
+          return of({ dataState: DataState.LOADED, appData: this.dataSubject.value === null ? undefined : this.dataSubject.value, error });
+        })
+      );
+    } else {
+      passwordForm.reset();
+      this.isLoadingSubject.next(false);
+    }
   }
 
   /**
@@ -182,9 +215,7 @@ throw new Error('Method not implemented.');
 updateRole(_t125: NgForm) {
 throw new Error('Method not implemented.');
 }
-updatePassword(_t85: NgForm) {
-throw new Error('Method not implemented.');
-}
+
 
 toggleMfa() {
 throw new Error('Method not implemented.');

@@ -5,6 +5,7 @@ import { CustomHttpResponse } from '../interface/customhttpresponse';
 import { Profile } from '../interface/profile';
 import { User } from '../interface/user';
 import { Key } from '../enum/key.enum';
+import { UpdatePasswordForm } from '../interface/updatePasswordForm';
 
 @Injectable({
   providedIn: 'root'
@@ -140,4 +141,29 @@ export class UserService {
       catchError(this.handleError)
     );
   }
+
+  /**
+   * Sends a request to update the user's password.
+   * @param form - Object containing the current password, new password, and its confirmation
+   * @returns An Observable emitting a CustomHttpResponse indicating the result of the operation
+   * 
+   * @remarks
+   * - Utilizes HttpClient to send a PATCH request to /user/update/password
+   * - Includes Content-Type: application/json header
+   * - Pipes the response to log it and handle any potential errors using handleError method
+   */
+  updatePassword$(form: UpdatePasswordForm): Observable<CustomHttpResponse<any>> {
+    const headers = new HttpHeaders()
+      .set('Content-Type', 'application/json');
+
+    return this.http.patch<CustomHttpResponse<any>>(
+      `${this.server}/user/update/password`,
+      form,
+      { headers }
+    ).pipe(
+      tap(console.log),
+      catchError(this.handleError)
+    );
+  }
+
 }
