@@ -7,6 +7,8 @@ import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+import javax.management.InstanceNotFoundException;
+
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,10 +30,10 @@ import com.clear.balance.clearBalance.enumeration.VerificationType;
 import com.clear.balance.clearBalance.exeception.ApiException;
 import com.clear.balance.clearBalance.repository.AccountVerificationRepository;
 import com.clear.balance.clearBalance.repository.ResetPasswordVerificationRepository;
-import com.clear.balance.clearBalance.repository.RoleRepository;
 import com.clear.balance.clearBalance.repository.TwoFactorVerificationRepository;
 import com.clear.balance.clearBalance.repository.UserRepository;
 import com.clear.balance.clearBalance.service.EmailService;
+import com.clear.balance.clearBalance.service.UserRoleService;
 import com.clear.balance.clearBalance.service.UserService;
 
 import jakarta.validation.Valid;
@@ -43,8 +45,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class UserServiceImpl implements UserService {
 	private final UserRepository userRepository;
-	private final RoleRepository roleRepository;
-	private final RoleServiceImpl roleServiceImpl;
+	private final UserRoleService roleService;
 	private final PasswordEncoder encoder;
 	private final EmailService emailService;
 	private final AccountVerificationRepository accountVerificationRepository;
@@ -94,8 +95,7 @@ public class UserServiceImpl implements UserService {
 
 			// 3. Assign default role
 			log.debug("Assigning default role '{}' to user: {}", RoleType.ROLE_USER.name(), user.getEmail());
-			Role defaultRole = roleRepository.findByName(RoleType.ROLE_USER.name())
-					.orElseThrow(() -> new ApiException("Default role not found."));
+			Role defaultRole = roleService.findRoleByName(RoleType.ROLE_USER.name());
 			UserRole userRole = new UserRole();
 			userRole.setUser(user);
 			userRole.setRole(defaultRole);
@@ -228,7 +228,7 @@ public class UserServiceImpl implements UserService {
 		});
 
 		log.info("User found: ID={}, email={}", user.getId(), user.getEmail());
-		return UserDtoMapper.fromUser(user, roleServiceImpl.getRoleByUserId(user.getId()));
+		return UserDtoMapper.fromUser(user, roleService.getRoleByUserId(user.getId()));
 	}
 
 	/**
@@ -369,7 +369,7 @@ public class UserServiceImpl implements UserService {
 		twoFactorVerificationRepository.delete(verification);
 		log.info("Verification code '{}' successfully verified for user '{}'", code, email);
 
-		return UserDtoMapper.fromUser(user, roleServiceImpl.getRoleByUserId(user.getId()));
+		return UserDtoMapper.fromUser(user, roleService.getRoleByUserId(user.getId()));
 	}
 	
 	/**
@@ -620,7 +620,25 @@ public class UserServiceImpl implements UserService {
 
 	    return UserDtoMapper.fromUser(savedUser);
 	}
-
+	
+	/**
+	 * Updates the password for a specific user.
+	 * <p>
+	 * This method performs the following steps:
+	 * <ol>
+	 *     <li>Retrieves the user by their ID.</li>
+	 *     <li>Validates that the provided current password matches the stored password.</li>
+	 *     <li>Validates that the new password and confirmation password match.</li>
+	 *     <li>Encodes the new password and updates the user's record in the database.</li>
+	 * </ol>
+	 * <p>
+	 * The method is transactional, ensuring that all operations complete successfully or
+	 * roll back in case of any failure.
+	 *
+	 * @param id   the ID of the user whose password is to be updated
+	 * @param form a {@link UpdatePasswordFormDto} containing the current, new, and confirmation passwords
+	 * @throws ApiException if the current password does not match or the new passwords do not match
+	 */
 	@Override
 	@Transactional
 	public void updatePassword(Long id, @Valid UpdatePasswordFormDto form) {
@@ -647,5 +665,50 @@ public class UserServiceImpl implements UserService {
 
 	    log.info("Password updated successfully for user {}", user.getEmail());
 	}
+	
+	/**
+	 * Retrieves a user along with their associated role information by user ID.
+	 * <p>
+	 * This method uses a {@code LEFT JOIN FETCH} query to eagerly fetch the {@link UserRole}
+	 * and {@link Role} associated with the user, ensuring that all role data is available
+	 * in a single query.
+	 * <p>
+	 * The method is marked as read-only transactional for optimal performance.
+	 *
+	 * @param userId the ID of the user to retrieve
+	 * @return the {@link User} entity with its associated {@link UserRole} and {@link Role}
+	 * @throws ApiException if no user is found with the specified ID
+	 */
+	@Override
+	@Transactional(readOnly = true)
+	public User getUserWithRoleById(Long userId) {
+	    return userRepository.findByIdWithUserRoleAndRole(userId)
+	            .orElseThrow(() -> new ApiException("User not found with ID: " + userId));
+	}
+
+	/**
+	 * Updates the account settings of a user, specifically the 'enabled' and 'notLocked' flags.
+	 *
+	 * @param id        the ID of the user to update
+	 * @param enabled   whether the user account should be enabled
+	 * @param notLocked whether the user account should be unlocked
+	 * @throws ApiException if the user with the given ID does not exist
+	 */
+	@Override
+	@Transactional
+	public void updateAccountSettings(Long id, Boolean enabled, Boolean notLocked) {
+	    log.info("Updating account settings for user with ID: {}", id);
+
+	    User user = this.getUserById(id);
+	    log.debug("Current settings - Enabled: {}, NotLocked: {}", user.isEnabled(), user.isNotLocked());
+
+	    user.setEnabled(enabled);
+	    user.setNotLocked(notLocked);
+	    log.debug("Updated settings - Enabled: {}, NotLocked: {}", user.isEnabled(), user.isNotLocked());
+
+	    userRepository.save(user);
+	    log.info("Account settings updated successfully for user with ID: {}", id);
+	}
+
 
 }

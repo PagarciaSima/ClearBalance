@@ -11,6 +11,11 @@ public class UserDtoMapper {
     public static UserDto fromUser(User user) {
     	UserDto userDTO = new UserDto();
         BeanUtils.copyProperties(user, userDTO);
+        if (user.getUserRole() != null && user.getUserRole().getRole() != null) {
+            Role role = user.getUserRole().getRole();
+            userDTO.setRoleName(role.getName());
+            userDTO.setPermissions(role.getPermission());
+        }
         return userDTO;
     }
 

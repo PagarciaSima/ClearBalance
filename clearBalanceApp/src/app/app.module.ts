@@ -21,6 +21,8 @@ import { NavbarComponent } from './component/navbar/navbar.component';
 import { StatsComponent } from './component/stats/stats.component';
 import { FooterComponent } from './component/footer/footer.component';
 import { TokenInterceptor } from './interceptor/token.interceptor';
+import { PermissionFormatPipe } from './pipes/permission-format.pipe';
+import { RoleFormatPipe } from './pipes/role-format.pipe';
 
 @NgModule({
   declarations: [
@@ -38,7 +40,9 @@ import { TokenInterceptor } from './interceptor/token.interceptor';
     CustomersComponent,
     NavbarComponent,
     StatsComponent,
-    FooterComponent
+    FooterComponent,
+    PermissionFormatPipe,
+    RoleFormatPipe
   ],
   imports: [
     AppRoutingModule,

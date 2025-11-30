@@ -6,6 +6,7 @@ import { Profile } from '../interface/profile';
 import { User } from '../interface/user';
 import { Key } from '../enum/key.enum';
 import { UpdatePasswordForm } from '../interface/updatePasswordForm';
+import { profileSettingsForm } from '../interface/profileSettingsForm';
 
 @Injectable({
   providedIn: 'root'
@@ -121,8 +122,8 @@ export class UserService {
    * - Includes an Authorization header with the refresh token for authentication
    * - Pipes the response to update localStorage with the new tokens and handle any potential errors using handleError method
    */
-  refreshToken$(token: string): Observable<CustomHttpResponse<any>> {
-    return this.http.get<CustomHttpResponse<any>>(
+  refreshToken$(token: string): Observable<CustomHttpResponse<Profile>> {
+    return this.http.get<CustomHttpResponse<Profile>>(
       `${this.server}/user/refresh/token`,
       { 
         headers: { 
@@ -135,8 +136,8 @@ export class UserService {
         localStorage.removeItem(Key.TOKEN);
         localStorage.removeItem(Key.REFRESH_TOKEN);
         
-        localStorage.setItem(Key.TOKEN, response.data.access_token);
-        localStorage.setItem(Key.REFRESH_TOKEN, response.data.refresh_token);
+        localStorage.setItem(Key.TOKEN, response.data?.access_token ||  '');
+        localStorage.setItem(Key.REFRESH_TOKEN, response.data?.refresh_token || '');
       }),
       catchError(this.handleError)
     );
@@ -152,12 +153,60 @@ export class UserService {
    * - Includes Content-Type: application/json header
    * - Pipes the response to log it and handle any potential errors using handleError method
    */
-  updatePassword$(form: UpdatePasswordForm): Observable<CustomHttpResponse<any>> {
+  updatePassword$(form: UpdatePasswordForm): Observable<CustomHttpResponse<Profile>> {
     const headers = new HttpHeaders()
       .set('Content-Type', 'application/json');
 
-    return this.http.patch<CustomHttpResponse<any>>(
+    return this.http.patch<CustomHttpResponse<Profile>>(
       `${this.server}/user/update/password`,
+      form,
+      { headers }
+    ).pipe(
+      tap(console.log),
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Sends a request to update the user's role.
+   * @param roleName - The new role name to be assigned to the user
+   * @returns An Observable emitting a CustomHttpResponse containing the updated user's Profile
+   * 
+   * @remarks
+   * - Utilizes HttpClient to send a PATCH request to /user/update/role/{roleName}
+   * - Includes Content-Type: application/json header
+   * - Pipes the response to log it and handle any potential errors using handleError method
+   */
+  updateRole$(roleName: string): Observable<CustomHttpResponse<Profile>> {
+    const headers = new HttpHeaders()
+      .set('Content-Type', 'application/json');
+
+    return this.http.patch<CustomHttpResponse<Profile>>(
+      `${this.server}/user/update/role/${roleName}`,
+      {},
+      { headers }
+    ).pipe(
+      tap(console.log),
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Sends a request to update the user's profile settings.
+   * @param form - Object containing the profile settings to be updated
+   * @returns An Observable emitting a CustomHttpResponse containing the updated user's Profile
+   * 
+   * @remarks
+   * - Utilizes HttpClient to send a PATCH request to /user/update/settings
+   * - Includes Content-Type: application/json header
+   * - Pipes the response to log it and handle any potential errors using handleError method
+   */
+  updateSettings$(form: profileSettingsForm): Observable<CustomHttpResponse<Profile>> {
+    const headers = new HttpHeaders()
+      .set('Content-Type', 'application/json');
+
+    return this.http.patch<CustomHttpResponse<Profile>>(
+      `${this.server}/user/update/settings`,
       form,
       { headers }
     ).pipe(

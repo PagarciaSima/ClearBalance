@@ -265,36 +265,52 @@
                               <h3 class="content-title">
                                  <i class="bi bi-shield-shaded me-3"></i>Authorization Settings
                               </h3>
+                              
                               <form #roleForm="ngForm" (ngSubmit)="updateRole(roleForm)">
                                  <div class="row">
                                     <div class="col-md-6">
                                        <div class="form-group">
-                                          <label><i class="bi bi-person-badge me-2"></i>Role Name</label>
-                                          <select name="roleName" [ngModel]="state.appData?.data?.user?.roleName" class="form-control" required>
-                                             <option value="" selected>-- Select Role --</option>
-                                             <option value="ROLE_USER">User</option>
-                                             <option value="ROLE_MANAGER">Manager</option>
-                                             <option value="ROLE_ADMIN">Admin</option>
-                                             <option value="ROLE_SUPER_ADMIN">Super Admin</option>
+                                          <label style="margin-bottom: 5px;"><i class="bi bi-person-badge me-2"></i>Role Name</label>
+                                          <select name="roleName" 
+                                                [ngModel]="state?.appData?.data?.user?.roleName" 
+                                                [disabled]="!(state?.appData?.data?.user?.roleName === 'ROLE_SYSADMIN' || state?.appData?.data?.user?.roleName === 'ROLE_ADMIN') || ((isLoading$ | async) ?? false)" 
+                                                class="form-control select-cl" 
+                                                required
+                                          >
+                                             <option *ngFor="let role of state?.appData?.data?.roles"
+                                                      [selected]="state?.appData?.data?.user?.roleName === role.name"
+                                                      [disabled]="!(state?.appData?.data?.user?.roleName === 'ROLE_SYSADMIN' || state?.appData?.data?.user?.roleName === 'ROLE_ADMIN') || ((isLoading$ | async) ?? false)"
+                                                      [ngValue]="role.name"
+                                                      class="select-cl">
+                                                {{ role.name | roleFormat }}
+                                             </option>
                                           </select>
                                        </div>
                                     </div>
-                                    <div class="col-md-6">
+                                   <div class="col-md-6">
                                        <div class="form-group">
-                                          <label><i class="bi bi-list-check me-2"></i>Role Permissions</label>
-                                             <input type="text" name="permissions" [ngModel]="state.appData?.data?.user?.permissions" [disabled]="true" class="form-control" placeholder="Permission list auto-filled" />
+                                          <label style="margin-bottom: 5px;"><i class="bi bi-shield-lock me-2"></i>Role Permissions</label>
+                                          <div class="permissions-container">
+                                             <div *ngFor="let perm of (state?.appData?.data?.user?.permissions | permissionFormat)" 
+                                                class="permission-badge"
+                                                [class]="perm.cssClass"
+                                                [title]="perm.tooltip">
+                                             <i [class]="perm.iconClass"></i>
+                                             {{ perm.displayText }}
+                                             </div>
+                                          </div>
                                        </div>
                                     </div>
                                  </div>
                                  <div>
-                                    <button type="submit" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="Update user role and permissions">
-                                       <i class="bi bi-arrow-repeat me-2"></i>
+                                    <button [disabled]="!(state?.appData?.data?.user?.roleName === 'ROLE_SYSADMIN' || state?.appData?.data?.user?.roleName === 'ROLE_ADMIN') || (isLoading$ | async)" type="submit" class="btn btn-primary">
                                        <span *ngIf="isLoading$ | async" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="margin-right: 5px;"></span>
-                                       <span *ngIf="isLoading$ | async" class="me-2">Loading...</span>
-                                       <span>Update Role</span>
+                                       <span *ngIf="isLoading$ | async">Loading...</span>
+                                       <span *ngIf="!(isLoading$ | async)">Update Role</span>
                                     </button>
                                  </div>
                               </form>
+
                            </div>
 
                            <!-- ========================= ACCOUNT SETTINGS TAB ========================= -->
@@ -308,22 +324,31 @@
                                     <div class="col-md-6">
                                        <div class="form-group">
                                           <div class="form-check">
-                                             <input type="checkbox" name="enabled" [ngModel]="state.appData?.data?.user?.enabled" class="form-check-input" id="enabled">
+                                             <input type="checkbox" [disabled]="!(state?.appData?.data?.user?.roleName === 'ROLE_SYSADMIN' || state?.appData?.data?.user?.roleName === 'ROLE_ADMIN') || ((isLoading$ | async) ?? false)" name="enabled"
+                                                [checked]="state?.appData?.data?.user?.enabled"
+                                                [ngModel]="state?.appData?.data?.user?.enabled"
+                                                class="form-check-input" 
+                                                id="enabled"
+                                             >
                                              <label class="form-check-label" for="enabled"><i class="bi bi-toggle-on me-2"></i>Account Active</label>
                                           </div>
                                           <div class="form-check">
-                                             <input type="checkbox" name="notLocked" [ngModel]="state.appData?.data?.user?.notLocked" class="form-check-input" id="notLocked">
+                                             <input type="checkbox" [disabled]="!(state?.appData?.data?.user?.roleName === 'ROLE_SYSADMIN' || state?.appData?.data?.user?.roleName === 'ROLE_ADMIN') || ((isLoading$ | async) ?? false)" name="notLocked" 
+                                                [checked]="state?.appData?.data?.user?.notLocked"
+                                                [ngModel]="state?.appData?.data?.user?.notLocked" 
+                                                class="form-check-input"
+                                                id="notLocked"
+                                             >
                                              <label class="form-check-label" for="notLocked"><i class="bi bi-unlock me-2"></i>Account Unlocked</label>
                                           </div>
                                        </div>
                                     </div>
                                  </div>
                                  <div>
-                                    <button type="submit" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="Save account settings">
-                                       <i class="bi bi-save me-2"></i>
+                                    <button [disabled]="!(state?.appData?.data?.user?.roleName === 'ROLE_SYSADMIN' || state?.appData?.data?.user?.roleName === 'ROLE_ADMIN') || (isLoading$ | async)" type="submit" class="btn btn-primary">
                                        <span *ngIf="isLoading$ | async" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="margin-right: 5px;"></span>
-                                       <span *ngIf="isLoading$ | async"class="me-2">Loading...</span>
-                                       <span>Update Settings</span>
+                                       <span *ngIf="isLoading$ | async">Loading...</span>
+                                       <span *ngIf="!(isLoading$ | async)">Update Settings</span>
                                     </button>
                                  </div>
                               </form>

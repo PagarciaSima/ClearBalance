@@ -411,4 +411,81 @@
   .setting-item .btn {
     width: 100%;
   }
+
+}
+
+.permissions-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.permission-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid;
+  transition: all 0.3s ease;
+}
+
+.permission-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.permission-read { 
+  background: linear-gradient(135deg, var(--info-gradient-start) 0%, var(--info-gradient-mid) 50%, var(--info-gradient-end) 100%);
+  border-color: var(--info-gradient-mid);
+  color: #fff;
+}
+
+.permission-create { 
+  background: linear-gradient(135deg, var(--success-gradient-start) 0%, var(--success-gradient-mid) 50%, var(--success-gradient-end) 100%);
+  border-color: var(--success-gradient-mid);
+  color: #1a0033;
+}
+
+.permission-update { 
+  background: linear-gradient(135deg, var(--warning-gradient-start) 0%, var(--warning-gradient-mid) 50%, var(--warning-gradient-end) 100%);
+  border-color: var(--warning-gradient-mid);
+  color: #1a0033;
+}
+
+.permission-delete { 
+  background: linear-gradient(135deg, var(--danger-gradient-start) 0%, var(--danger-gradient-mid) 50%, var(--danger-gradient-end) 100%);
+  border-color: var(--danger-gradient-mid);
+  color: #fff;
+}
+
+.permission-default { 
+  background: linear-gradient(135deg, var(--primary-gradient-start) 0%, var(--primary-gradient-mid) 50%, var(--primary-gradient-end) 100%);
+  border-color: var(--primary-gradient-mid);
+  color: #fff;
+}
+
+
+/* Iconos de permisos: color dinámico y sombra para contraste */
+.permission-badge i {
+  font-size: 18px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.35);
+}
+.permission-read i {
+  color: #1976d2 !important;
+}
+.permission-create i {
+  color: #388e3c !important;
+}
+.permission-update i {
+  color: #f57c00 !important;
+}
+.permission-delete i {
+  color: #d32f2f !important;
+}
+.permission-default i {
+  color: #616161 !important;
 }

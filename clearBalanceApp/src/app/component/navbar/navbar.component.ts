@@ -10,8 +10,6 @@ import { Key } from 'src/app/enum/key.enum';
 })
 export class NavbarComponent implements AfterViewInit {
   stars: { top: string; left: string; delay: string }[] = [];
-
-
   constructor(
     private tooltipService: TooltipService,
     private router: Router

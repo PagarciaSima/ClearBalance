@@ -6,6 +6,7 @@ import static org.springframework.web.servlet.support.ServletUriComponentsBuilde
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
@@ -27,13 +28,15 @@ import com.clear.balance.clearBalance.domain.HttpResponse;
 import com.clear.balance.clearBalance.domain.User;
 import com.clear.balance.clearBalance.domain.UserPrincipal;
 import com.clear.balance.clearBalance.dto.LoginRequestDto;
+import com.clear.balance.clearBalance.dto.RoleDto;
+import com.clear.balance.clearBalance.dto.SettingsFormDto;
 import com.clear.balance.clearBalance.dto.UpdateFormDto;
 import com.clear.balance.clearBalance.dto.UpdatePasswordFormDto;
 import com.clear.balance.clearBalance.dto.UserDto;
 import com.clear.balance.clearBalance.dtoMapper.UserDtoMapper;
 import com.clear.balance.clearBalance.exeception.ApiException;
 import com.clear.balance.clearBalance.provider.TokenProvider;
-import com.clear.balance.clearBalance.service.RoleService;
+import com.clear.balance.clearBalance.service.UserRoleService;
 import com.clear.balance.clearBalance.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -58,7 +61,7 @@ public class UserController {
 	private final UserService userService;
 	private final AuthenticationManager authenticationManager;
 	private final TokenProvider tokenProvider;
-	private final RoleService roleService;
+	private final UserRoleService userRoleService;
 	private final HttpServletRequest request;
 	private final HttpServletResponse response;
 
@@ -147,10 +150,16 @@ public class UserController {
 
         UserDto user = userService.getUserDtoByEmail(UserUtils.getAuthenticatedUserDto(authentication).getEmail());
         log.debug("User retrieved from service: {}", user);
+        List<RoleDto> rolesDtoList = userRoleService.getAllRoles();
 
         HttpResponse response = HttpResponse.builder()
                 .timeStamp(LocalDateTime.now().toString())
-                .data(Map.of("user", user))
+                .data(
+                	Map.of(
+                		"user", user,
+                		"roles", rolesDtoList
+                	)
+                )
                 .message("Profile retrieved successfully")
                 .status(HttpStatus.OK)
                 .statusCode(HttpStatus.OK.value())
@@ -406,6 +415,95 @@ public class UserController {
 	}
 	
 	/**
+	 * Updates the role of the currently authenticated user.
+	 * <p>
+	 * This endpoint receives the new role name in the request body and updates
+	 * the user's role accordingly. It performs the following steps:
+	 * </p>
+	 * <ul>
+	 *     <li>Retrieves the authenticated user information from the security context.</li>
+	 *     <li>Delegates the role update operation to {@link UserRoleService#updateUserRole(Long, String)}.</li>
+	 *     <li>Fetches the updated user and maps it to a {@link UserDto}.</li>
+	 *     <li>Includes the updated user data and the list of all available roles in the response payload.</li>
+	 * </ul>
+	 * <p>
+	 * If the provided role does not exist or the update operation fails,
+	 * an appropriate exception is thrown and handled globally.
+	 * </p>
+	 *
+	 * @param authentication the authentication object containing the currently logged-in user
+	 * @param roleName       the name of the new role to assign to the authenticated user
+	 * @return a {@link ResponseEntity} containing an {@link HttpResponse} with the updated user information,
+	 *         the list of all roles, and a success message
+	 */
+	@PatchMapping("/update/role/{roleName}")
+	public ResponseEntity<HttpResponse> updateRole(
+	        Authentication authentication,
+	        @PathVariable String roleName
+	) {
+	    UserDto userDto = UserUtils.getAuthenticatedUserDto(authentication);
+	    log.debug("Updating role to {} for user ID: {}", roleName, userDto.getId());
+
+	    this.userRoleService.updateUserRole(userDto.getId(), roleName);
+
+	    User updatedUser = this.userService.getUserWithRoleById(userDto.getId());
+	    UserDto updatedUserDto = UserDtoMapper.fromUser(updatedUser);
+
+	    HttpResponse response = HttpResponse.builder()
+	            .data(
+	                Map.of(
+	                    "user", updatedUserDto,
+	                    "roles", userRoleService.getAllRoles()
+	                )
+	            )
+	            .timeStamp(LocalDateTime.now().toString())
+	            .message("User role updated successfully")
+	            .status(HttpStatus.OK)
+	            .statusCode(HttpStatus.OK.value())
+	            .build();
+
+	    return ResponseEntity.ok(response);
+	}
+	
+	/**
+	 * Updates the account settings of the currently authenticated user.
+	 * <p>
+	 * This endpoint allows the user to change their 'enabled' and 'notLocked' status.
+	 * After updating, it returns the updated user information along with all available roles.
+	 * </p>
+	 *
+	 * @param authentication the authentication object containing the currently logged-in user
+	 * @param form           a {@link SettingsFormDto} containing the new account settings
+	 * @return a {@link ResponseEntity} containing a {@link HttpResponse} with the updated user and roles
+	 */
+	@PatchMapping("/update/settings")
+	public ResponseEntity<HttpResponse> updateAccountSettings(
+	        Authentication authentication, 
+	        @RequestBody @Valid SettingsFormDto form) {
+
+	    UserDto userDto = UserUtils.getAuthenticatedUserDto(authentication);
+	    log.info("Updating account settings for user ID: {}", userDto.getId());
+
+	    userService.updateAccountSettings(userDto.getId(), form.getEnabled(), form.getNotLocked());
+	    User updatedUser = this.userService.getUserWithRoleById(userDto.getId());
+	    UserDto updatedUserDto = UserDtoMapper.fromUser(updatedUser);
+
+	    HttpResponse response = HttpResponse.builder()
+	            .data(Map.of(
+	                    "user", updatedUserDto,
+	                    "roles", userRoleService.getAllRoles()
+	            ))
+	            .timeStamp(LocalDateTime.now().toString())
+	            .message("User account settings updated successfully")
+	            .status(HttpStatus.OK)
+	            .statusCode(HttpStatus.OK.value())
+	            .build();
+
+	    log.info("Account settings updated successfully for user ID: {}", userDto.getId());
+	    return ResponseEntity.ok(response);
+	}
+
+	/**
 	 * Handles the refresh token request and generates a new refresh token if the provided
 	 * Authorization header contains a valid token.
 	 *
@@ -577,7 +675,7 @@ public class UserController {
 			var userDto = userService.getUserDtoByEmail(user.getEmail());
 			log.trace("Fetched UserDto for email {}: {}", user.getEmail(), userDto);
 
-			var role = roleService.getRoleByUserId(user.getId());
+			var role = userRoleService.getRoleByUserId(user.getId());
 			log.trace("Fetched role for user ID {}: {}", user.getId(), role);
 
 			var userPrincipal = new UserPrincipal(UserDtoMapper.toUser(userDto), role);
