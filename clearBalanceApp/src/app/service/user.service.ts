@@ -215,4 +215,27 @@ export class UserService {
     );
   }
 
+  /**
+   * Sends a request to toggle multi-factor authentication (MFA) for the user.
+   * @returns An Observable emitting a CustomHttpResponse containing the updated user's Profile
+   * 
+   * @remarks
+   * - Utilizes HttpClient to send a PATCH request to /user/togglemfa
+   * - Includes Content-Type: application/json header
+   * - Pipes the response to log it and handle any potential errors using handleError method
+   */
+  toggleMfa$(): Observable<CustomHttpResponse<Profile>> {
+    const headers = new HttpHeaders()
+      .set('Content-Type', 'application/json');
+
+    return this.http.patch<CustomHttpResponse<Profile>>(
+      `${this.server}/user/togglemfa`,
+      {},
+      { headers }
+    ).pipe(
+      tap(console.log),
+      catchError(this.handleError)
+    );
+  }
+
 }

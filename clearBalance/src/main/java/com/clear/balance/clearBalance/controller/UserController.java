@@ -502,6 +502,41 @@ public class UserController {
 	    log.info("Account settings updated successfully for user ID: {}", userDto.getId());
 	    return ResponseEntity.ok(response);
 	}
+	
+	/**
+	 * Toggles the Multi-Factor Authentication (MFA) setting for the currently authenticated user.
+	 * <p>
+	 * This endpoint retrieves the authenticated user's information, delegates the MFA toggle operation
+	 * to the {@code userService}, and returns a structured HTTP response containing the updated user data
+	 * and the list of available roles.
+	 * </p>
+	 *
+	 * <p>
+	 * A success message is included, indicating the new MFA state after the toggle operation.
+	 * </p>
+	 *
+	 * @param authentication the authentication object containing the details of the currently logged-in user
+	 * @return a {@link ResponseEntity} containing a {@link HttpResponse} with updated user information and roles
+	 * @throws InterruptedException if the execution is interrupted during processing
+	 */
+	@PatchMapping("/togglemfa")
+    public ResponseEntity<HttpResponse> toggleMfa(Authentication authentication) throws InterruptedException {
+	    UserDto userDto = UserUtils.getAuthenticatedUserDto(authentication);
+        log.info("Toggling MFA for user ID: {}", userDto.getId());
+        UserDto updatedUserDto = userService.toggleMfa(userDto.getEmail());
+        HttpResponse response = HttpResponse.builder()
+	            .data(Map.of(
+	                    "user", updatedUserDto,
+	                    "roles", userRoleService.getAllRoles()
+	            ))
+	            .timeStamp(LocalDateTime.now().toString())
+	            .message("User MFA setting toggled successfully, current state: " + updatedUserDto.isUsingMfa())
+	            .status(HttpStatus.OK)
+	            .statusCode(HttpStatus.OK.value())
+	            .build();
+        log.info("MFA toggled successfully for user ID: {}", userDto.getId());
+        return ResponseEntity.ok(response);
+    }
 
 	/**
 	 * Handles the refresh token request and generates a new refresh token if the provided

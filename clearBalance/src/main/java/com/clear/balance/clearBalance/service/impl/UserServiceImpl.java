@@ -10,6 +10,7 @@ import java.util.concurrent.CompletableFuture;
 import javax.management.InstanceNotFoundException;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -710,5 +711,51 @@ public class UserServiceImpl implements UserService {
 	    log.info("Account settings updated successfully for user with ID: {}", id);
 	}
 
+	/**
+	 * Toggles the Multi-Factor Authentication (MFA) state for the user identified by the given email.
+	 * <p>
+	 * This method retrieves the user, validates that a phone number is present (required for enabling MFA),
+	 * switches the current MFA state, persists the updated state, and performs cleanup operations if needed.
+	 * </p>
+	 *
+	 * <p>
+	 * If MFA is being disabled (i.e., transitioning from enabled to disabled), any existing verification
+	 * codes associated with the user are removed to prevent the reuse of old MFA tokens.
+	 * </p>
+	 *
+	 * @param email the email of the user whose MFA setting will be toggled
+	 * @return a {@link UserDto} containing the updated user information and associated roles
+	 * @throws ApiException if the user does not have a phone number registered or if the user cannot be found
+	 */
+	@Override
+	@Transactional
+	public UserDto toggleMfa(String email) {
+	    log.info("Toggling MFA for user with email: {}", email);
+
+	    User user = this.getUserByEmail(email);
+	    
+	    // Check if user has phone number to toggle MFA state
+		if (StringUtils.isBlank(user.getPhone())) {
+			log.error("Cannot toggle MFA. User {} does not have a phone number set.", email);
+			throw new ApiException("Cannot enable MFA without a phone number. Please update your profile.");
+		}
+
+	    // Toggle MFA state
+		boolean previousState = user.isUsingMfa();
+		boolean newState = !previousState;
+	    user.setUsingMfa(newState);
+	    userRepository.save(user);
+
+	    log.info("MFA state updated for user {}: now {}", email, newState);
+
+	    // Clear existing verification codes if MFA is disabled
+	    if (previousState && !newState) {
+	        log.info("MFA disabled. Removing any existing verification codes for user {}", user.getId());
+	        twoFactorVerificationRepository.deleteByUserId(user.getId());
+	    }
+
+	    // return Dto with roles
+	    return UserDtoMapper.fromUser(user, roleService.getRoleByUserId(user.getId()));
+	}
 
 }

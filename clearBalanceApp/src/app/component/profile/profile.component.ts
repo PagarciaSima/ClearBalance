@@ -264,6 +264,33 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
   }
 
   /**
+   * Toggles the user's multi-factor authentication (MFA) setting.
+   * @remarks
+   * - Sets the loading state to true while the toggle is in progress
+   * - Calls the UserService's toggleMfa$ method to update the MFA setting on the server
+   * - Updates the dataSubject with the new profile data on success
+   * - Handles errors by logging them and maintaining the previous profile data
+   */
+  toggleMfa() {
+    this.isLoadingSubject.next(true);
+    this.profileState$ = this.userService.toggleMfa$()
+      .pipe(
+        map(response => {
+          console.log('toggleMfa:', response);
+          this.dataSubject.next({ ...response, data: response.data });
+          this.isLoadingSubject.next(false);
+          return { dataState: DataState.LOADED, appData: this.dataSubject.value };
+
+        }),
+        startWith({ dataState: DataState.LOADED, appData: this.dataSubject.value }),
+        catchError((error: string) => {
+          this.isLoadingSubject.next(false);
+          return of({ dataState: DataState.LOADED, appData: this.dataSubject.value, error })
+        })
+      );
+  }
+
+  /**
    * Returns the user's image URL or a default astronaut image if not available.
    */
   getUserImage(imageUrl?: string): string {
@@ -279,10 +306,6 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
       const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
       window.open(mapsUrl, '_blank', 'noopener,noreferrer');
     }
-  }
-
-  toggleMfa() {
-  throw new Error('Method not implemented.');
   }
 
   // Avatar upload handler
