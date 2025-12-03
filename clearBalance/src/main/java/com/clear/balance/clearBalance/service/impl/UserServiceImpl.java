@@ -2,6 +2,10 @@ package com.clear.balance.clearBalance.service.impl;
 
 import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentContextPath;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.UUID;
@@ -14,6 +18,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.clear.balance.clearBalance.Utils.SmsUtils;
 import com.clear.balance.clearBalance.domain.AccountVerification;
@@ -756,6 +762,120 @@ public class UserServiceImpl implements UserService {
 
 	    // return Dto with roles
 	    return UserDtoMapper.fromUser(user, roleService.getRoleByUserId(user.getId()));
+	}
+
+	/**
+	 * Updates the profile image of a user.
+	 * <p>
+	 * This method performs three main operations:
+	 * <ul>
+	 *     <li>Generates a public URL for the new profile image based on the user's email.</li>
+	 *     <li>Saves the uploaded image file to the server's file system.</li>
+	 *     <li>Updates the user's stored image URL in the database and returns the updated DTO.</li>
+	 * </ul>
+	 * </p>
+	 *
+	 * @param userDto the data transfer object representing the authenticated user
+	 * @param image   the uploaded image file to be set as the new profile picture
+	 * @return an updated {@link UserDto} containing the new image URL
+	 * @throws ApiException if the user cannot be found or if saving the image fails
+	 */
+	@Override
+	public UserDto updateImage(UserDto userDto, MultipartFile image) {
+
+	    log.info("Starting profile image update for user: {}", userDto.getEmail());
+
+	    // Generate the public URL for the image
+	    String imageUrl = this.setUserImageUrl(userDto.getEmail());
+	    log.debug("Generated image URL '{}' for user {}", imageUrl, userDto.getEmail());
+
+	    // Save image physically in the file system
+	    log.info("Saving new profile image for user {}", userDto.getEmail());
+	    this.saveImage(userDto.getEmail(), image);
+	    log.info("Profile image saved successfully for user {}", userDto.getEmail());
+
+	    // Update user entity in database
+	    User user = this.getUserById(userDto.getId());
+	    log.debug("Fetched user entity with ID {} to update image URL", userDto.getId());
+
+	    user.setImageUrl(imageUrl);
+	    userRepository.save(user);
+	    log.info("Updated image URL in database for user {}", userDto.getEmail());
+
+	    // Return updated UserDto
+	    UserDto updatedDto = UserDtoMapper.fromUser(user);
+	    log.info("Returning updated user DTO for {}", updatedDto.getEmail());
+
+	    return updatedDto;
+	}
+
+	/**
+	 * Saves the uploaded profile image for a user to the local file system.
+	 * <p>
+	 * The image is stored inside the user's home directory under
+	 * <code>~/Downloads/images</code>. If the target directory does not exist,
+	 * it will be created automatically. The file is saved using the user's email
+	 * as the filename (e.g., <code>email.png</code>). If an image with the same
+	 * name already exists, it will be replaced.
+	 * </p>
+	 *
+	 * <p>
+	 * This method performs the following steps:
+	 * <ul>
+	 *     <li>Resolves the target folder path and normalizes it.</li>
+	 *     <li>Creates the directory if it does not exist.</li>
+	 *     <li>Copies the uploaded image into the directory using {@link Files#copy}
+	 *         and {@link StandardCopyOption#REPLACE_EXISTING}.</li>
+	 *     <li>Logs both directory creation and file storage operations.</li>
+	 * </ul>
+	 * </p>
+	 *
+	 * @param email the user's email, used to generate the stored image filename
+	 * @param image the uploaded image file to be saved
+	 * @throws ApiException if the directory cannot be created or the file cannot be stored
+	 */
+	private void saveImage(String email, MultipartFile image) {
+		Path fileStorageLocation = Paths.
+				get(System.getProperty("user.home") + "/Downloads/images").
+				toAbsolutePath().
+				normalize();
+		if(!Files.exists(fileStorageLocation)) {
+			try  {
+				Files.createDirectories(fileStorageLocation);
+			}
+			catch (Exception ex) {
+				log.error("Could not create the directory where the uploaded files will be stored.", ex);
+				throw new ApiException("Could not create the directory where the uploaded files will be stored.");
+			}
+			log.info("Created Directories: {}", fileStorageLocation.toString());
+		}
+		try {
+			Files.copy(image.getInputStream(), fileStorageLocation.resolve(email + ".png"),
+                    StandardCopyOption.REPLACE_EXISTING);
+		} catch (Exception ex) {
+			log.error("Could not store file {}. Please try again!", image.getOriginalFilename(), ex);
+			throw new ApiException("Could not store file " + image.getOriginalFilename() + ". Please try again!");
+		}
+		log.info("Stored file {} at location {}", image.getOriginalFilename(),
+				fileStorageLocation.resolve(email + ".png").toString());
+	}
+	
+	/**
+	 * Builds the public URL for accessing a user's profile image based on their email.
+	 * <p>
+	 * This method uses {@link ServletUriComponentsBuilder#fromCurrentContextPath()} 
+	 * to generate an absolute URL that includes the application's current domain, 
+	 * protocol, port, and context path. It then appends a fixed path pointing to 
+	 * the user image resource, using the user's email as the image filename.
+	 * </p>
+	 *
+	 * @param email the user's email, used as the base name for the image file
+	 * @return a fully qualified URL pointing to the user's profile image
+	 */
+	private String setUserImageUrl(String email) {
+		return ServletUriComponentsBuilder.
+				fromCurrentContextPath().
+				path("/user/image/" + email + ".png").toUriString();
 	}
 
 }

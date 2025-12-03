@@ -4,13 +4,21 @@ import static org.springframework.security.authentication.UsernamePasswordAuthen
 import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentContextPath;
 
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
@@ -20,7 +28,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.clear.balance.clearBalance.Utils.ExceptionUtils;
 import com.clear.balance.clearBalance.Utils.UserUtils;
@@ -33,9 +43,13 @@ import com.clear.balance.clearBalance.dto.SettingsFormDto;
 import com.clear.balance.clearBalance.dto.UpdateFormDto;
 import com.clear.balance.clearBalance.dto.UpdatePasswordFormDto;
 import com.clear.balance.clearBalance.dto.UserDto;
+import com.clear.balance.clearBalance.dto.UserEventResponseDto;
 import com.clear.balance.clearBalance.dtoMapper.UserDtoMapper;
+import com.clear.balance.clearBalance.enumeration.EventType;
+import com.clear.balance.clearBalance.event.NewUserEvent;
 import com.clear.balance.clearBalance.exeception.ApiException;
 import com.clear.balance.clearBalance.provider.TokenProvider;
+import com.clear.balance.clearBalance.service.EventService;
 import com.clear.balance.clearBalance.service.UserRoleService;
 import com.clear.balance.clearBalance.service.UserService;
 
@@ -59,34 +73,33 @@ public class UserController {
 
 	private static final String TOKEN_PREFIX = "Bearer ";
 	private final UserService userService;
+	private final EventService eventService;
+	private final UserRoleService userRoleService;
+
 	private final AuthenticationManager authenticationManager;
 	private final TokenProvider tokenProvider;
-	private final UserRoleService userRoleService;
 	private final HttpServletRequest request;
 	private final HttpServletResponse response;
+	private final ApplicationEventPublisher eventPublisher;
 
-    /**
-     * Handles user login requests.
-     * <p>
-     * This method authenticates the user using their email and password,
-     * retrieves the authenticated {@link UserDto}, and then:
-     * <ul>
-     *     <li>If the user is using MFA (multi-factor authentication), it sends a verification code.</li>
-     *     <li>If not, it sends the standard login response.</li>
-     * </ul>
-     *
-     * @param loginRequestDto the login request containing email and password
-     * @return a {@link ResponseEntity} containing either the MFA verification response
-     *         or the standard user login response
-     */
+	/**
+	 * Handles user login requests by authenticating the provided credentials and returning
+	 * either an MFA verification response or a standard authentication response.
+	 *
+	 * <p>Flow:
+	 * <ul>
+	 *   <li>Authenticates the user via {@code authenticate()}.</li>
+	 *   <li>Returns an MFA verification step if MFA is enabled.</li>
+	 *   <li>Otherwise returns the authenticated user response.</li>
+	 * </ul>
+	 *
+	 * @param loginRequestDto the login request containing email and password
+	 * @return an MFA verification response or a normal login response
+	 */
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid LoginRequestDto loginRequestDto) {
         log.info("Login attempt for user: {}", loginRequestDto.getEmail());
-
-        Authentication authentication = authenticate(loginRequestDto.getEmail(), loginRequestDto.getPassword());
-        log.debug("Authentication object created for user: {}", loginRequestDto.getEmail());
-
-        UserDto userDto = UserUtils.getLoggedInUserDto(authentication);
+        UserDto userDto = this.authenticate(loginRequestDto.getEmail(), loginRequestDto.getPassword());
         if (userDto == null) {
             log.warn("Authenticated UserDto is null for user: {}", loginRequestDto.getEmail());
             return ResponseEntity.status(500).body("Failed to retrieve authenticated user information.");
@@ -145,19 +158,27 @@ public class UserController {
      * @return ResponseEntity containing HttpResponse with user profile data and HTTP status.
      */
     @GetMapping("/profile")
-    public ResponseEntity<HttpResponse> profile(Authentication authentication) {
+    public ResponseEntity<HttpResponse> profile(
+    		Authentication authentication,
+    		@RequestParam(defaultValue = "0") int page,
+	        @RequestParam(defaultValue = "10") int size
+	) {
         log.info("Profile request received for user: {}", authentication.getName());
 
         UserDto user = userService.getUserDtoByEmail(UserUtils.getAuthenticatedUserDto(authentication).getEmail());
         log.debug("User retrieved from service: {}", user);
         List<RoleDto> rolesDtoList = userRoleService.getAllRoles();
+        
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<UserEventResponseDto> eventsPage = this.eventService.getPagedEventsByUserId(user.getId(), pageable);
 
         HttpResponse response = HttpResponse.builder()
                 .timeStamp(LocalDateTime.now().toString())
                 .data(
                 	Map.of(
                 		"user", user,
-                		"roles", rolesDtoList
+                		"roles", rolesDtoList,
+                		"events", eventsPage
                 	)
                 )
                 .message("Profile retrieved successfully")
@@ -190,16 +211,30 @@ public class UserController {
      */
     @PatchMapping("/update")
     public ResponseEntity<HttpResponse> updateUser(
-            @RequestBody @Valid UpdateFormDto user
+            @RequestBody @Valid UpdateFormDto user,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
     ) {
         log.info("Received request to update user with ID: {}", user.getId());
         try {
             UserDto updatedUser = userService.updateUserDetails(user);
+        	this.eventPublisher.publishEvent(new NewUserEvent(updatedUser.getEmail(), EventType.PROFILE_UPDATE));
+
             log.debug("User updated successfully: {}", updatedUser);
+            
+            Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+            Page<UserEventResponseDto> eventsPage = this.eventService.getPagedEventsByUserId(user.getId(), pageable);
 
             HttpResponse response = HttpResponse.builder()
                     .timeStamp(LocalDateTime.now().toString())
-                    .data(Map.of("user", updatedUser))
+                    .data(
+                    		Map.of(
+                    				"user", updatedUser,
+                    				"roles", userRoleService.getAllRoles(),
+                            		"events", eventsPage
+                    		)
+                    		
+                    )
                     .message("User updated successfully")
                     .status(HttpStatus.OK)
                     .statusCode(HttpStatus.OK.value())
@@ -330,6 +365,8 @@ public class UserController {
 
 	    try {
 	        UserDto user = userService.verifyCode(email, code);
+	    	this.eventPublisher.publishEvent(new NewUserEvent(user.getEmail(), EventType.LOGIN_ATTEMPT_SUCCESS));
+
 	        log.info("Verification successful for user '{}'", email);
 
 	        Map<String, Object> data = new LinkedHashMap<>();
@@ -399,12 +436,28 @@ public class UserController {
 	@PatchMapping("/update/password")
 	public ResponseEntity<HttpResponse> updatePassoword(
 			Authentication authentication,
-			@RequestBody @Valid UpdatePasswordFormDto updatePasswordFormDto
+			@RequestBody @Valid UpdatePasswordFormDto updatePasswordFormDto,
+			@RequestParam(defaultValue = "0") int page,
+	        @RequestParam(defaultValue = "10") int size
 	) {
         UserDto userDto = UserUtils.getAuthenticatedUserDto(authentication);
+
         log.debug("Updating password for user ID: {}", userDto.getId());
         this.userService.updatePassword(userDto.getId(), updatePasswordFormDto);
+    	this.eventPublisher.publishEvent(new NewUserEvent(userDto.getEmail(), EventType.PASSWORD_UPDATE));
+    	
+    	Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<UserEventResponseDto> eventsPage = this.eventService.getPagedEventsByUserId(userDto.getId(), pageable);
+
         HttpResponse response = HttpResponse.builder()
+        		.data(
+    	                Map.of(
+    	                    "user", userDto,
+    	                    "roles", userRoleService.getAllRoles(),
+                    		"events", eventsPage
+
+    	                )
+	            )
                 .timeStamp(LocalDateTime.now().toString())
                 .message("Password updated successfully")
                 .status(HttpStatus.OK)
@@ -439,21 +492,30 @@ public class UserController {
 	@PatchMapping("/update/role/{roleName}")
 	public ResponseEntity<HttpResponse> updateRole(
 	        Authentication authentication,
-	        @PathVariable String roleName
+	        @PathVariable String roleName,
+	        @RequestParam(defaultValue = "0") int page,
+	        @RequestParam(defaultValue = "10") int size
 	) {
 	    UserDto userDto = UserUtils.getAuthenticatedUserDto(authentication);
 	    log.debug("Updating role to {} for user ID: {}", roleName, userDto.getId());
 
 	    this.userRoleService.updateUserRole(userDto.getId(), roleName);
+    	this.eventPublisher.publishEvent(new NewUserEvent(userDto.getEmail(), EventType.ROLE_UPDATE));
 
 	    User updatedUser = this.userService.getUserWithRoleById(userDto.getId());
 	    UserDto updatedUserDto = UserDtoMapper.fromUser(updatedUser);
+	    
+	    Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<UserEventResponseDto> eventsPage = this.eventService.getPagedEventsByUserId(userDto.getId(), pageable);
+
 
 	    HttpResponse response = HttpResponse.builder()
 	            .data(
 	                Map.of(
 	                    "user", updatedUserDto,
-	                    "roles", userRoleService.getAllRoles()
+	                    "roles", userRoleService.getAllRoles(),
+                		"events", eventsPage
+
 	                )
 	            )
 	            .timeStamp(LocalDateTime.now().toString())
@@ -479,19 +541,29 @@ public class UserController {
 	@PatchMapping("/update/settings")
 	public ResponseEntity<HttpResponse> updateAccountSettings(
 	        Authentication authentication, 
-	        @RequestBody @Valid SettingsFormDto form) {
+	        @RequestBody @Valid SettingsFormDto form,
+	        @RequestParam(defaultValue = "0") int page,
+	        @RequestParam(defaultValue = "10") int size
+	) {
 
 	    UserDto userDto = UserUtils.getAuthenticatedUserDto(authentication);
 	    log.info("Updating account settings for user ID: {}", userDto.getId());
 
 	    userService.updateAccountSettings(userDto.getId(), form.getEnabled(), form.getNotLocked());
+    	this.eventPublisher.publishEvent(new NewUserEvent(userDto.getEmail(), EventType.ACCOUNT_SETTINGS_UPDATE));
+
 	    User updatedUser = this.userService.getUserWithRoleById(userDto.getId());
 	    UserDto updatedUserDto = UserDtoMapper.fromUser(updatedUser);
+	    
+	    Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<UserEventResponseDto> eventsPage = this.eventService.getPagedEventsByUserId(userDto.getId(), pageable);
 
 	    HttpResponse response = HttpResponse.builder()
 	            .data(Map.of(
 	                    "user", updatedUserDto,
-	                    "roles", userRoleService.getAllRoles()
+	                    "roles", userRoleService.getAllRoles(),
+                		"events", eventsPage
+
 	            ))
 	            .timeStamp(LocalDateTime.now().toString())
 	            .message("User account settings updated successfully")
@@ -520,14 +592,25 @@ public class UserController {
 	 * @throws InterruptedException if the execution is interrupted during processing
 	 */
 	@PatchMapping("/togglemfa")
-    public ResponseEntity<HttpResponse> toggleMfa(Authentication authentication) throws InterruptedException {
+    public ResponseEntity<HttpResponse> toggleMfa(
+    		Authentication authentication,
+    		@RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+	) throws InterruptedException {
 	    UserDto userDto = UserUtils.getAuthenticatedUserDto(authentication);
         log.info("Toggling MFA for user ID: {}", userDto.getId());
         UserDto updatedUserDto = userService.toggleMfa(userDto.getEmail());
+    	this.eventPublisher.publishEvent(new NewUserEvent(userDto.getEmail(), EventType.MFA_UPDATE));
+
+    	Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<UserEventResponseDto> eventsPage = this.eventService.getPagedEventsByUserId(userDto.getId(), pageable);
+
         HttpResponse response = HttpResponse.builder()
 	            .data(Map.of(
 	                    "user", updatedUserDto,
-	                    "roles", userRoleService.getAllRoles()
+	                    "roles", userRoleService.getAllRoles(),
+                		"events", eventsPage
+
 	            ))
 	            .timeStamp(LocalDateTime.now().toString())
 	            .message("User MFA setting toggled successfully, current state: " + updatedUserDto.isUsingMfa())
@@ -537,6 +620,70 @@ public class UserController {
         log.info("MFA toggled successfully for user ID: {}", userDto.getId());
         return ResponseEntity.ok(response);
     }
+	
+	/**
+	 * Updates the profile image of the currently authenticated user.
+	 * <p>
+	 * This endpoint allows the authenticated user to upload a new profile image.
+	 * The uploaded image is processed and saved via the {@link UserService#updateImage(UserDto, MultipartFile)} method.
+	 * The response includes the updated user information along with all available roles.
+	 * </p>
+	 *
+	 * @param authentication the authentication object containing the currently logged-in user's details
+	 * @param image the uploaded image file to be set as the user's new profile picture
+	 * @return a {@link ResponseEntity} containing an {@link HttpResponse} with the updated user information, roles,
+	 *         timestamp, message, and HTTP status code
+	 * @throws InterruptedException if the thread is interrupted while processing the image
+	 */
+	@PatchMapping("/update/image")
+    public ResponseEntity<HttpResponse> updateProfileImage(
+    		Authentication authentication,
+    		@RequestParam ("image") MultipartFile image,
+    		@RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+	) throws InterruptedException {
+		
+	    UserDto userDto = UserUtils.getAuthenticatedUserDto(authentication);
+        log.info("Updating image for user ID: {}", userDto.getId());
+        UserDto updatedUserDto = this.userService.updateImage(userDto, image);
+    	this.eventPublisher.publishEvent(new NewUserEvent(userDto.getEmail(), EventType.PROFILE_PICTURE_UPDATE));
+
+    	Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<UserEventResponseDto> eventsPage = this.eventService.getPagedEventsByUserId(userDto.getId(), pageable);
+
+        HttpResponse response = HttpResponse.builder()
+	            .data(Map.of(
+	                    "user", updatedUserDto,
+	                    "roles", userRoleService.getAllRoles(),
+                		"events", eventsPage
+
+	            ))
+	            .timeStamp(LocalDateTime.now().toString())
+	            .message("Profile image updated for user ID: " + updatedUserDto.getId())
+	            .status(HttpStatus.OK)
+	            .statusCode(HttpStatus.OK.value())
+	            .build();
+        log.info("MFA toggled successfully for user ID: {}", userDto.getId());
+        return ResponseEntity.ok(response);
+    }
+	
+	/**
+	 * Retrieves the profile image file as a byte array.
+	 * <p>
+	 * This endpoint reads the image file located in the user's local
+	 * "Downloads/images" directory and returns its content as a byte array.
+	 * The file is identified by its {@code fileName} path variable.
+	 * </p>
+	 *
+	 * @param fileName the name of the image file to retrieve
+	 * @return a byte array containing the contents of the requested image file
+	 * @throws Exception if an error occurs while reading the file, such as
+	 *                   the file not existing or lacking read permissions
+	 */
+	@GetMapping(value = "/image/{fileName}", produces = MediaType.IMAGE_PNG_VALUE)
+	public byte [] getProfileImage(@PathVariable String fileName) throws Exception {
+		return Files.readAllBytes(Paths.get(System.getProperty("user.home") + "/Downloads/images/" + fileName));
+	}
 
 	/**
 	 * Handles the refresh token request and generates a new refresh token if the provided
@@ -723,35 +870,52 @@ public class UserController {
 		}
 	}
 	
-    /**
-     * Attempts to authenticate a user with the given email and password.
-     * <p>
-     * If authentication succeeds, returns an {@link Authentication} object.
-     * If authentication fails, logs the error, writes a detailed JSON error response
-     * to the client using {@link ExceptionUtils#processError}, and throws an {@link ApiException}.
-     *
-     * @param email    The email of the user attempting to authenticate.
-     * @param password The password provided by the user.
-     * @return An {@link Authentication} object if authentication succeeds.
-     * @throws ApiException if authentication fails.
-     */
-    private Authentication authenticate(String email, String password) {
+	/**
+	 * Authenticates a user with the given email and password while publishing login-related
+	 * application events for auditing purposes.
+	 *
+	 * <p>Flow:
+	 * <ul>
+	 *   <li>Publishes a {@code LOGIN_ATTEMPT} event if the email exists.</li>
+	 *   <li>Attempts authentication via {@link AuthenticationManager}.</li>
+	 *   <li>On success: returns the authenticated {@link UserDto} and publishes
+	 *       {@code LOGIN_ATTEMPT_SUCCESS} if MFA is disabled.</li>
+	 *   <li>On failure: publishes {@code LOGIN_ATTEMPT_FAILURE}, logs the error, and throws an {@link ApiException}.</li>
+	 * </ul>
+	 *
+	 * @param email    the user's email
+	 * @param password the user's password
+	 * @return the authenticated {@link UserDto}
+	 * @throws ApiException if authentication fails
+	 */
+    private UserDto authenticate(String email, String password) {
         log.debug("Starting authentication process for user: {}", email);
         Authentication authentication = null;
 
         try {
+        	// There is a valid email for the authentication try
+        	if(null != this.userService.getUserByEmail(email)) {
+            	this.eventPublisher.publishEvent(new NewUserEvent(email, EventType.LOGIN_ATTEMPT));
+        	}
             authentication = authenticationManager.authenticate(
                     unauthenticated(email, password));
-            log.info("User '{}' successfully authenticated", email);
+            UserDto loggedInUserDto = UserUtils.getLoggedInUserDto(authentication);
+            
+			if (!loggedInUserDto.isUsingMfa()) {
+	        	this.eventPublisher.publishEvent(new NewUserEvent(email, EventType.LOGIN_ATTEMPT_SUCCESS));
+	            log.info("User '{}' successfully authenticated", email);
+			}
+
+            return loggedInUserDto;
+
         } catch (Exception e) {
+        	// Publish login attempt failure event
+        	this.eventPublisher.publishEvent(new NewUserEvent(email, EventType.LOGIN_ATTEMPT_FAILURE));
             log.error("Authentication failed for user '{}': {}", email, e.getMessage(), e);
             ExceptionUtils.processError(request, response, e);
             log.debug("ApiException thrown for user '{}'", email);
             throw new ApiException(e.getMessage());
         }
-
-        return authentication;
     }
-    
 
 }

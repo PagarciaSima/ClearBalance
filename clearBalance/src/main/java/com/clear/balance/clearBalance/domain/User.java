@@ -89,4 +89,8 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     @EqualsAndHashCode.Exclude
     private UserRole userRole;
+
+	public String getFullName() {
+		return this.firstName + " " + this.lastName;
+	}
 }

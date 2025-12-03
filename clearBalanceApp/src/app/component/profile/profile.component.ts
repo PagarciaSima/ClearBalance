@@ -1,16 +1,16 @@
-import { Component, AfterViewInit, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { TooltipService } from 'src/app/service/tooltip.service';
-import { slideBlur } from 'src/app/animations/animations';
-import { Router, NavigationStart } from '@angular/router';
+import { NavigationStart, Router } from '@angular/router';
 import { BehaviorSubject, Observable, of, Subscription } from 'rxjs';
-import { map, startWith, catchError } from 'rxjs/operators';
+import { catchError, map, startWith } from 'rxjs/operators';
+import { slideBlur } from 'src/app/animations/animations';
 import { DataState } from 'src/app/enum/datastate.enum';
-import { UserService } from 'src/app/service/user.service';
-import { State } from 'src/app/interface/state';
-import { Profile } from 'src/app/interface/profile';
 import { CustomHttpResponse } from 'src/app/interface/customhttpresponse';
+import { Profile } from 'src/app/interface/profile';
+import { State } from 'src/app/interface/state';
 import { NotificationService } from 'src/app/service/notification.service';
+import { TooltipService } from 'src/app/service/tooltip.service';
+import { UserService } from 'src/app/service/user.service';
 
 declare var bootstrap: any;
 
@@ -27,12 +27,13 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
   profileState$!: Observable<State<CustomHttpResponse<Profile>>>;
   private dataSubject = new BehaviorSubject<CustomHttpResponse<Profile> | null>(null);
   private isLoadingSubject = new BehaviorSubject<boolean>(false);
+  private routerSubscription?: Subscription;
   isLoading$: Observable<boolean> = this.isLoadingSubject.asObservable();
   showCurrentPassword: boolean = false;
   showNewPassword: boolean = false;
   showConfirmPassword: boolean = false;
   readonly DataState = DataState;
-  private routerSubscription?: Subscription;
+  imageTimestamp: number = Date.now();
 
   constructor(
     private tooltipService: TooltipService,
@@ -291,10 +292,55 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
   }
 
   /**
+   * Updates the user's profile image.
+   * @param image - The new profile image file to be uploaded
+   * @remarks
+   * - Sets the loading state to true while the update is in progress
+   * - Calls the UserService's updateImage$ method to upload the new image to the server
+   * - Updates the dataSubject with the new profile data on success
+   * - Updates the imageTimestamp to force reload of the image
+   * - Handles errors by logging them and maintaining the previous profile data
+   */
+  updateProfileImage(image: File) {
+    if(image) {
+      this.isLoadingSubject.next(true);
+      this.profileState$ = this.userService.updateImage$(this.getFormData(image))
+        .pipe(
+          map(response => {
+            console.log('updateProfileImage:', response);
+            this.dataSubject.next({ ...response, data: response.data });
+            this.isLoadingSubject.next(false);
+            this.imageTimestamp = Date.now(); 
+            return { dataState: DataState.LOADED, appData: this.dataSubject.value };
+
+          }),
+          startWith({ dataState: DataState.LOADED, appData: this.dataSubject.value }),
+          catchError((error: string) => {
+            this.isLoadingSubject.next(false);
+            return of({ dataState: DataState.LOADED, appData: this.dataSubject.value, error })
+          })
+      );
+    }
+  }
+
+  /**
+   * Converts a File object into FormData for HTTP requests.
+   * @param image - The image file to be converted
+   */
+  private getFormData(image: File): FormData {
+    const formData = new FormData();
+    formData.append('image', image);
+    return formData;
+  }
+
+  /**
    * Returns the user's image URL or a default astronaut image if not available.
    */
   getUserImage(imageUrl?: string): string {
-    return imageUrl || 'assets/img/astronaut.png';
+    if (!imageUrl) {
+      return 'assets/img/astronaut.png';
+    }
+    return `${imageUrl}?t=${this.imageTimestamp}`;
   }
 
   /**
@@ -313,15 +359,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
       const file = input.files[0];
-      const reader = new FileReader();
-      
-      reader.onload = (e: ProgressEvent<FileReader>) => {
-        // Here you would update the avatar image
-        console.log('Avatar selected:', file.name);
-        // TODO: Upload to server and update profile
-      };
-      
-      reader.readAsDataURL(file);
+      this.updateProfileImage(file);
     }
   }
 

@@ -2,6 +2,8 @@ package com.clear.balance.clearBalance.service;
 
 import java.util.Collection;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import com.clear.balance.clearBalance.domain.User;
 import com.clear.balance.clearBalance.dto.UpdateFormDto;
 import com.clear.balance.clearBalance.dto.UpdatePasswordFormDto;
@@ -30,5 +32,6 @@ public interface UserService {
 	User getUserWithRoleById(Long userId);
 	void updateAccountSettings(Long id, Boolean enabled, Boolean notLocked);
 	UserDto toggleMfa(String email);
+	UserDto updateImage(UserDto userDto, MultipartFile image);
 
 }

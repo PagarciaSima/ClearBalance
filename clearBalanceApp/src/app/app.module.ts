@@ -23,6 +23,8 @@ import { FooterComponent } from './component/footer/footer.component';
 import { TokenInterceptor } from './interceptor/token.interceptor';
 import { PermissionFormatPipe } from './pipes/permission-format.pipe';
 import { RoleFormatPipe } from './pipes/role-format.pipe';
+import { EventTypeFormatPipe } from './pipes/event-type-format.pipe';
+import { PaginationComponent } from './component/pagination/pagination.component';
 
 @NgModule({
   declarations: [
@@ -42,7 +44,9 @@ import { RoleFormatPipe } from './pipes/role-format.pipe';
     StatsComponent,
     FooterComponent,
     PermissionFormatPipe,
-    RoleFormatPipe
+    RoleFormatPipe,
+    EventTypeFormatPipe,
+    PaginationComponent
   ],
   imports: [
     AppRoutingModule,

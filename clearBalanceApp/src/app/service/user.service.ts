@@ -238,4 +238,23 @@ export class UserService {
     );
   }
 
+  /**
+   * Sends a request to update the user's profile image.
+   * @param formData - FormData object containing the new profile image file
+   * @returns An Observable emitting a CustomHttpResponse containing the updated user's Profile
+   * 
+   * @remarks
+   * - Utilizes HttpClient to send a PATCH request to /user/update/image
+   * - Pipes the response to log it and handle any potential errors using handleError method
+   */
+  updateImage$(formData: FormData): Observable<CustomHttpResponse<Profile>> {
+    return this.http.patch<CustomHttpResponse<Profile>>(
+      `${this.server}/user/update/image`,
+      formData,
+    ).pipe(
+      tap(console.log),
+      catchError(this.handleError)
+    );
+  }
+
 }
