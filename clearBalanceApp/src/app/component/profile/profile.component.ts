@@ -6,6 +6,7 @@ import { catchError, map, startWith } from 'rxjs/operators';
 import { slideBlur } from 'src/app/animations/animations';
 import { DataState } from 'src/app/enum/datastate.enum';
 import { CustomHttpResponse } from 'src/app/interface/customhttpresponse';
+import { PagedEvents } from 'src/app/interface/events';
 import { Profile } from 'src/app/interface/profile';
 import { State } from 'src/app/interface/state';
 import { NotificationService } from 'src/app/service/notification.service';
@@ -34,6 +35,10 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
   showConfirmPassword: boolean = false;
   readonly DataState = DataState;
   imageTimestamp: number = Date.now();
+  
+  eventsPage?: PagedEvents;
+  currentPage: number = 0;
+  eventsPageSize: number = 10;
 
   constructor(
     private tooltipService: TooltipService,
@@ -51,6 +56,26 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
 
   ngOnInit(): void {
     this.loadProfileData();
+    this.loadEvents();
+  }
+
+  /**
+   * Handles page change events from the pagination component.
+   * @param page - The new page number to load
+   */
+  onPageChange(page: number): void {
+    this.loadEvents(page);
+  }
+
+  /**
+   * Loads the user's events for the specified page.
+   * @param eventsPageSize - The page number to load (default is 0)
+   */
+  loadEvents(page: number = 0): void {
+    this.userService.getUserEvents$(page, this.eventsPageSize).subscribe(response => {
+      this.eventsPage = response?.data?.events;
+      this.currentPage = this.eventsPage?.number || 0;
+    });
   }
 
   /**
@@ -159,6 +184,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
           console.log('Received response:', response);
           this.dataSubject.next({ ...response, data: response.data });
           this.isLoadingSubject.next(false);
+          this.loadEvents(this.currentPage);
           return {
             dataState: DataState.LOADED,
             appData: this.dataSubject.value === null ? undefined : this.dataSubject.value
@@ -194,6 +220,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
           console.log(response);
           passwordForm.reset();
           this.isLoadingSubject.next(false);
+          this.loadEvents(this.currentPage);
           return { dataState: DataState.LOADED, appData: this.dataSubject.value === null ? undefined : this.dataSubject.value };
         }),
         startWith({ dataState: DataState.LOADED, appData: this.dataSubject.value === null ? undefined : this.dataSubject.value }),
@@ -226,6 +253,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
           console.log(response);
           this.dataSubject.next({ ...response, data: response.data });
           this.isLoadingSubject.next(false);
+          this.loadEvents(this.currentPage);
           return { dataState: DataState.LOADED, appData: this.dataSubject.value };
         }),
         startWith({ dataState: DataState.LOADED, appData: this.dataSubject.value }),
@@ -253,6 +281,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
           console.log('Settings updated:', response);
           this.dataSubject.next({ ...response, data: response.data });
           this.isLoadingSubject.next(false);
+          this.loadEvents(this.currentPage);
           return { dataState: DataState.LOADED, appData: this.dataSubject.value };
 
         }),
@@ -280,6 +309,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
           console.log('toggleMfa:', response);
           this.dataSubject.next({ ...response, data: response.data });
           this.isLoadingSubject.next(false);
+          this.loadEvents(this.currentPage);
           return { dataState: DataState.LOADED, appData: this.dataSubject.value };
 
         }),
@@ -311,6 +341,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
             this.dataSubject.next({ ...response, data: response.data });
             this.isLoadingSubject.next(false);
             this.imageTimestamp = Date.now(); 
+            this.loadEvents(this.currentPage);
             return { dataState: DataState.LOADED, appData: this.dataSubject.value };
 
           }),

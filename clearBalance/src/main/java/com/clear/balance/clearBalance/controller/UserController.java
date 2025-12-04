@@ -158,27 +158,19 @@ public class UserController {
      * @return ResponseEntity containing HttpResponse with user profile data and HTTP status.
      */
     @GetMapping("/profile")
-    public ResponseEntity<HttpResponse> profile(
-    		Authentication authentication,
-    		@RequestParam(defaultValue = "0") int page,
-	        @RequestParam(defaultValue = "10") int size
-	) {
+    public ResponseEntity<HttpResponse> profile(Authentication authentication) {
         log.info("Profile request received for user: {}", authentication.getName());
 
         UserDto user = userService.getUserDtoByEmail(UserUtils.getAuthenticatedUserDto(authentication).getEmail());
         log.debug("User retrieved from service: {}", user);
         List<RoleDto> rolesDtoList = userRoleService.getAllRoles();
-        
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        Page<UserEventResponseDto> eventsPage = this.eventService.getPagedEventsByUserId(user.getId(), pageable);
 
         HttpResponse response = HttpResponse.builder()
                 .timeStamp(LocalDateTime.now().toString())
                 .data(
                 	Map.of(
                 		"user", user,
-                		"roles", rolesDtoList,
-                		"events", eventsPage
+                		"roles", rolesDtoList
                 	)
                 )
                 .message("Profile retrieved successfully")
@@ -211,9 +203,7 @@ public class UserController {
      */
     @PatchMapping("/update")
     public ResponseEntity<HttpResponse> updateUser(
-            @RequestBody @Valid UpdateFormDto user,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestBody @Valid UpdateFormDto user
     ) {
         log.info("Received request to update user with ID: {}", user.getId());
         try {
@@ -221,17 +211,13 @@ public class UserController {
         	this.eventPublisher.publishEvent(new NewUserEvent(updatedUser.getEmail(), EventType.PROFILE_UPDATE));
 
             log.debug("User updated successfully: {}", updatedUser);
-            
-            Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-            Page<UserEventResponseDto> eventsPage = this.eventService.getPagedEventsByUserId(user.getId(), pageable);
 
             HttpResponse response = HttpResponse.builder()
                     .timeStamp(LocalDateTime.now().toString())
                     .data(
                     		Map.of(
                     				"user", updatedUser,
-                    				"roles", userRoleService.getAllRoles(),
-                            		"events", eventsPage
+                    				"roles", userRoleService.getAllRoles()
                     		)
                     		
                     )
@@ -436,25 +422,19 @@ public class UserController {
 	@PatchMapping("/update/password")
 	public ResponseEntity<HttpResponse> updatePassoword(
 			Authentication authentication,
-			@RequestBody @Valid UpdatePasswordFormDto updatePasswordFormDto,
-			@RequestParam(defaultValue = "0") int page,
-	        @RequestParam(defaultValue = "10") int size
+			@RequestBody @Valid UpdatePasswordFormDto updatePasswordFormDto
 	) {
         UserDto userDto = UserUtils.getAuthenticatedUserDto(authentication);
 
         log.debug("Updating password for user ID: {}", userDto.getId());
         this.userService.updatePassword(userDto.getId(), updatePasswordFormDto);
     	this.eventPublisher.publishEvent(new NewUserEvent(userDto.getEmail(), EventType.PASSWORD_UPDATE));
-    	
-    	Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        Page<UserEventResponseDto> eventsPage = this.eventService.getPagedEventsByUserId(userDto.getId(), pageable);
 
         HttpResponse response = HttpResponse.builder()
         		.data(
     	                Map.of(
     	                    "user", userDto,
-    	                    "roles", userRoleService.getAllRoles(),
-                    		"events", eventsPage
+    	                    "roles", userRoleService.getAllRoles()
 
     	                )
 	            )
@@ -492,9 +472,7 @@ public class UserController {
 	@PatchMapping("/update/role/{roleName}")
 	public ResponseEntity<HttpResponse> updateRole(
 	        Authentication authentication,
-	        @PathVariable String roleName,
-	        @RequestParam(defaultValue = "0") int page,
-	        @RequestParam(defaultValue = "10") int size
+	        @PathVariable String roleName
 	) {
 	    UserDto userDto = UserUtils.getAuthenticatedUserDto(authentication);
 	    log.debug("Updating role to {} for user ID: {}", roleName, userDto.getId());
@@ -504,17 +482,12 @@ public class UserController {
 
 	    User updatedUser = this.userService.getUserWithRoleById(userDto.getId());
 	    UserDto updatedUserDto = UserDtoMapper.fromUser(updatedUser);
-	    
-	    Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        Page<UserEventResponseDto> eventsPage = this.eventService.getPagedEventsByUserId(userDto.getId(), pageable);
-
 
 	    HttpResponse response = HttpResponse.builder()
 	            .data(
 	                Map.of(
 	                    "user", updatedUserDto,
-	                    "roles", userRoleService.getAllRoles(),
-                		"events", eventsPage
+	                    "roles", userRoleService.getAllRoles()
 
 	                )
 	            )
@@ -541,10 +514,7 @@ public class UserController {
 	@PatchMapping("/update/settings")
 	public ResponseEntity<HttpResponse> updateAccountSettings(
 	        Authentication authentication, 
-	        @RequestBody @Valid SettingsFormDto form,
-	        @RequestParam(defaultValue = "0") int page,
-	        @RequestParam(defaultValue = "10") int size
-	) {
+	        @RequestBody @Valid SettingsFormDto form) {
 
 	    UserDto userDto = UserUtils.getAuthenticatedUserDto(authentication);
 	    log.info("Updating account settings for user ID: {}", userDto.getId());
@@ -554,15 +524,11 @@ public class UserController {
 
 	    User updatedUser = this.userService.getUserWithRoleById(userDto.getId());
 	    UserDto updatedUserDto = UserDtoMapper.fromUser(updatedUser);
-	    
-	    Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        Page<UserEventResponseDto> eventsPage = this.eventService.getPagedEventsByUserId(userDto.getId(), pageable);
 
 	    HttpResponse response = HttpResponse.builder()
 	            .data(Map.of(
 	                    "user", updatedUserDto,
-	                    "roles", userRoleService.getAllRoles(),
-                		"events", eventsPage
+	                    "roles", userRoleService.getAllRoles()
 
 	            ))
 	            .timeStamp(LocalDateTime.now().toString())
@@ -592,25 +558,17 @@ public class UserController {
 	 * @throws InterruptedException if the execution is interrupted during processing
 	 */
 	@PatchMapping("/togglemfa")
-    public ResponseEntity<HttpResponse> toggleMfa(
-    		Authentication authentication,
-    		@RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-	) throws InterruptedException {
+    public ResponseEntity<HttpResponse> toggleMfa(Authentication authentication) throws InterruptedException {
 	    UserDto userDto = UserUtils.getAuthenticatedUserDto(authentication);
         log.info("Toggling MFA for user ID: {}", userDto.getId());
         UserDto updatedUserDto = userService.toggleMfa(userDto.getEmail());
     	this.eventPublisher.publishEvent(new NewUserEvent(userDto.getEmail(), EventType.MFA_UPDATE));
 
-    	Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        Page<UserEventResponseDto> eventsPage = this.eventService.getPagedEventsByUserId(userDto.getId(), pageable);
-
         HttpResponse response = HttpResponse.builder()
 	            .data(Map.of(
 	                    "user", updatedUserDto,
-	                    "roles", userRoleService.getAllRoles(),
-                		"events", eventsPage
-
+	                    "roles", userRoleService.getAllRoles()
+	                    
 	            ))
 	            .timeStamp(LocalDateTime.now().toString())
 	            .message("User MFA setting toggled successfully, current state: " + updatedUserDto.isUsingMfa())
@@ -638,9 +596,7 @@ public class UserController {
 	@PatchMapping("/update/image")
     public ResponseEntity<HttpResponse> updateProfileImage(
     		Authentication authentication,
-    		@RequestParam ("image") MultipartFile image,
-    		@RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+    		@RequestParam ("image") MultipartFile image
 	) throws InterruptedException {
 		
 	    UserDto userDto = UserUtils.getAuthenticatedUserDto(authentication);
@@ -648,14 +604,10 @@ public class UserController {
         UserDto updatedUserDto = this.userService.updateImage(userDto, image);
     	this.eventPublisher.publishEvent(new NewUserEvent(userDto.getEmail(), EventType.PROFILE_PICTURE_UPDATE));
 
-    	Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        Page<UserEventResponseDto> eventsPage = this.eventService.getPagedEventsByUserId(userDto.getId(), pageable);
-
         HttpResponse response = HttpResponse.builder()
 	            .data(Map.of(
 	                    "user", updatedUserDto,
-	                    "roles", userRoleService.getAllRoles(),
-                		"events", eventsPage
+	                    "roles", userRoleService.getAllRoles()
 
 	            ))
 	            .timeStamp(LocalDateTime.now().toString())
@@ -787,6 +739,52 @@ public class UserController {
         log.info("Returning BAD_REQUEST response for {} {}", method, path);
         return ResponseEntity.badRequest().body(response);
     }
+    
+    /**
+     * Retrieves a paginated list of events associated with the authenticated user.
+     *
+     * <p>This endpoint allows the client to request user-specific events using pagination
+     * parameters. The events are sorted in descending order by their creation timestamp.
+     * The authenticated user's identity is resolved through the provided {@link Authentication}
+     * object.</p>
+     *
+     * @param authentication the authentication object containing the currently authenticated user
+     * @param page the page number to retrieve (0-based index); defaults to {@code 0}
+     * @param size the number of records per page; defaults to {@code 10}
+     *
+     * @return a {@link ResponseEntity} containing an {@link HttpResponse} with a paginated list
+     *         of {@link UserEventResponseDto} objects under the {@code "events"} key
+     *
+     * @apiNote The response includes metadata such as total pages, total elements, and flags
+     *          indicating whether the current page is the first or last page.
+     *
+     * @see UserUtils#getAuthenticatedUserDto(Authentication)
+     * @see org.springframework.data.domain.Page
+     * @see UserEventResponseDto
+     */
+
+    @GetMapping("/events")
+    public ResponseEntity<HttpResponse> getUserEvents(
+            Authentication authentication,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        UserDto userDto = UserUtils.getAuthenticatedUserDto(authentication);
+        log.info("Fetching events for user: {}, page: {}, size: {}", userDto.getId(), page, size);
+        
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<UserEventResponseDto> eventsPage = this.eventService.getPagedEventsByUserId(userDto.getId(), pageable);
+
+        HttpResponse response = HttpResponse.builder()
+                .timeStamp(LocalDateTime.now().toString())
+                .data(Map.of("events", eventsPage))
+                .message("Events retrieved successfully")
+                .status(HttpStatus.OK)
+                .statusCode(HttpStatus.OK.value())
+                .build();
+
+        return ResponseEntity.ok().body(response);
+    }
 
 	/**
 	 * Builds a generic URI template for user-related operations.
@@ -916,6 +914,7 @@ public class UserController {
             log.debug("ApiException thrown for user '{}'", email);
             throw new ApiException(e.getMessage());
         }
+
     }
 
 }

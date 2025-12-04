@@ -7,6 +7,7 @@ import { User } from '../interface/user';
 import { Key } from '../enum/key.enum';
 import { UpdatePasswordForm } from '../interface/updatePasswordForm';
 import { profileSettingsForm } from '../interface/profileSettingsForm';
+import { EventsData } from '../interface/events';
 
 @Injectable({
   providedIn: 'root'
@@ -251,6 +252,21 @@ export class UserService {
     return this.http.patch<CustomHttpResponse<Profile>>(
       `${this.server}/user/update/image`,
       formData,
+    ).pipe(
+      tap(console.log),
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Retrieves a paginated list of user events from the server.
+   * @param page - The page number to retrieve (default is 0)
+   * @param size - The number of events per page (default is 10)
+   * @returns An Observable emitting a CustomHttpResponse containing EventsData with paginated events
+   */
+  getUserEvents$(page: number = 0, size: number = 10): Observable<CustomHttpResponse<EventsData>> {
+    return this.http.get<CustomHttpResponse<EventsData>>(
+      `${this.server}/user/events?page=${page}&size=${size}`
     ).pipe(
       tap(console.log),
       catchError(this.handleError)

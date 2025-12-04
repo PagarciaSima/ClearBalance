@@ -424,26 +424,30 @@
                            </tr>
                         </thead>
                         <tbody>
-                           <tr *ngFor="let event of state?.appData?.data?.events">
+                           <tr *ngFor="let event of eventsPage?.content">
                               <td>{{ event.device }}</td>
                               <td>{{ event.ipAddress }}</td>
                               <td>{{ event.createdAt | date: 'MMMM d, y, h:mm a' }}</td>
-                                 <td>
-                                    <span class="badge"
-                                          [ngClass]="(event.type | eventTypeFormat).class">
-                                      <i [class]="(event.type | eventTypeFormat).icon"></i>
-                                      {{ (event.type | eventTypeFormat).text }}
-                                    </span>
-                                 </td>
+                              <td>
+                                 <span class="badge" [ngClass]="(event.type | eventTypeFormat).class">
+                                 <i [class]="(event.type | eventTypeFormat).icon"></i>
+                                 {{ (event.type | eventTypeFormat).text }}
+                                 </span>
+                              </td>
                               <td>{{ event.description }}</td>
                               <td>
                                  <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="tooltip"
-                                    data-bs-placement="top" title="Report suspicious activity">Report</button>
+                                 data-bs-placement="top" title="Report suspicious activity">Report</button>
                               </td>
                            </tr>
                         </tbody>
                      </table>
                   </div>
+                  <app-pagination
+                     [currentPage]="(eventsPage?.number ?? 0) + 1"
+                     [totalPages]="eventsPage?.totalPages ?? 1"
+                     (pageChange)="onPageChange($event - 1)">
+                  </app-pagination>
                </div>
             </div>
          </div>

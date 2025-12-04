@@ -1,4 +1,4 @@
-<nav *ngIf="totalPages > 1">
+<nav *ngIf="totalPages > 1" class="mt-3 mb-3">
   <ul class="pagination justify-content-center">
     <li class="page-item" [class.disabled]="currentPage === 1">
       <button class="page-link" (click)="goToFirst()">Primera</button>
