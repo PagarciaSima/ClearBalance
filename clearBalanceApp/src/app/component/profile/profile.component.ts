@@ -1,5 +1,8 @@
+/**
+ * Handles closing the report modal. Used by the modular report modal component.
+ */
 import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
-import { NgForm } from '@angular/forms';
+import { FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
 import { NavigationStart, Router } from '@angular/router';
 import { BehaviorSubject, Observable, of, Subscription } from 'rxjs';
 import { catchError, map, startWith } from 'rxjs/operators';
@@ -9,6 +12,8 @@ import { CustomHttpResponse } from 'src/app/interface/customhttpresponse';
 import { PagedEvents } from 'src/app/interface/events';
 import { Profile } from 'src/app/interface/profile';
 import { State } from 'src/app/interface/state';
+import { UserEventReportDetailDto } from 'src/app/interface/userEventReportResponse';
+import { EventService } from 'src/app/service/event.service';
 import { NotificationService } from 'src/app/service/notification.service';
 import { TooltipService } from 'src/app/service/tooltip.service';
 import { UserService } from 'src/app/service/user.service';
@@ -24,29 +29,41 @@ declare var bootstrap: any;
   ]
 })
 export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
-
+  // ======= PUBLIC PROPERTIES =======
+  selectedReportDetail: UserEventReportDetailDto | null = null;
   profileState$!: Observable<State<CustomHttpResponse<Profile>>>;
-  private dataSubject = new BehaviorSubject<CustomHttpResponse<Profile> | null>(null);
-  private isLoadingSubject = new BehaviorSubject<boolean>(false);
-  private routerSubscription?: Subscription;
-  isLoading$: Observable<boolean> = this.isLoadingSubject.asObservable();
-  showCurrentPassword: boolean = false;
-  showNewPassword: boolean = false;
-  showConfirmPassword: boolean = false;
+  isLoading$!: Observable<boolean>;
+  showLogs$!: Observable<boolean>;
+  showCurrentPassword = false;
+  showNewPassword = false;
+  showConfirmPassword = false;
   readonly DataState = DataState;
-  imageTimestamp: number = Date.now();
-  
+  imageTimestamp = Date.now();
   eventsPage?: PagedEvents;
-  currentPage: number = 0;
-  eventsPageSize: number = 10;
+  currentPage = 0;
+  eventsPageSize = 10;
+  reportForm!: FormGroup;
+  reportUpdateId: number | null = null;
+
+  // ======= PRIVATE PROPERTIES =======
+  private dataSubject: BehaviorSubject<CustomHttpResponse<Profile> | null>;
+  private isLoadingSubject: BehaviorSubject<boolean>;
+  private showLogsSubject: BehaviorSubject<boolean>;
+  private routerSubscription?: Subscription;
 
   constructor(
     private tooltipService: TooltipService,
     private router: Router,
     private userService: UserService,
-    private notificationService: NotificationService
+    private eventService: EventService,
+    private notificationService: NotificationService,
+    private fb: FormBuilder
   ) {
-    // Subscribe to router events to clean tooltips before navigation
+    this.dataSubject = new BehaviorSubject<CustomHttpResponse<Profile> | null>(null);
+    this.isLoadingSubject = new BehaviorSubject<boolean>(false);
+    this.showLogsSubject = new BehaviorSubject<boolean>(true);
+    this.isLoading$ = this.isLoadingSubject.asObservable();
+    this.showLogs$ = this.showLogsSubject.asObservable();
     this.routerSubscription = this.router.events.subscribe(event => {
       if (event instanceof NavigationStart) {
         this.forceCleanAllTooltips();
@@ -54,9 +71,21 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
     });
   }
 
+  // ======= ANGULAR LIFECYCLE HOOKS =======
+
+  /**
+   * Initializes the component by loading profile data and user events.
+   * Also sets up the report form with validation.
+   */
   ngOnInit(): void {
     this.loadProfileData();
     this.loadEvents();
+    this.reportForm = this.fb.group({
+      userEventId: [''],
+      reason: ['', [Validators.required, Validators.minLength(3)]],
+      comment: ['', [Validators.maxLength(500)]],
+      status: ['', Validators.required]
+    });
   }
 
   /**
@@ -72,7 +101,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
    * @param eventsPageSize - The page number to load (default is 0)
    */
   loadEvents(page: number = 0): void {
-    this.userService.getUserEvents$(page, this.eventsPageSize).subscribe(response => {
+    this.eventService.getUserEvents$(page, this.eventsPageSize).subscribe(response => {
       this.eventsPage = response?.data?.events;
       this.currentPage = this.eventsPage?.number || 0;
     });
@@ -87,16 +116,16 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
     this.routerSubscription?.unsubscribe();
   }
 
- /**
- * Initializes tooltips after the view has been fully initialized.
- * Only initializes tooltips on non-interactive elements.
- */
+  /**
+  * Initializes tooltips after the view has been fully initialized.
+  * Only initializes tooltips on non-interactive elements.
+  */
   ngAfterViewInit(): void {
     // Small delay to ensure DOM is ready
     setTimeout(() => {
       // Initialize regular tooltips (non-pill buttons)
       this.tooltipService.initialize();
-      
+
       // Add special handling for breadcrumb links to force hide tooltips
       this.addBreadcrumbTooltipHandlers();
     }, 150);
@@ -111,7 +140,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
     document.querySelectorAll('.tooltip').forEach(tooltip => {
       tooltip.remove();
     });
-    
+
     // Dispose all tooltip instances (only on tooltip elements, not pills)
     document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(element => {
       const tooltip = bootstrap.Tooltip.getInstance(element);
@@ -213,23 +242,23 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
    */
   updatePassword(passwordForm: NgForm): void {
     this.isLoadingSubject.next(true);
-    if (passwordForm.value.newPassword === passwordForm.value.confirmNewPassword) { 
+    if (passwordForm.value.newPassword === passwordForm.value.confirmNewPassword) {
       this.profileState$ = this.userService.updatePassword$(passwordForm.value)
-      .pipe(
-        map(response => {
-          console.log(response);
-          passwordForm.reset();
-          this.isLoadingSubject.next(false);
-          this.loadEvents(this.currentPage);
-          return { dataState: DataState.LOADED, appData: this.dataSubject.value === null ? undefined : this.dataSubject.value };
-        }),
-        startWith({ dataState: DataState.LOADED, appData: this.dataSubject.value === null ? undefined : this.dataSubject.value }),
-        catchError((error: string) => {
-          console.error('Error in updatePassword:', error);
-          this.isLoadingSubject.next(false);
-          return of({ dataState: DataState.LOADED, appData: this.dataSubject.value === null ? undefined : this.dataSubject.value, error });
-        })
-      );
+        .pipe(
+          map(response => {
+            console.log(response);
+            passwordForm.reset();
+            this.isLoadingSubject.next(false);
+            this.loadEvents(this.currentPage);
+            return { dataState: DataState.LOADED, appData: this.dataSubject.value === null ? undefined : this.dataSubject.value };
+          }),
+          startWith({ dataState: DataState.LOADED, appData: this.dataSubject.value === null ? undefined : this.dataSubject.value }),
+          catchError((error: string) => {
+            console.error('Error in updatePassword:', error);
+            this.isLoadingSubject.next(false);
+            return of({ dataState: DataState.LOADED, appData: this.dataSubject.value === null ? undefined : this.dataSubject.value, error });
+          })
+        );
     } else {
       passwordForm.reset();
       this.isLoadingSubject.next(false);
@@ -332,7 +361,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
    * - Handles errors by logging them and maintaining the previous profile data
    */
   updateProfileImage(image: File) {
-    if(image) {
+    if (image) {
       this.isLoadingSubject.next(true);
       this.profileState$ = this.userService.updateImage$(this.getFormData(image))
         .pipe(
@@ -340,7 +369,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
             console.log('updateProfileImage:', response);
             this.dataSubject.next({ ...response, data: response.data });
             this.isLoadingSubject.next(false);
-            this.imageTimestamp = Date.now(); 
+            this.imageTimestamp = Date.now();
             this.loadEvents(this.currentPage);
             return { dataState: DataState.LOADED, appData: this.dataSubject.value };
 
@@ -350,8 +379,16 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
             this.isLoadingSubject.next(false);
             return of({ dataState: DataState.LOADED, appData: this.dataSubject.value, error })
           })
-      );
+        );
     }
+  }
+
+  /**
+   * Toggles the visibility of logs in the profile component.
+   */
+  toggleLogs(): void {
+    this.showLogsSubject.next(!this.showLogsSubject.value);
+    setTimeout(() => this.tooltipService.initialize(), 100);
   }
 
   /**
@@ -394,4 +431,118 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
     }
   }
 
+  /**
+   * Opens the report event modal and initializes the form with the given event ID.
+   * @param eventId - The ID of the event to be reported
+   */
+  openReportModal(eventId: number): void {
+    this.reportUpdateId = null;
+    this.reportForm.reset();
+    this.reportForm.patchValue({ userEventId: eventId });
+    const modal = new bootstrap.Modal(document.getElementById('reportEventModal'));
+    modal.show();
+  }
+
+  updateReport(eventId: number): void {
+    // Load current report data to edit
+    this.eventService.getEventReport$(eventId).subscribe({
+      next: (response) => {
+        if (response.data && response.data.report) {
+          this.reportUpdateId = response.data.report.id;
+          this.reportForm.patchValue({
+            userEventId: response.data.report.userEventId,
+            reason: response.data.report.reason,
+            comment: response.data.report.comment,
+            status: response.data.report.status
+          });
+          const modal = new bootstrap.Modal(document.getElementById('reportEventModal'));
+          modal.show();
+        }
+      },
+      error: () => {
+        this.notificationService.showError('No se pudo cargar el reporte para editar.', 'Error');
+      }
+    });
+  }
+
+  /**
+   * Submits the report form to report a suspicious event.
+   * Closes the modal and resets the form on success.
+   * Provides error feedback on failure.
+   */
+  submitReport(): void {
+    if (this.reportForm.valid) {
+      if (this.reportUpdateId) {
+        // Update existing report
+        this.eventService.updateReport$(this.reportUpdateId, this.reportForm.value).subscribe({
+          next: () => {
+            const modalInstance = bootstrap.Modal.getInstance(document.getElementById('reportEventModal'));
+            if (modalInstance) modalInstance.hide();
+            this.reportForm.reset();
+            this.reportUpdateId = null;
+            this.loadEvents(this.currentPage);
+          },
+          error: (err) => {
+            this.notificationService.showError('No se pudo actualizar el reporte.', 'Error');
+          }
+        });
+      } else {
+        // Create new report
+        this.eventService.reportEvent$(this.reportForm.value).subscribe({
+          next: () => {
+            const modalInstance = bootstrap.Modal.getInstance(document.getElementById('reportEventModal'));
+            if (modalInstance) modalInstance.hide();
+            this.reportForm.reset();
+            this.loadEvents(this.currentPage);
+          },
+          error: (err) => {
+            this.notificationService.showError('No se pudo crear el reporte.', 'Error');
+          }
+        });
+      }
+    }
+  }
+
+  /**
+  * Loads and displays the detail of a report for a given event.
+  */
+  viewReportDetail(eventId: number): void {
+    this.selectedReportDetail = null;
+    this.eventService.getEventReport$(eventId).subscribe({
+      next: (response: CustomHttpResponse<UserEventReportDetailDto>) => {
+        if (response.data) {
+          this.selectedReportDetail = response.data;
+        } else {
+          this.selectedReportDetail = { hasReport: false, report: null };
+        }
+        const modal = new bootstrap.Modal(document.getElementById('reportDetailModal'));
+        modal.show();
+      },
+      error: (err) => {
+        this.notificationService.showError('No se pudo cargar el detalle del reporte.', 'Error');
+      }
+    });
+  }
+
+  /**
+   * Handles closing the report modal. Used by the modular report modal component.
+   */
+  onCloseReportModal(): void {
+    const modalInstance = bootstrap?.Modal?.getInstance(document.getElementById('reportEventModal'));
+    if (modalInstance) {
+      modalInstance.hide();
+    }
+    this.reportForm.reset();
+  }
+
+  /**
+   * Handles closing the report detail modal. Used by the modular report detail modal component.
+   */
+  onCloseReportDetailModal(): void {
+    const modalInstance = bootstrap?.Modal?.getInstance(document.getElementById('reportDetailModal'));
+    if (modalInstance) {
+      modalInstance.hide();
+    }
+    this.selectedReportDetail = null;
+  }
 }

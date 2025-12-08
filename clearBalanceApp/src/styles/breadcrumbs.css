@@ -1,0 +1,46 @@
+/* ================================================
+   Breadcrumb Styles
+   ================================================ */
+.breadcrumb {
+  background: transparent;
+  padding: 0.5rem 0;
+  margin-bottom: 0;
+  display: flex;
+  flex-wrap: wrap;
+  list-style: none;
+}
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.8);
+}
+.breadcrumb-item + .breadcrumb-item::before {
+  content: "/" !important;
+  padding: 0 0.5rem !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-weight: 600 !important;
+}
+.breadcrumb-item a {
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+}
+.breadcrumb-item a:hover {
+  color: white;
+  text-shadow: 0 0 10px rgba(138, 94, 180, 0.8);
+}
+.breadcrumb-item a i {
+  color: rgba(138, 94, 180, 0.8);
+  transition: all 0.3s ease;
+}
+.breadcrumb-item a:hover i {
+  color: #d32985;
+  filter: drop-shadow(0 0 8px rgba(211, 41, 133, 0.8));
+}
+.breadcrumb-item.active {
+  color: white;
+  font-weight: 600;
+}

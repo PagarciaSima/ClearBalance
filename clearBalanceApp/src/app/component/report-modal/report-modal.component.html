@@ -1,0 +1,52 @@
+<div class="modal fade galactic-modal" id="reportEventModal" tabindex="-1" aria-labelledby="reportEventModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form [formGroup]="reportForm" (ngSubmit)="submitReport.emit()">
+      <div class="modal-content galactic-modal-content">
+        <div class="modal-header galactic-modal-header">
+          <h5 class="modal-title galactic-modal-title" id="reportEventModalLabel">
+            <i class="bi bi-flag-fill me-2"></i>Report Event
+          </h5>
+          <button type="button" class="btn-close galactic-btn-close" data-bs-dismiss="modal" aria-label="Close" (click)="closeModal.emit()"></button>
+        </div>
+        <div class="modal-body galactic-modal-body">
+          <input type="hidden" formControlName="userEventId">
+          <div class="mb-3">
+            <label for="reason" class="form-label required"><i class="bi bi-exclamation-circle me-2"></i>Reason</label>
+            <input type="text" class="form-control galactic-input" id="reason" formControlName="reason"
+              [class.is-invalid]="reportForm.get('reason')?.invalid && reportForm.get('reason')?.touched">
+            <div *ngIf="reportForm.get('reason')?.errors?.['required'] && reportForm.get('reason')?.touched" class="text-danger mt-3">
+              Reason is required.
+            </div>
+            <div *ngIf="reportForm.get('reason')?.errors?.['minlength'] && reportForm.get('reason')?.touched" class="text-danger mt-3">
+              Reason must be at least 3 characters.
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="comment" class="form-label"><i class="bi bi-chat-left-text me-2"></i>Comment</label>
+            <textarea class="form-control galactic-input" id="comment" formControlName="comment"></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="status" class="form-label required"><i class="bi bi-hourglass-split me-2"></i>Status</label>
+            <select class="form-control galactic-input" id="status" formControlName="status" required>
+              <option value="" disabled selected>Select status</option>
+              <option value="PENDING">Pending</option>
+              <option value="REVIEWED">Reviewed</option>
+              <option value="REJECTED">Rejected</option>
+            </select>
+            <div *ngIf="reportForm.get('status')?.invalid && reportForm.get('status')?.touched" class="text-danger mt-3">
+              Status is required.
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer galactic-modal-footer">
+          <button type="submit" class="btn btn-primary galactic-btn" [disabled]="reportForm.invalid">
+            <i class="bi bi-send-fill me-2"></i>Submit
+          </button>
+          <button type="button" class="btn galactic-btn galactic-btn-danger" data-bs-dismiss="modal" (click)="closeModal.emit()">
+            <i class="bi bi-x-circle-fill me-2"></i>Cancel
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

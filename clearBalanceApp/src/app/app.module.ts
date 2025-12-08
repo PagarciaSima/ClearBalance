@@ -8,13 +8,15 @@ import { LoginComponent } from './component/login/login.component';
 import { RegisterComponent } from './component/register/register.component';
 import { ResetpasswordComponent } from './component/resetpassword/resetpassword.component';
 import { VerifyComponent } from './component/verify/verify.component';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { UfoComponent } from './component/ufo/ufo.component';
 import { ShootingStarComponent } from './component/shooting-star/shooting-star.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { PageNotFoundComponent } from './component/page-not-found/page-not-found.component';
 import { CustomerComponent } from './component/customer/customer.component';
 import { ProfileComponent } from './component/profile/profile.component';
+import { ReportModalComponent } from './component/report-modal/report-modal.component';
+import { ReportDetailModalComponent } from './component/report-detail-modal/report-detail-modal.component';
 import { HomeComponent } from './component/home/home.component';
 import { CustomersComponent } from './component/customers/customers.component';
 import { NavbarComponent } from './component/navbar/navbar.component';
@@ -46,9 +48,12 @@ import { PaginationComponent } from './component/pagination/pagination.component
     PermissionFormatPipe,
     RoleFormatPipe,
     EventTypeFormatPipe,
-    PaginationComponent
+    PaginationComponent,
+    ReportModalComponent,
+    ReportDetailModalComponent
   ],
   imports: [
+    ReactiveFormsModule,
     AppRoutingModule,
     BrowserModule,
     BrowserAnimationsModule,

@@ -2,9 +2,9 @@ package com.clear.balance.clearBalance.Utils;
 
 import org.springframework.security.core.Authentication;
 
-import com.clear.balance.clearBalance.domain.User;
-import com.clear.balance.clearBalance.domain.UserPrincipal;
-import com.clear.balance.clearBalance.dto.UserDto;
+import com.clear.balance.clearBalance.domain.user.User;
+import com.clear.balance.clearBalance.domain.user.UserPrincipal;
+import com.clear.balance.clearBalance.dto.user.UserDto;
 import com.clear.balance.clearBalance.dtoMapper.UserDtoMapper;
 
 import lombok.extern.slf4j.Slf4j;

@@ -34,16 +34,16 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.clear.balance.clearBalance.Utils.ExceptionUtils;
 import com.clear.balance.clearBalance.Utils.UserUtils;
-import com.clear.balance.clearBalance.domain.HttpResponse;
-import com.clear.balance.clearBalance.domain.User;
-import com.clear.balance.clearBalance.domain.UserPrincipal;
-import com.clear.balance.clearBalance.dto.LoginRequestDto;
-import com.clear.balance.clearBalance.dto.RoleDto;
-import com.clear.balance.clearBalance.dto.SettingsFormDto;
-import com.clear.balance.clearBalance.dto.UpdateFormDto;
-import com.clear.balance.clearBalance.dto.UpdatePasswordFormDto;
-import com.clear.balance.clearBalance.dto.UserDto;
-import com.clear.balance.clearBalance.dto.UserEventResponseDto;
+import com.clear.balance.clearBalance.domain.response.HttpResponse;
+import com.clear.balance.clearBalance.domain.user.User;
+import com.clear.balance.clearBalance.domain.user.UserPrincipal;
+import com.clear.balance.clearBalance.dto.login.LoginRequestDto;
+import com.clear.balance.clearBalance.dto.profile.SettingsFormDto;
+import com.clear.balance.clearBalance.dto.profile.UpdatePasswordFormDto;
+import com.clear.balance.clearBalance.dto.profile.UpdateProfileFormDto;
+import com.clear.balance.clearBalance.dto.profile.events.UserEventResponseDto;
+import com.clear.balance.clearBalance.dto.role.RoleDto;
+import com.clear.balance.clearBalance.dto.user.UserDto;
 import com.clear.balance.clearBalance.dtoMapper.UserDtoMapper;
 import com.clear.balance.clearBalance.enumeration.EventType;
 import com.clear.balance.clearBalance.event.NewUserEvent;
@@ -185,7 +185,7 @@ public class UserController {
     /**
      * Updates the details of an existing user.
      *
-     * <p>This endpoint receives a {@link UpdateFormDto} containing the user fields
+     * <p>This endpoint receives a {@link UpdateProfileFormDto} containing the user fields
      * to be updated. Validation is applied to ensure all required fields meet the
      * specified constraints. If the update is successful, a {@link HttpResponse}
      * object containing the updated user data is returned.</p>
@@ -197,13 +197,13 @@ public class UserController {
      * @return a {@link ResponseEntity} containing a {@link HttpResponse} with the updated user
      * @throws RuntimeException if an unexpected error occurs during the update process
      *
-     * @see UpdateFormDto
+     * @see UpdateProfileFormDto
      * @see UserDto
-     * @see UserService#updateUserDetails(UpdateFormDto)
+     * @see UserService#updateUserDetails(UpdateProfileFormDto)
      */
     @PatchMapping("/update")
     public ResponseEntity<HttpResponse> updateUser(
-            @RequestBody @Valid UpdateFormDto user
+            @RequestBody @Valid UpdateProfileFormDto user
     ) {
         log.info("Received request to update user with ID: {}", user.getId());
         try {

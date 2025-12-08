@@ -12,7 +12,7 @@ import org.springframework.security.authentication.LockedException;
 
 import com.auth0.jwt.exceptions.InvalidClaimException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
-import com.clear.balance.clearBalance.domain.HttpResponse;
+import com.clear.balance.clearBalance.domain.response.HttpResponse;
 import com.clear.balance.clearBalance.exeception.ApiException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 

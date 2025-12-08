@@ -10,6 +10,11 @@
   pointer-events: none;
 }
 
+.no-logs-margin {
+  /* Solo cuando los logs están ocultos, el card ocupa menos espacio */
+  min-height: 100vh;
+}
+
 .profile-section * {
   pointer-events: auto;
 }

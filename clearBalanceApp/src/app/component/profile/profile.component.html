@@ -1,7 +1,7 @@
 <!-- ========================= PROFILE COMPONENT TEMPLATE ========================= -->
 <ng-container *ngIf="(profileState$ | async) as state">
    <section class="profile-section">
-      <div class="container">
+      <div class="container" [ngClass]="{'no-logs-margin': !(showLogs$ | async)}">
 
          <!-- ========================= BREADCRUMB ========================= -->
          <div class="card" [@slideBlur]>
@@ -20,12 +20,13 @@
          </div>
 
          <!-- ========================= PROFILE LAYOUT (SIDEBAR + TAB CONTENT) ========================= -->
-         <div class="card profile-card" [@slideBlur]>
+         <div class="card profile-card" [@slideBlur] [ngClass]="{'no-logs-margin': !(showLogs$ | async)}">
             <div class="card-body p-0">
                <div class="d-block d-sm-flex">
 
                   <!-- ========================= SIDEBAR ========================= -->
-                  <aside class="profile-sidebar" aria-label="Profile Sidebar">
+                  <aside class="profile-sidebar" [ngClass]="{'no-logs-margin': !(showLogs$ | async)}"
+                     aria-label="Profile Sidebar">
                      <div class="p-4">
                         <div class="profile-avatar-wrapper">
                            <div class="profile-avatar-container">
@@ -392,7 +393,8 @@
                                     </div>
                                     <div class="col-auto">
                                        <div class="form-switch">
-                                          <input type="checkbox" class="form-check-input" id="activityLog">
+                                          <input type="checkbox" (change)="toggleLogs()" class="form-check-input"
+                                             id="activityLog">
                                        </div>
                                     </div>
                                  </div>
@@ -406,51 +408,69 @@
          </div>
 
          <!-- ========================= ACCOUNT ACTIVITIES TABLE ========================= -->
-         <div class="row">
-            <div class="col-xl-12 mt-4">
-               <div class="card" [@slideBlur]>
-                  <div class="card-body">
-                     <h5 class="card-title"><i class="bi bi-clock-history me-2"></i>Account Activities</h5>
-                     <h6 class="card-subtitle mb-3 text-white-50 mt-3">Latest activities on your account.</h6>
-                     <table class="table table-hover">
-                        <thead>
-                           <tr>
-                              <th scope="col"><i class="bi bi-laptop me-2"></i> Device</th>
-                              <th scope="col"><i class="bi bi-globe me-2"></i> IP Address</th>
-                              <th scope="col"><i class="bi bi-calendar-event me-2"></i> Date</th>
-                              <th scope="col"><i class="bi bi-tag me-2"></i> Type</th>
-                              <th scope="col"><i class="bi bi-card-text me-2"></i> Description</th>
-                              <th scope="col"><i class="bi bi-exclamation-triangle me-2"></i> Action</th>
-                           </tr>
-                        </thead>
-                        <tbody>
-                           <tr *ngFor="let event of eventsPage?.content">
-                              <td>{{ event.device }}</td>
-                              <td>{{ event.ipAddress }}</td>
-                              <td>{{ event.createdAt | date: 'MMMM d, y, h:mm a' }}</td>
-                              <td>
-                                 <span class="badge" [ngClass]="(event.type | eventTypeFormat).class">
-                                 <i [class]="(event.type | eventTypeFormat).icon"></i>
-                                 {{ (event.type | eventTypeFormat).text }}
-                                 </span>
-                              </td>
-                              <td>{{ event.description }}</td>
-                              <td>
-                                 <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="tooltip"
-                                 data-bs-placement="top" title="Report suspicious activity">Report</button>
-                              </td>
-                           </tr>
-                        </tbody>
-                     </table>
+         <ng-container *ngIf="(showLogs$ | async)">
+            <div class="row">
+               <div class="col-xl-12 mt-4">
+                  <div class="card" [@slideBlur]>
+                     <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-clock-history me-2"></i>Account Activities</h5>
+                        <h6 class="card-subtitle mb-3 text-white-50 mt-3">Latest activities on your account.</h6>
+                        <table class="table table-hover">
+                           <thead>
+                              <tr>
+                                 <th scope="col"><i class="bi bi-laptop me-2"></i> Device</th>
+                                 <th scope="col"><i class="bi bi-globe me-2"></i> IP Address</th>
+                                 <th scope="col"><i class="bi bi-calendar-event me-2"></i> Date</th>
+                                 <th scope="col"><i class="bi bi-tag me-2"></i> Type</th>
+                                 <th scope="col"><i class="bi bi-card-text me-2"></i> Description</th>
+                                 <th scope="col"><i class="bi bi-exclamation-triangle me-2"></i> Action</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              <tr *ngFor="let event of eventsPage?.content">
+                                 <td>{{ event.device }}</td>
+                                 <td>{{ event.ipAddress }}</td>
+                                 <td>{{ event.createdAt | date: 'MMMM d, y, h:mm a' }}</td>
+                                 <td>
+                                    <span class="badge" [ngClass]="(event.type | eventTypeFormat).class">
+                                       <i [class]="(event.type | eventTypeFormat).icon"></i>
+                                       {{ (event.type | eventTypeFormat).text }}
+                                    </span>
+                                 </td>
+                                 <td>{{ event.description }}</td>
+                                 <td>
+                                    <ng-container *ngIf="event?.hasReport; else showReportBtn">
+                                       <button type="button" class="btn btn-info btn-sm d-flex me-2 w-100"
+                                          data-bs-toggle="tooltip" data-bs-placement="top" title="View report details"
+                                          (click)="viewReportDetail(event.id)">
+                                          <i class="bi bi-eye-fill me-2"></i><span>View Detail</span>
+                                       </button>
+                                       <button type="button" class="btn btn-warning btn-sm d-flex w-100 mt-2"
+                                          data-bs-toggle="tooltip" data-bs-placement="top" title="Update report"
+                                          (click)="updateReport(event.id)">
+                                          <i class="bi bi-pencil-fill me-2"></i><span class="min-width-max">Update
+                                             Report</span>
+                                       </button>
+                                    </ng-container>
+                                    <ng-template #showReportBtn>
+                                       <button type="button" class="btn btn-primary btn-sm d-flex w-100"
+                                          data-bs-toggle="tooltip" data-bs-placement="top"
+                                          title="Report suspicious activity" (click)="openReportModal(event.id)">
+                                          <i class="bi bi-flag-fill me-2"></i><span>Report</span>
+                                       </button>
+                                    </ng-template>
+                                 </td>
+                              </tr>
+                           </tbody>
+                        </table>
+                     </div>
+                     <app-pagination [currentPage]="(eventsPage?.number ?? 0) + 1"
+                        [totalPages]="eventsPage?.totalPages ?? 1" (pageChange)="onPageChange($event - 1)">
+                     </app-pagination>
                   </div>
-                  <app-pagination
-                     [currentPage]="(eventsPage?.number ?? 0) + 1"
-                     [totalPages]="eventsPage?.totalPages ?? 1"
-                     (pageChange)="onPageChange($event - 1)">
-                  </app-pagination>
                </div>
             </div>
-         </div>
+         </ng-container>
       </div>
    </section>
 
@@ -460,3 +480,17 @@
          (change)="onAvatarChange($event)" />
    </form>
    <!-- ========================= END PROFILE COMPONENT TEMPLATE ========================= -->
+
+</ng-container>
+
+<!-- ========================= MODALS ========================= -->
+
+
+<!-- Report Event Modal -->
+<app-report-modal [reportForm]="reportForm" [loading]="(isLoading$ | async) ?? false" (submitReport)="submitReport()"
+   (closeModal)="onCloseReportModal()">
+</app-report-modal>
+
+<!-- Report Detail Modal -->
+<app-report-detail-modal [selectedReportDetail]="selectedReportDetail" (closeModal)="onCloseReportDetailModal()">
+</app-report-detail-modal>

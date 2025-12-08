@@ -22,6 +22,8 @@ export interface Events {
   device: string;
   ipAddress: string;
   createdAt: Date;
+  hasReport?: boolean;
+  reportStatus?: string;
 }
 
 export interface PagedEvents {

@@ -1,0 +1,47 @@
+/* ================================================
+   Form Control Styles
+   ================================================ */
+.card .form-control {
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 0.75rem 1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+}
+.card .form-control:focus {
+    border-color: white;
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.3);
+    background: white;
+}
+.card .form-control::placeholder {
+    color: #666;
+}
+.card select.form-control {
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+    cursor: pointer;
+}
+.card select.form-control option {
+    background: #2d1b4e !important;
+    color: white !important;
+    padding: 0.5rem;
+}
+.card select.form-control option:hover {
+    background: #5d42e6 !important;
+    color: white !important;
+}
+.card select.form-control option:checked {
+    background: #8e34e8 !important;
+    color: white !important;
+    font-weight: 600;
+}
+input:disabled,
+textarea:disabled,
+select:disabled,
+button:disabled,
+.btn:disabled,
+.form-control:disabled {
+    cursor: not-allowed !important;
+    opacity: 0.6 !important;
+}

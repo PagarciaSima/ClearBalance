@@ -4,9 +4,9 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.clear.balance.clearBalance.domain.Role;
-import com.clear.balance.clearBalance.domain.UserRole;
-import com.clear.balance.clearBalance.dto.RoleDto;
+import com.clear.balance.clearBalance.domain.role.Role;
+import com.clear.balance.clearBalance.domain.role.UserRole;
+import com.clear.balance.clearBalance.dto.role.RoleDto;
 import com.clear.balance.clearBalance.exeception.ApiException;
 import com.clear.balance.clearBalance.repository.RoleRepository;
 import com.clear.balance.clearBalance.repository.UserRoleRepository;

@@ -1,0 +1,44 @@
+/* ================================================
+   Card Styles
+   ================================================ */
+.card {
+    position: relative;
+    z-index: 10;
+    padding-left: 15px;
+    padding-right: 15px;
+    border: solid 2px rgba(138, 94, 180, 0.6) !important;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background: linear-gradient(135deg, #220d46 0%, #3d185e 50%, #235eac 100%);
+    pointer-events: auto;
+}
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(138, 94, 180, 0.5);
+}
+.card-body {
+    padding: 2rem;
+}
+.card h2, 
+.card h5,
+.card .card-title {
+    font-weight: 600;
+    letter-spacing: -0.5px;
+    color: white;
+}
+.card label,
+.card p {
+    color: white;
+}
+.card i {
+    color: white;
+}
+.card a {
+    color: white !important;
+    font-weight: 500;
+}
+.card a:hover {
+    color: rgba(255, 255, 255, 0.8) !important;
+}

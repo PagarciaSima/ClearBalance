@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import Swal from 'sweetalert2';
+import Swal from 'sweetalert2/dist/sweetalert2.all.js';
 
 @Injectable({ providedIn: 'root' })
 export class NotificationService {
@@ -64,6 +64,6 @@ export class NotificationService {
       showCancelButton: true,
       confirmButtonText: 'Sí',
       cancelButtonText: 'No'
-    }).then(result => result.isConfirmed);
+    }).then((result: any) => result.isConfirmed);
   }
 }

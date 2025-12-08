@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.clear.balance.clearBalance.domain.Role;
+import com.clear.balance.clearBalance.domain.role.Role;
 
 public interface RoleRepository extends JpaRepository<Role, Long>{
 

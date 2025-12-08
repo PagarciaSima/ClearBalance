@@ -4,10 +4,10 @@ import java.util.Collection;
 
 import org.springframework.web.multipart.MultipartFile;
 
-import com.clear.balance.clearBalance.domain.User;
-import com.clear.balance.clearBalance.dto.UpdateFormDto;
-import com.clear.balance.clearBalance.dto.UpdatePasswordFormDto;
-import com.clear.balance.clearBalance.dto.UserDto;
+import com.clear.balance.clearBalance.domain.user.User;
+import com.clear.balance.clearBalance.dto.profile.UpdatePasswordFormDto;
+import com.clear.balance.clearBalance.dto.profile.UpdateProfileFormDto;
+import com.clear.balance.clearBalance.dto.user.UserDto;
 
 import jakarta.validation.Valid;
 
@@ -27,7 +27,7 @@ public interface UserService {
 	UserDto verifyPassword(String key);
 	UserDto renewPassword(String key, String password, String confirmPassword);
 	UserDto verifyAccount(String key);
-	UserDto updateUserDetails(@Valid UpdateFormDto user);
+	UserDto updateUserDetails(@Valid UpdateProfileFormDto user);
 	void updatePassword(Long id, @Valid UpdatePasswordFormDto updatePasswordFormDto);
 	User getUserWithRoleById(Long userId);
 	void updateAccountSettings(Long id, Boolean enabled, Boolean notLocked);

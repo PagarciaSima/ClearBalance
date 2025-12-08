@@ -1,0 +1,66 @@
+<div class="modal fade galactic-modal" id="reportDetailModal" tabindex="-1" aria-labelledby="reportDetailModalLabel"
+   aria-hidden="true">
+   <div class="modal-dialog">
+      <div class="modal-content galactic-modal-content">
+         <div class="modal-header galactic-modal-header">
+            <h5 class="modal-title galactic-modal-title" id="reportDetailModalLabel">
+               <i class="bi bi-eye-fill me-2"></i>Report Detail
+            </h5>
+            <button type="button" class="btn-close galactic-btn-close" data-bs-dismiss="modal"
+               aria-label="Close" (click)="onClose()"></button>
+         </div>
+         <div class="modal-body galactic-modal-body">
+            <div *ngIf="selectedReportDetail?.hasReport">
+               <div class="mb-3">
+                  <label class="form-label"><i class="bi bi-exclamation-circle me-2"></i>Reason</label>
+                  <div class="form-control galactic-input" readonly>{{ selectedReportDetail?.report?.reason }}</div>
+               </div>
+               <div class="mb-3">
+                  <label class="form-label"><i class="bi bi-chat-left-text me-2"></i>Comment</label>
+                  <div class="form-control galactic-input" readonly>{{ selectedReportDetail?.report?.comment }}</div>
+               </div>
+               <div class="mb-3">
+                  <label class="form-label"><i class="bi bi-hourglass-split me-2"></i>Status</label>
+                  <div class="form-control galactic-input" readonly>{{ selectedReportDetail?.report?.status }}</div>
+               </div>
+               <div class="mb-3">
+                  <label class="form-label"><i class="bi bi-calendar-event me-2"></i>Reported At</label>
+                  <div class="form-control galactic-input" readonly>{{ selectedReportDetail?.report?.createdAt | date:
+                     'MMMM d, y, h:mm a' }}</div>
+               </div>
+               <hr>
+               <div class="mb-3">
+                  <label class="form-label"><i class="bi bi-laptop me-2"></i>Device</label>
+                  <div class="form-control galactic-input" readonly>{{ selectedReportDetail?.report?.device }}</div>
+               </div>
+               <div class="mb-3">
+                  <label class="form-label"><i class="bi bi-globe me-2"></i>IP Address</label>
+                  <div class="form-control galactic-input" readonly>{{ selectedReportDetail?.report?.ipAddress }}</div>
+               </div>
+               <div class="mb-3">
+                  <label class="form-label"><i class="bi bi-tag me-2"></i>Event Type</label>
+                  <div class="form-control galactic-input" readonly>{{ selectedReportDetail?.report?.eventType }}</div>
+               </div>
+               <div class="mb-3">
+                  <label class="form-label"><i class="bi bi-card-text me-2"></i>Event Description</label>
+                  <div class="form-control galactic-input" readonly>{{ selectedReportDetail?.report?.eventDescription }}
+                  </div>
+               </div>
+               <div class="mb-3">
+                  <label class="form-label"><i class="bi bi-calendar-event me-2"></i>Event Date</label>
+                  <div class="form-control galactic-input" readonly>{{ selectedReportDetail?.report?.eventCreatedAt |
+                     date: 'MMMM d, y, h:mm a' }}</div>
+               </div>
+            </div>
+            <div *ngIf="selectedReportDetail && !selectedReportDetail.hasReport" class="text-center text-muted">
+               No report data available.
+            </div>
+         </div>
+         <div class="modal-footer galactic-modal-footer">
+            <button type="button" class="btn galactic-btn galactic-btn-danger" data-bs-dismiss="modal" (click)="onClose()">
+               <i class="bi bi-x-circle-fill me-2"></i>Close
+            </button>
+         </div>
+      </div>
+   </div>
+</div>

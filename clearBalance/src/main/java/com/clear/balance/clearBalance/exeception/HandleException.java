@@ -25,7 +25,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
-import com.clear.balance.clearBalance.domain.HttpResponse;
+import com.clear.balance.clearBalance.domain.response.HttpResponse;
 
 import lombok.extern.slf4j.Slf4j;
 

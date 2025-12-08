@@ -1,0 +1,23 @@
+/* CSS Custom Properties (Variables) */
+:root {
+    --color-success: #96f380;
+    --color-link: #0D6EFD;
+    /* Space Theme Color Gradients */
+    --primary-gradient-start: #5d42e6;
+    --primary-gradient-mid: #8e34e8;
+    --primary-gradient-end: #d32985;
+    --warning-gradient-start: #ff9500;
+    --warning-gradient-mid: #ffb347;
+    --warning-gradient-end: #ffd700;
+    --danger-gradient-start: #e63946;
+    --danger-gradient-mid: #f72585;
+    --danger-gradient-end: #b5179e;
+    --success-gradient-start: #00d084;
+    --success-gradient-mid: #00e89f;
+    --success-gradient-end: #7affc5;
+    --info-gradient-start: #1e90ff;
+    --info-gradient-mid: #4da6ff;
+    --info-gradient-end: #87ceeb;
+    /* Typography */
+    --font-primary: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+}

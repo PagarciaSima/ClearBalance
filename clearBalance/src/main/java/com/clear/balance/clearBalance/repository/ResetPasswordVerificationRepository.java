@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.clear.balance.clearBalance.domain.ResetPasswordVerification;
+import com.clear.balance.clearBalance.domain.auth.ResetPasswordVerification;
 
 @Repository
 public interface ResetPasswordVerificationRepository extends JpaRepository<ResetPasswordVerification, Long> {

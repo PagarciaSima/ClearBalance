@@ -22,15 +22,15 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.clear.balance.clearBalance.Utils.SmsUtils;
-import com.clear.balance.clearBalance.domain.AccountVerification;
-import com.clear.balance.clearBalance.domain.ResetPasswordVerification;
-import com.clear.balance.clearBalance.domain.Role;
-import com.clear.balance.clearBalance.domain.TwoFactorVerification;
-import com.clear.balance.clearBalance.domain.User;
-import com.clear.balance.clearBalance.domain.UserRole;
-import com.clear.balance.clearBalance.dto.UpdateFormDto;
-import com.clear.balance.clearBalance.dto.UpdatePasswordFormDto;
-import com.clear.balance.clearBalance.dto.UserDto;
+import com.clear.balance.clearBalance.domain.auth.AccountVerification;
+import com.clear.balance.clearBalance.domain.auth.ResetPasswordVerification;
+import com.clear.balance.clearBalance.domain.auth.TwoFactorVerification;
+import com.clear.balance.clearBalance.domain.role.Role;
+import com.clear.balance.clearBalance.domain.role.UserRole;
+import com.clear.balance.clearBalance.domain.user.User;
+import com.clear.balance.clearBalance.dto.profile.UpdatePasswordFormDto;
+import com.clear.balance.clearBalance.dto.profile.UpdateProfileFormDto;
+import com.clear.balance.clearBalance.dto.user.UserDto;
 import com.clear.balance.clearBalance.dtoMapper.UserDtoMapper;
 import com.clear.balance.clearBalance.enumeration.RoleType;
 import com.clear.balance.clearBalance.enumeration.VerificationType;
@@ -595,13 +595,13 @@ public class UserServiceImpl implements UserService {
 	 * @throws jakarta.validation.ConstraintViolationException if validation of the DTO fails
 	 * @throws InstanceNotFoundException if the user with the given ID does not exist
 	 *
-	 * @see UpdateFormDto
+	 * @see UpdateProfileFormDto
 	 * @see UserDto
 	 * @see UserDtoMapper
 	 */
 	@Override
 	@Transactional
-	public UserDto updateUserDetails(@Valid UpdateFormDto updateFormDto) {
+	public UserDto updateUserDetails(@Valid UpdateProfileFormDto updateFormDto) {
 	    log.info("Updating user with ID {}", updateFormDto.getId());
 
 	    User existingUser = this.getUserById(updateFormDto.getId());

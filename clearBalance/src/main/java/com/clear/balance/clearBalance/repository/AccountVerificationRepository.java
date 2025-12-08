@@ -6,8 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.clear.balance.clearBalance.domain.AccountVerification;
-import com.clear.balance.clearBalance.domain.User;
+import com.clear.balance.clearBalance.domain.auth.AccountVerification;
+import com.clear.balance.clearBalance.domain.user.User;
 
 public interface AccountVerificationRepository extends JpaRepository<AccountVerification, Long> {
     Optional<AccountVerification> findByUrl(String url);

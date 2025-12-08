@@ -1,0 +1,3 @@
+.galactic-modal .modal-content { background: #2a2253; color: #fff; }
+.galactic-modal .modal-header, .galactic-modal .modal-footer { border: none; }
+.galactic-modal .form-control[readonly] { background: #1e1a3a; color: #fff; border: none; }

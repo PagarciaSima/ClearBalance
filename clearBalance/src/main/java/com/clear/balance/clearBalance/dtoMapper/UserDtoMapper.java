@@ -2,9 +2,9 @@ package com.clear.balance.clearBalance.dtoMapper;
 
 import org.springframework.beans.BeanUtils;
 
-import com.clear.balance.clearBalance.domain.Role;
-import com.clear.balance.clearBalance.domain.User;
-import com.clear.balance.clearBalance.dto.UserDto;
+import com.clear.balance.clearBalance.domain.role.Role;
+import com.clear.balance.clearBalance.domain.user.User;
+import com.clear.balance.clearBalance.dto.user.UserDto;
 
 public class UserDtoMapper {
 	

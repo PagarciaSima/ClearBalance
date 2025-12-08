@@ -1,0 +1,41 @@
+/* ================================================
+   Alert Styles
+   ================================================ */
+.alert {
+    animation: slideIn 0.4s ease-out;
+    border-radius: 12px !important;
+    border: none !important;
+    font-weight: 500;
+    backdrop-filter: blur(10px);
+}
+.alert.fade:not(.show) {
+    animation: slideOut 0.3s ease-in;
+}
+.alert-danger {
+    background: linear-gradient(135deg, var(--danger-gradient-start) 0%, var(--danger-gradient-mid) 50%, var(--danger-gradient-end) 100%) !important;
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(230, 57, 70, 0.4);
+}
+.alert-danger .btn-close,
+.alert-danger .btn-close-white {
+    filter: brightness(0) invert(1);
+}
+.alert-warning {
+    background: linear-gradient(135deg, var(--warning-gradient-start) 0%, var(--warning-gradient-mid) 50%, var(--warning-gradient-end) 100%) !important;
+    color: #1a0033 !important;
+    box-shadow: 0 4px 12px rgba(255, 149, 0, 0.4);
+}
+.alert-success {
+    background: linear-gradient(135deg, var(--success-gradient-start) 0%, var(--success-gradient-mid) 50%, var(--success-gradient-end) 100%) !important;
+    color: #1a0033 !important;
+    box-shadow: 0 4px 12px rgba(0, 208, 132, 0.4);
+}
+.alert-info {
+    background: linear-gradient(135deg, var(--info-gradient-start) 0%, var(--info-gradient-mid) 50%, var(--info-gradient-end) 100%) !important;
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(30, 144, 255, 0.4);
+}
+.alert-info .btn-close,
+.alert-info .btn-close-white {
+    filter: brightness(0) invert(1);
+}

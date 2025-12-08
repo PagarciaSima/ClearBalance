@@ -20,7 +20,7 @@ import com.auth0.jwt.exceptions.InvalidClaimException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.clear.balance.clearBalance.domain.UserPrincipal;
+import com.clear.balance.clearBalance.domain.user.UserPrincipal;
 import com.clear.balance.clearBalance.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;

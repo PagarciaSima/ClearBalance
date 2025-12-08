@@ -5,9 +5,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.clear.balance.clearBalance.domain.Role;
-import com.clear.balance.clearBalance.domain.User;
-import com.clear.balance.clearBalance.domain.UserPrincipal;
+import com.clear.balance.clearBalance.domain.role.Role;
+import com.clear.balance.clearBalance.domain.user.User;
+import com.clear.balance.clearBalance.domain.user.UserPrincipal;
 import com.clear.balance.clearBalance.repository.UserRepository;
 import com.clear.balance.clearBalance.repository.UserRoleRepository;
 
