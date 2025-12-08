@@ -9,6 +9,7 @@ import { CustomerComponent } from './component/customer/customer.component';
 import { ProfileComponent } from './component/profile/profile.component';
 import { CustomersComponent } from './component/customers/customers.component';
 import { HomeComponent } from './component/home/home.component';
+import { authenticationGuard } from './guards/authentication.guard';
 
 /**
  *  set up the routes for the application
@@ -19,9 +20,9 @@ const routes: Routes = [
   { path: 'resetpassword', component: ResetpasswordComponent },
   { path: 'user/verify/account/:key', component: VerifyComponent },
   { path: 'user/verify/password/:key', component: VerifyComponent },
-  { path: 'customers', component: CustomersComponent },
-  { path: 'profile', component: ProfileComponent },
-  { path: '', component: HomeComponent },
+  { path: 'customers', component: CustomersComponent, canActivate: [authenticationGuard] },
+  { path: 'profile', component: ProfileComponent, canActivate: [authenticationGuard] },
+  { path: '', component: HomeComponent, canActivate: [authenticationGuard], pathMatch: 'full' },
   { path: '**', component: PageNotFoundComponent},
 ];
 

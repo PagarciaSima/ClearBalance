@@ -7,17 +7,20 @@ import { User } from '../interface/user';
 import { Key } from '../enum/key.enum';
 import { UpdatePasswordForm } from '../interface/updatePasswordForm';
 import { profileSettingsForm } from '../interface/profileSettingsForm';
-import { EventsData } from '../interface/events';
+import { JwtHelperService } from '@auth0/angular-jwt';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
-
+  // ======= PROPIEDADES PRIVADAS =======
   private readonly server: string = 'http://localhost:8080';
-  constructor(
-    private http: HttpClient
-  ) { }
+  private readonly jwtHelper = new JwtHelperService();
+
+  // ======= CONSTRUCTOR =======
+  constructor(private http: HttpClient) { }
+
+  // ======= MÉTODOS DE AUTENTICACIÓN =======
 
   /**
    * Sends a login request to the server with the provided email and password.
@@ -111,6 +114,16 @@ export class UserService {
    */
   handleError(error: HttpErrorResponse): Observable<never> {
     return throwError(() => error);
+  }
+
+  /**
+   * Checks if the user is currently authenticated based on the presence and validity of the JWT token.
+   * @returns A boolean indicating whether the user is authenticated (true) or not (false)
+   */
+  isAuthenticated(): boolean {
+    const token = localStorage.getItem(Key.TOKEN);
+    if (!token) return false;
+    return !this.jwtHelper.isTokenExpired(token);
   }
 
   /**

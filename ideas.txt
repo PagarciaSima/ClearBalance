@@ -1,0 +1,12 @@
+Para una app tipo portfolio con tu schema, haría lo siguiente para aprovechar mapas de forma útil y visual:
+
+Mini-mapa en el perfil de usuario
+
+Muestra la dirección del usuario en un mapa pequeño usando Google Maps o Leaflet.
+Permite abrir la ubicación en Google Maps con un botón.
+Mapa general de usuarios
+
+Página donde se ven todos los usuarios como marcadores en el mapa.
+Al hacer clic en un marcador, muestra nombre, email y enlace al perfil.
+Visualización de actividad
+

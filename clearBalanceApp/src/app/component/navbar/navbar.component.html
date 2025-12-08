@@ -120,9 +120,9 @@
                 [routerLink]="['/profile']"
                 data-bs-toggle="tooltip" 
                 data-bs-placement="left" 
-                title="View your profile"
-                aria-label="View profile for john doe">
-                <i class="bi bi-person-circle me-2" aria-hidden="true"></i>john doe
+                [title]="'View profile for ' + userFullName"
+                [attr.aria-label]="'View profile for ' + userFullName">
+                <i class="bi bi-person-circle me-2" aria-hidden="true"></i>{{ userFullName || 'Usuario' }}
               </a>
             </li>
             <li>
