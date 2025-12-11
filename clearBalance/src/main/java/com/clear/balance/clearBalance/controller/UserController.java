@@ -133,7 +133,7 @@ public class UserController {
 			log.debug("User created successfully in service layer: {}", user.getEmail());
 
 			// Build and return response
-			ResponseEntity<HttpResponse> response = ResponseEntity.created(getUri())
+			ResponseEntity<HttpResponse> response = ResponseEntity.created(getUri(userDto.getId()))
 					.body(
 							HttpResponse.builder()
 							.timeStamp(LocalDateTime.now().toString())
@@ -147,7 +147,7 @@ public class UserController {
 
 		} catch (Exception e) {
 			log.error("Error while registering user '{}': {}", user.getEmail(), e.getMessage(), e);
-			throw e; // Let global exception handler process it
+			throw e; 
 		}
 	}
 
@@ -793,10 +793,28 @@ public class UserController {
 	 *
 	 * @return A {@link URI} pointing to the user resource endpoint.
 	 */
-	private URI getUri() {
-		return URI.create(fromCurrentContextPath().path("/user/get/<userId>").toUriString());
-	}
+    private URI getUri(Long userId) {
+        return URI.create(
+            fromCurrentContextPath()
+                .path("/user/get/" + userId)
+                .toUriString()
+        );
+    }
 
+    /**
+     * Sends a verification code to the specified user and returns an HTTP response.
+     *
+     * <p>This method delegates the operation to the {@link UserService} to generate
+     * and send the verification code (typically via SMS or another communication channel).
+     * After sending the code, it builds a standardized {@link HttpResponse} object
+     * that includes timestamp, user data, message, and HTTP status.</p>
+     *
+     * @param user the user to whom the verification code should be sent
+     * @return a {@link ResponseEntity} containing the HTTP response information,
+     *         including a success message and the user data
+     *
+     * @throws RuntimeException if sending the verification code fails
+     */
 	private ResponseEntity<HttpResponse> sendVerificationCode(UserDto user) {
 		this.userService.sendVerificationCode(user);
 		return ResponseEntity.ok()

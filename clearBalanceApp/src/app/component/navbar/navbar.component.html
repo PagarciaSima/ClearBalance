@@ -10,7 +10,7 @@
       aria-label="Clear Balance - Go to home page">
       <i class="bi bi-safe me-3" aria-hidden="true"></i>
       Clear Balance
-      <img src="assets/img/ufo.png" alt="" class="ufo-hover-icon" aria-hidden="true">
+      <img src="assets/img/ufo.png" alt="ufo" class="ufo-hover-icon" aria-hidden="true">
     </a>
     <button 
       class="navbar-toggler" 
@@ -111,7 +111,7 @@
             aria-expanded="false"
             aria-haspopup="true"
             aria-label="User menu">
-            <img src="assets/img/astronaut.png" alt="User avatar" class="user-avatar-md rounded-circle">
+            <img [src]="profile?.user?.imageUrl ? profile!.user!.imageUrl : 'assets/img/astronaut.png'" [alt]="'User avatar'" class="user-avatar-md rounded-circle">
           </a>
           <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownUser">
             <li>

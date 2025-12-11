@@ -26,6 +26,21 @@ export class NavbarComponent implements AfterViewInit, OnInit {
 
   ngOnInit(): void {
     this.getCurrentUser();
+    this.listenProfileUpdates();
+  }
+
+  /**
+   * Listens for profile updates from the UserService.
+   * Updates the userFullName and profile properties when a new profile is received.
+   * This method ensures that the component reflects the latest user profile information.
+   */
+  private listenProfileUpdates() {
+    this.userService.profile$Shared.subscribe(profile => {
+      if (profile && profile.user) {
+        this.profile = profile;
+        this.userFullName = `${profile.user.firstName} ${profile.user.lastName}`;
+      }
+    });
   }
 
   /**
@@ -34,6 +49,7 @@ export class NavbarComponent implements AfterViewInit, OnInit {
   private getCurrentUser() {
     this.userService.profile$().subscribe(resp => {
       this.profile = resp.data ?? null;
+      console.log('Navbar profile:', this.profile);
       if (this.profile && this.profile.user) {
         this.userFullName = `${this.profile.user.firstName} ${this.profile.user.lastName}`;
       }

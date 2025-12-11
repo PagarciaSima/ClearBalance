@@ -214,6 +214,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
           this.dataSubject.next({ ...response, data: response.data });
           this.isLoadingSubject.next(false);
           this.loadEvents(this.currentPage);
+
           return {
             dataState: DataState.LOADED,
             appData: this.dataSubject.value === null ? undefined : this.dataSubject.value

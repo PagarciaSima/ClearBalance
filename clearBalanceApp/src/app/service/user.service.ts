@@ -1,4 +1,5 @@
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { BehaviorSubject } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { catchError, Observable, tap, throwError } from 'rxjs';
 import { CustomHttpResponse } from '../interface/customhttpresponse';
@@ -13,14 +14,13 @@ import { JwtHelperService } from '@auth0/angular-jwt';
   providedIn: 'root'
 })
 export class UserService {
-  // ======= PROPIEDADES PRIVADAS =======
   private readonly server: string = 'http://localhost:8080';
   private readonly jwtHelper = new JwtHelperService();
 
-  // ======= CONSTRUCTOR =======
-  constructor(private http: HttpClient) { }
+  private profileSubject = new BehaviorSubject<Profile | null>(null);
+  profile$Shared: Observable<Profile | null> = this.profileSubject.asObservable();
 
-  // ======= MÉTODOS DE AUTENTICACIÓN =======
+  constructor(private http: HttpClient) { }
 
   /**
    * Sends a login request to the server with the provided email and password.
@@ -71,7 +71,11 @@ export class UserService {
       `${this.server}/user/profile`
     )
       .pipe(
-        tap(console.log),
+        tap(resp => {
+          if (resp.data) {
+            this.profileSubject.next(resp.data);
+          }
+        }),
         catchError(this.handleError)
       );
   }
@@ -95,7 +99,12 @@ export class UserService {
       user,
       { headers }
     ).pipe(
-      tap(console.log),
+      tap(resp => {
+        if (resp.data) {
+          this.profileSubject.next(resp.data);
+        }
+        console.log(resp);
+      }),
       catchError(this.handleError)
     );
   }

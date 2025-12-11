@@ -10,3 +10,5 @@ public class UpdateUserEventReportDto {
     private String comment;
     private EventReportStatus status;
 }
+
+
