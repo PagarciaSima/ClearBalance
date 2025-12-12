@@ -1,6 +1,3 @@
-/**
- * Handles closing the report modal. Used by the modular report modal component.
- */
 import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
 import { NavigationStart, Router } from '@angular/router';
@@ -9,7 +6,6 @@ import { catchError, map, startWith } from 'rxjs/operators';
 import { slideBlur } from 'src/app/animations/animations';
 import { DataState } from 'src/app/enum/datastate.enum';
 import { CustomHttpResponse } from 'src/app/interface/customhttpresponse';
-import { PagedEvents } from 'src/app/interface/events';
 import { Profile } from 'src/app/interface/profile';
 import { State } from 'src/app/interface/state';
 import { UserEventReportDetailDto } from 'src/app/interface/userEventReportResponse';
@@ -17,6 +13,8 @@ import { EventService } from 'src/app/service/event.service';
 import { NotificationService } from 'src/app/service/notification.service';
 import { TooltipService } from 'src/app/service/tooltip.service';
 import { UserService } from 'src/app/service/user.service';
+import { Page } from 'src/app/interface/page';
+import { Events } from 'src/app/interface/events';
 
 declare var bootstrap: any;
 
@@ -29,6 +27,7 @@ declare var bootstrap: any;
   ]
 })
 export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
+
   // ======= PUBLIC PROPERTIES =======
   selectedReportDetail: UserEventReportDetailDto | null = null;
   profileState$!: Observable<State<CustomHttpResponse<Profile>>>;
@@ -39,7 +38,8 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
   showConfirmPassword = false;
   readonly DataState = DataState;
   imageTimestamp = Date.now();
-  eventsPage?: PagedEvents;
+
+  eventsPage?: Page<Events>;
   currentPage = 0;
   eventsPageSize = 10;
   reportForm!: FormGroup;
@@ -545,5 +545,14 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
       modalInstance.hide();
     }
     this.selectedReportDetail = null;
+  }
+
+  /**
+   * Manages the change of page size from the paginator.
+   * @param newSize - The new selected page size
+   */
+  onPageSizeChange(newSize: number): void {
+    this.eventsPageSize = newSize;
+    this.loadEvents(0); // Reinicia a la primera página
   }
 }

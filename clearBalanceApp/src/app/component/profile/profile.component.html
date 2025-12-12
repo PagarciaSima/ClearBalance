@@ -464,8 +464,13 @@
                            </tbody>
                         </table>
                      </div>
-                     <app-pagination [currentPage]="(eventsPage?.number ?? 0) + 1"
-                        [totalPages]="eventsPage?.totalPages ?? 1" (pageChange)="onPageChange($event - 1)">
+                     <app-pagination
+                        [currentPage]="(eventsPage?.number ?? 0) + 1"
+                        [totalPages]="eventsPage?.totalPages ?? 1"
+                        [pageSize]="eventsPageSize"
+                        [pageSizeOptions]="[5, 10, 20]"
+                        (pageChange)="onPageChange(($event ? $event : 1) - 1)"
+                        (pageSizeChange)="onPageSizeChange($event)">
                      </app-pagination>
                   </div>
                </div>

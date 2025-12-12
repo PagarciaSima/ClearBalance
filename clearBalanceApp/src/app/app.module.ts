@@ -27,6 +27,8 @@ import { PermissionFormatPipe } from './pipes/permission-format.pipe';
 import { RoleFormatPipe } from './pipes/role-format.pipe';
 import { EventTypeFormatPipe } from './pipes/event-type-format.pipe';
 import { PaginationComponent } from './component/pagination/pagination.component';
+import { CustomerStatusPipe } from './pipes/customer-status.pipe';
+import { CapitalizePipe } from './pipes/capitalize.pipe';
 
 @NgModule({
   declarations: [
@@ -50,7 +52,9 @@ import { PaginationComponent } from './component/pagination/pagination.component
     EventTypeFormatPipe,
     PaginationComponent,
     ReportModalComponent,
-    ReportDetailModalComponent
+    ReportDetailModalComponent,
+    CustomerStatusPipe,
+    CapitalizePipe
   ],
   imports: [
     ReactiveFormsModule,

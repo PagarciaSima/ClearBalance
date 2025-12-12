@@ -8,7 +8,27 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 export class PaginationComponent {
     @Input() currentPage: number = 1;
     @Input() totalPages: number = 1;
+    @Input() pageSize: number = 10;
+    @Input() pageSizeOptions: number[] = [5, 10, 20];
     @Output() pageChange = new EventEmitter<number>();
+    @Output() pageSizeChange = new EventEmitter<number>();
+
+    /**
+     *  Manages the change event from the page size select element
+     */
+    handlePageSizeChange(event: Event): void {
+        const value = (event.target as HTMLSelectElement)?.value;
+        if (value) {
+            this.onPageSizeChange(Number(value));
+        }
+    }
+
+    /**
+     * Called when the user changes the page size
+     */
+    onPageSizeChange(newSize: number): void {
+        this.pageSizeChange.emit(newSize);
+    }
 
     /**
    * Generates an array of consecutive numbers from a starting value to an ending value (inclusive).
