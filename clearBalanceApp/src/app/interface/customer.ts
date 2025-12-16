@@ -14,6 +14,6 @@ export interface Customer {
   invoices?: Invoice[];
 }
 
-export interface CustomerData {
+export interface CustomerPage {
   customers: Page<Customer>;
 }

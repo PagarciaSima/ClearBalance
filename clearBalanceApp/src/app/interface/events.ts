@@ -12,6 +12,6 @@ export interface Events {
   reportStatus?: string;
 }
 
-export interface EventsData {
+export interface EventsPage {
   events: Page<Events>;
 }

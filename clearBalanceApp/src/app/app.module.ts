@@ -29,6 +29,10 @@ import { EventTypeFormatPipe } from './pipes/event-type-format.pipe';
 import { PaginationComponent } from './component/pagination/pagination.component';
 import { CustomerStatusPipe } from './pipes/customer-status.pipe';
 import { CapitalizePipe } from './pipes/capitalize.pipe';
+import { NewcustomerComponent } from './component/newcustomer/newcustomer.component';
+import { NewinvoiceComponent } from './component/newinvoice/newinvoice.component';
+import { InvoicesComponent } from './component/invoices/invoices.component';
+import { InvoiceComponent } from './component/invoice/invoice.component';
 
 @NgModule({
   declarations: [
@@ -55,6 +59,10 @@ import { CapitalizePipe } from './pipes/capitalize.pipe';
     ReportDetailModalComponent,
     CustomerStatusPipe,
     CapitalizePipe,
+    NewcustomerComponent,
+    NewinvoiceComponent,
+    InvoicesComponent,
+    InvoiceComponent,
 
   ],
   imports: [

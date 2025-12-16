@@ -28,16 +28,41 @@ public class CustomerServiceImpl implements CustomerService {
     private final InvoiceRepository invoiceRepository;
 
     /**
-     * Creates a new customer and sets the creation date.
+     * Creates a new customer in the system.
      *
-     * @param customer the customer to create
-     * @return the created customer
+     * <p>This method performs the following operations:
+     * <ul>
+     *   <li>Normalizes the customer's email (trimmed and lowercased)</li>
+     *   <li>Validates that the email is not already in use</li>
+     *   <li>Sets the creation timestamp</li>
+     *   <li>Persists the customer entity in the database</li>
+     * </ul>
+     *
+     * <p>If a customer with the same email already exists, an {@link ApiException}
+     * is thrown to prevent duplicate records.</p>
+     *
+     * @param customer the customer entity to be created
+     * @return the newly created and persisted {@link Customer}
+     * @throws ApiException if a customer with the same email already exists
      */
     @Override
     public Customer createCustomer(Customer customer) {
+
+        // Normalize email
+        String normalizedEmail = customer.getEmail().trim().toLowerCase();
+        customer.setEmail(normalizedEmail);
+
+        // Verify if email already exists
+        if (customerRepository.existsByEmail(normalizedEmail)) {
+            log.warn("Attempt to create customer with existing email: {}", normalizedEmail);
+            throw new ApiException("Email already in use. Please use a different email and try again.");
+        }
+
         log.info("Creating new customer: {}", customer.getName());
+
         customer.setCreatedAt(new Date());
         Customer savedCustomer = customerRepository.save(customer);
+
         log.debug("Customer created with ID: {}", savedCustomer.getId());
         return savedCustomer;
     }

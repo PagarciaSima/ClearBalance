@@ -11,7 +11,7 @@
             <div class="stat-content">
               <h3 class="stat-number" aria-live="polite">
                 <ng-container *ngIf="!loading && stats; else loadingOrError">
-                  {{ stats?.totalCustomers }}
+                  {{ stats.totalCustomers }}
                 </ng-container>
                 <ng-template #loadingOrError>
                   <span *ngIf="loading">...</span>
@@ -35,7 +35,7 @@
             <div class="stat-content">
               <h3 class="stat-number" aria-live="polite">
                 <ng-container *ngIf="!loading && stats; else loadingOrErrorInvoices">
-                  {{ stats?.totalInvoices }}
+                  {{ stats.totalInvoices }}
                 </ng-container>
                 <ng-template #loadingOrErrorInvoices>
                   <span *ngIf="loading">...</span>
@@ -59,7 +59,7 @@
             <div class="stat-content">
               <h3 class="stat-number" aria-live="polite">
                 <ng-container *ngIf="!loading && stats; else loadingOrErrorBilled">
-                  ${{ stats?.totalBilled }}
+                  ${{ stats.totalBilled }}
                 </ng-container>
                 <ng-template #loadingOrErrorBilled>
                   <span *ngIf="loading">...</span>

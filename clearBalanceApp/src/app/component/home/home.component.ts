@@ -2,7 +2,7 @@ import { AfterViewInit, Component, OnDestroy } from '@angular/core';
 import { BehaviorSubject, Observable, catchError, map, of, startWith } from 'rxjs';
 import { slideBlur } from 'src/app/animations/animations';
 import { DataState } from 'src/app/enum/datastate.enum';
-import { Customer, CustomerData } from 'src/app/interface/customer';
+import { Customer, CustomerPage } from 'src/app/interface/customer';
 import { CustomHttpResponse } from 'src/app/interface/customhttpresponse';
 import { State } from 'src/app/interface/state';
 import { CustomerService } from 'src/app/service/customer.service';
@@ -21,10 +21,10 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
 
   customerPageSize: number = 10;
-  homeState$!: Observable<State<CustomHttpResponse<CustomerData>>>;
+  homeState$!: Observable<State<CustomHttpResponse<CustomerPage>>>;
   isLoading$!: Observable<boolean>;
   showLogs$!: Observable<boolean>;
-  private dataSubject: BehaviorSubject<CustomHttpResponse<CustomerData> | null>;
+  private dataSubject: BehaviorSubject<CustomHttpResponse<CustomerPage> | null>;
   private isLoadingSubject: BehaviorSubject<boolean>;
   private showLogsSubject: BehaviorSubject<boolean>;
 
@@ -35,7 +35,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     private customerService: CustomerService,
     private tooltipService: TooltipService
   ) { 
-    this.dataSubject = new BehaviorSubject<CustomHttpResponse<CustomerData> | null>(null);
+    this.dataSubject = new BehaviorSubject<CustomHttpResponse<CustomerPage> | null>(null);
     this.isLoadingSubject = new BehaviorSubject<boolean>(false);
     this.showLogsSubject = new BehaviorSubject<boolean>(true);
   }

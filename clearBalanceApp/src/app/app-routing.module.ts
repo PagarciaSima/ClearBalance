@@ -10,6 +10,10 @@ import { ProfileComponent } from './component/profile/profile.component';
 import { CustomersComponent } from './component/customers/customers.component';
 import { HomeComponent } from './component/home/home.component';
 import { authenticationGuard } from './guards/authentication.guard';
+import { NewcustomerComponent } from './component/newcustomer/newcustomer.component';
+import { NewinvoiceComponent } from './component/newinvoice/newinvoice.component';
+import { InvoicesComponent } from './component/invoices/invoices.component';
+import { InvoiceComponent } from './component/invoice/invoice.component';
 
 /**
  *  set up the routes for the application
@@ -22,6 +26,11 @@ const routes: Routes = [
   { path: 'user/verify/password/:key', component: VerifyComponent },
   { path: 'customers', component: CustomersComponent, canActivate: [authenticationGuard] },
   { path: 'profile', component: ProfileComponent, canActivate: [authenticationGuard] },
+  { path: 'customers/new', component: NewcustomerComponent, canActivate: [authenticationGuard] },
+  { path: 'invoices/new', component: NewinvoiceComponent, canActivate: [authenticationGuard] },
+  { path: 'invoices', component: InvoicesComponent, canActivate: [authenticationGuard] },
+  { path: 'customer/:id', component: CustomerComponent, canActivate: [authenticationGuard] },
+  { path: 'invoices/id/:invoiceNumber', component: InvoiceComponent, canActivate: [authenticationGuard] },
   { path: '', component: HomeComponent, canActivate: [authenticationGuard], pathMatch: 'full' },
   { path: '**', component: PageNotFoundComponent},
 ];

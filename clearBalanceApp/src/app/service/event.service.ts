@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { EventsData } from '../interface/events';
+import { EventsPage } from '../interface/events';
 import { catchError, Observable, tap, throwError } from 'rxjs';
 import { CustomHttpResponse } from '../interface/customhttpresponse';
 import { ReportEventRequest } from '../interface/reportEventRequest';
@@ -19,8 +19,8 @@ export class EventService {
     /**
      * Retrieves a paginated list of user events from the server.
      */
-    getUserEvents$(page: number = 0, size: number = 10): Observable<CustomHttpResponse<EventsData>> {
-      return this.http.get<CustomHttpResponse<EventsData>>(
+    getUserEvents$(page: number = 0, size: number = 10): Observable<CustomHttpResponse<EventsPage>> {
+      return this.http.get<CustomHttpResponse<EventsPage>>(
         `${this.server}/events/userevents?page=${page}&size=${size}`
       ).pipe(
         tap(response => console.log({response})),

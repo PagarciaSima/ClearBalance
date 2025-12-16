@@ -9,4 +9,6 @@ import com.clear.balance.clearBalance.domain.customer.Customer;
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
 	Page<Customer> findByNameContainingIgnoreCase(String name, Pageable pagegeable);
+
+	boolean existsByEmail(String lowerCase);
 }
