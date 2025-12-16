@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 
 import com.clear.balance.clearBalance.domain.customer.Customer;
 import com.clear.balance.clearBalance.domain.invoice.Invoice;
+import com.clear.balance.clearBalance.dto.stats.StatsDto;
 
 public interface CustomerService {
     // Customer functions
@@ -13,6 +14,7 @@ public interface CustomerService {
     Iterable<Customer> getCustomers();
     Customer getCustomer(Long id);
     Page<Customer> searchCustomers(String name, int page, int size);
+	StatsDto getGlobalStats();
 
     // Invoice functions
     Invoice createInvoice(Invoice invoice);

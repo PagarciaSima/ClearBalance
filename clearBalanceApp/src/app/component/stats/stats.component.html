@@ -9,7 +9,16 @@
               <i class="bi bi-people-fill stat-icon"></i>
             </div>
             <div class="stat-content">
-              <h3 class="stat-number" aria-live="polite">0</h3>
+              <h3 class="stat-number" aria-live="polite">
+                <ng-container *ngIf="!loading && stats; else loadingOrError">
+                  {{ stats?.totalCustomers }}
+                </ng-container>
+                <ng-template #loadingOrError>
+                  <span *ngIf="loading">...</span>
+                  <span *ngIf="error">-</span>
+                  <span *ngIf="!loading && !error">0</span>
+                </ng-template>
+              </h3>
               <p class="stat-label" id="stat-customers-label">Total Customers</p>
             </div>
           </div>
@@ -24,7 +33,16 @@
               <i class="bi bi-receipt-cutoff stat-icon"></i>
             </div>
             <div class="stat-content">
-              <h3 class="stat-number" aria-live="polite">0</h3>
+              <h3 class="stat-number" aria-live="polite">
+                <ng-container *ngIf="!loading && stats; else loadingOrErrorInvoices">
+                  {{ stats?.totalInvoices }}
+                </ng-container>
+                <ng-template #loadingOrErrorInvoices>
+                  <span *ngIf="loading">...</span>
+                  <span *ngIf="error">-</span>
+                  <span *ngIf="!loading && !error">0</span>
+                </ng-template>
+              </h3>
               <p class="stat-label" id="stat-invoices-label">Total Invoices</p>
             </div>
           </div>
@@ -39,7 +57,16 @@
               <i class="bi bi-currency-dollar stat-icon"></i>
             </div>
             <div class="stat-content">
-              <h3 class="stat-number" aria-live="polite">$0.00</h3>
+              <h3 class="stat-number" aria-live="polite">
+                <ng-container *ngIf="!loading && stats; else loadingOrErrorBilled">
+                  ${{ stats?.totalBilled }}
+                </ng-container>
+                <ng-template #loadingOrErrorBilled>
+                  <span *ngIf="loading">...</span>
+                  <span *ngIf="error">-</span>
+                  <span *ngIf="!loading && !error">$0.00</span>
+                </ng-template>
+              </h3>
               <p class="stat-label" id="stat-billed-label">Total Billed</p>
             </div>
           </div>

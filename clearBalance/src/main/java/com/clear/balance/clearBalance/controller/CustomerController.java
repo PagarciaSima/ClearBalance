@@ -25,6 +25,7 @@ import com.clear.balance.clearBalance.domain.customer.Customer;
 import com.clear.balance.clearBalance.domain.invoice.Invoice;
 import com.clear.balance.clearBalance.domain.response.HttpResponse;
 import com.clear.balance.clearBalance.domain.user.User;
+import com.clear.balance.clearBalance.dto.stats.StatsDto;
 import com.clear.balance.clearBalance.dto.user.UserDto;
 import com.clear.balance.clearBalance.service.CustomerService;
 import com.clear.balance.clearBalance.service.UserService;
@@ -87,6 +88,54 @@ public class CustomerController {
 	    return ResponseEntity.ok().body(response);
 	}
 	
+	/**
+	 * Retrieves global application statistics for dashboard purposes.
+	 *
+	 * <p>This endpoint returns aggregated, system-wide statistics including:
+	 * <ul>
+	 *   <li>Total number of customers</li>
+	 *   <li>Total number of invoices</li>
+	 *   <li>Total amount billed across all invoices</li>
+	 * </ul>
+	 *
+	 * <p>The response also includes the authenticated user's information,
+	 * allowing the frontend to display both user context and dashboard data
+	 * in a single request.</p>
+	 *
+	 * <p>This endpoint is typically used to populate a global dashboard
+	 * or overview screen.</p>
+	 *
+	 * @param authentication the authentication token containing the logged-in user's details
+	 * @return a {@link ResponseEntity} containing a {@link HttpResponse} with
+	 *         global statistics and authenticated user information
+	 */
+	@GetMapping("/stats")
+	public ResponseEntity<HttpResponse> getGlobalStats(final Authentication authentication) {
+
+	    log.info("Received request to retrieve global statistics");
+	    UserDto userDto = UserUtils.getAuthenticatedUserDto(authentication);
+
+	    log.debug("Authenticated user resolved: {}", userDto);
+
+	    // Get stats
+	    final StatsDto stats = customerService.getGlobalStats();
+	    log.debug("Global stats retrieved: {}", stats);
+
+	    // Build response
+	    final HttpResponse response = HttpResponse.builder()
+	            .timeStamp(LocalDateTime.now().toString())
+	            .data(Map.of(
+	                    "user", userDto,
+	                    "stats", stats
+	            ))
+	            .message("Global statistics retrieved successfully")
+	            .status(HttpStatus.OK)
+	            .statusCode(HttpStatus.OK.value())
+	            .build();
+
+	    return ResponseEntity.ok(response);
+	}
+
 	/**
 	 * Creates a new customer for the authenticated user.
 	 *

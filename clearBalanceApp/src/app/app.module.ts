@@ -54,7 +54,8 @@ import { CapitalizePipe } from './pipes/capitalize.pipe';
     ReportModalComponent,
     ReportDetailModalComponent,
     CustomerStatusPipe,
-    CapitalizePipe
+    CapitalizePipe,
+
   ],
   imports: [
     ReactiveFormsModule,

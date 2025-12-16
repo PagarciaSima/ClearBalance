@@ -3,6 +3,8 @@ import { Injectable } from '@angular/core';
 import { catchError, Observable, tap, throwError } from 'rxjs';
 import { CustomHttpResponse } from '../interface/customhttpresponse';
 import { CustomerData } from '../interface/customer';
+import { Stats } from '../interface/stats';
+import { User } from '../interface/user';
 
 @Injectable({
   providedIn: 'root'
@@ -40,5 +42,18 @@ export class CustomerService {
    */
   handleError(error: HttpErrorResponse): Observable<never> {
     return throwError(() => error);
+  }
+
+  /**
+   * Retrieves global statistics from the server.
+   *
+   * @returns An Observable emitting a CustomHttpResponse containing global stats data
+   */
+  getGlobalStats$(): Observable<CustomHttpResponse<{ user: User; stats: Stats }>> {
+    return this.http.get<CustomHttpResponse<{ user: User; stats: Stats }>>(`${this.server}/customer/stats`)
+      .pipe(
+        tap(console.log),
+        catchError(this.handleError)
+      );
   }
 }

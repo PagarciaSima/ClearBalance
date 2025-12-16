@@ -19,6 +19,7 @@ import { UserService } from 'src/app/service/user.service';
 })
 export class HomeComponent implements AfterViewInit, OnDestroy {
 
+
   customerPageSize: number = 10;
   homeState$!: Observable<State<CustomHttpResponse<CustomerData>>>;
   isLoading$!: Observable<boolean>;

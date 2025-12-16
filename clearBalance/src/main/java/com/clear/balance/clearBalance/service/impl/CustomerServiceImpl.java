@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.clear.balance.clearBalance.domain.customer.Customer;
 import com.clear.balance.clearBalance.domain.invoice.Invoice;
+import com.clear.balance.clearBalance.dto.stats.StatsDto;
 import com.clear.balance.clearBalance.exeception.ApiException;
 import com.clear.balance.clearBalance.repository.CustomerRepository;
 import com.clear.balance.clearBalance.repository.InvoiceRepository;
@@ -188,5 +189,14 @@ public class CustomerServiceImpl implements CustomerService {
         log.debug("Invoice found: {}", invoice);
         return invoice;
     }
+    
+    @Override
+    public StatsDto getGlobalStats() {
+    	int totalCustomers = (int) customerRepository.count();
+        int totalInvoices = (int) invoiceRepository.count();
+        double totalBilled = invoiceRepository.sumAllTotals(); 
+
+        return new StatsDto(totalCustomers, totalInvoices, totalBilled);
+	}
 
 }
