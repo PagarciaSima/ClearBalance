@@ -1,1 +1,145 @@
-<p>customers works!</p>
+<ng-container *ngIf="(customersState$ | async) as state" [ngSwitch]="state.dataState">
+    <ng-container *ngSwitchCase="DataState.LOADED">
+        <!-- ========================= CUSTOMERS SECTION ========================= -->
+        <section aria-labelledby="customers-title" @slideBlur>
+            <div class="container mt-4">
+                <!-- ========================= CARD & BREADCRUMB ========================= -->
+                <div class="row card">
+                    <nav aria-label="breadcrumb" class="mt-3">
+                        <ol class="breadcrumb bg-transparent p-0 mb-2">
+                            <li class="breadcrumb-item">
+                                <a [routerLink]="['/']">Home</a>
+                            </li>
+                            <li class="breadcrumb-item active text-white"> Customers </li>
+                        </ol>
+                    </nav>
+                    <!-- ========================= HEADER ROW ========================= -->
+                    <div class="col mt-3">
+                        <h4 id="customers-title" class="fw-bold text-start text-white">
+                            <i class="bi bi-people-fill me-2" aria-hidden="true"></i>Customers
+                        </h4>
+                    </div>
+                    <!-- ========================= EXPORT BUTTON ========================= -->
+                    <div class="col">
+                        <div class="fw-bold text-end">
+                            <button type="button" class="mb-3 btn btn-link p-0 border-0 bg-transparent"
+                                data-bs-toggle="tooltip" data-bs-placement="top" title="Export customers to Excel"
+                                aria-label="Export customers to Excel">
+                                <i class="bi bi-file-earmark-excel success-icon fs-1 mb-0" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- ========================= SEARCH FORM ========================= -->
+                    <div class="col-12">
+                        <form #searchForm="ngForm" (ngSubmit)="searchCustomers(searchForm)" class="row g-3 justify-content-end mb-3">
+                            <div class="col-auto">
+                                <label for="name" class="visually-hidden">Customer Name</label>
+                                <input type="text" [(ngModel)]="searchTerm" name="name" #name="ngModel" class="form-control" placeholder="Customer Name" autocomplete="off">
+                            </div>
+                            <div class="col-auto">
+                                <button type="submit" class="btn btn-primary mb-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Search customers">
+                                    <i class="bi bi-search me-1"></i> Search
+                                </button>
+                            </div>
+                            <div class="col-auto" *ngIf="searchTerm">
+                                <button type="button" class="btn btn-secondary mb-3" (click)="resetSearch()" data-bs-toggle="tooltip" data-bs-placement="top" title="Clear search">
+                                    <i class="bi bi-x-circle me-1"></i> Clear
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <!-- ========================= CUSTOMERS TABLE ========================= -->
+                    <div class="col-12">
+                        <ng-container *ngIf="state?.appData?.data?.customers?.content!.length > 0; else noResults">
+                            <table class="table table-hover" aria-label="Customers list">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center" scope="col">
+                                            <i class="bi bi-hash me-2" aria-hidden="true"></i>ID
+                                        </th>
+                                        <th scope="col">
+                                            <i class="bi bi-person-circle me-2" aria-hidden="true"></i>Photo
+                                        </th>
+                                        <th scope="col">
+                                            <i class="bi bi-person me-2" aria-hidden="true"></i>Name
+                                        </th>
+                                        <th scope="col">
+                                            <i class="bi bi-envelope me-2" aria-hidden="true"></i>Email
+                                        </th>
+                                        <th scope="col">
+                                            <i class="bi bi-telephone me-2" aria-hidden="true"></i>Phone
+                                        </th>
+                                        <th scope="col">
+                                            <i class="bi bi-circle-fill me-2" aria-hidden="true"></i>Status
+                                        </th>
+                                        <th scope="col">
+                                            <i class="bi bi-star me-2" aria-hidden="true"></i>Type
+                                        </th>
+                                        <th scope="col">
+                                            <i class="bi bi-gear me-2" aria-hidden="true"></i>Action
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody class="table-body">
+                                    <tr *ngFor="let customer of state?.appData?.data?.customers?.content">
+                                        <th class="text-center" scope="row">{{ customer.id }}</th>
+                                        <td>
+                                            <img [src]="customer.imageUrl || 'assets/img/astronaut.png'" width="42"
+                                                height="42" class="rounded-circle"
+                                                [alt]="'Profile picture of ' + customer.name" tabindex="0"
+                                                data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-html="true"
+                                                [attr.data-bs-content]="'<img src=\'' + (customer.imageUrl || 'assets/img/astronaut.png') + '\' style=\'width:120px;height:120px;max-width:120px;max-height:120px;object-fit:cover;border-radius:16px;display:block;\' alt=\'Profile picture of ' + customer.name + '\'/>'"
+                                                data-bs-placement="left">
+                                        </td>
+                                        <td>{{ customer.name }}</td>
+                                        <td>{{ customer.email }}</td>
+                                        <td>{{ customer.phone }}</td>
+                                        <td>
+                                            <span class="badge" [ngClass]="customer.status | customerStatus" role="status">
+                                                {{ customer.status }}
+                                            </span>
+                                        </td>
+                                        <td>{{ customer.type | capitalize }}</td>
+                                        <td>
+                                            <button type="button" (click)="selectCustomer(customer)"
+                                                class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top"
+                                                [title]="'View customer details for ' + customer.name">
+                                                View
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </ng-container>
+                        <ng-template #noResults>
+                            <div class="alert alert-warning bg-warning text-dark border-0 mt-3" role="alert">
+                                <i class="bi bi-exclamation-triangle me-2"></i>
+                                No customers found for the current search.
+                            </div>
+                        </ng-template>
+                    </div>
+                    <!-- ========================= PAGINATION ========================= -->
+                    <div class="col-12 p-0">
+                        <app-pagination
+                            [currentPage]="(state?.appData?.data?.customers?.number ?? 0) + 1"
+                            [totalPages]="state?.appData?.data?.customers?.totalPages ?? 1"
+                            [pageSize]="customerPageSize"
+                            [pageSizeOptions]="[5, 10, 20]"
+                            [totalItems]="state?.appData?.data?.customers?.totalElements ?? 0"
+                            (pageChange)="onPageChange(($event ? $event : 1) - 1)"
+                            (pageSizeChange)="onPageSizeChange($event)">
+                        </app-pagination>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </ng-container>
+
+    <ng-container *ngSwitchCase="DataState.LOADING">
+        <div>Loading...</div>
+    </ng-container>
+
+    <ng-container *ngSwitchCase="DataState.ERROR">
+        <div>{{ state.error }}</div>
+    </ng-container>
+</ng-container>

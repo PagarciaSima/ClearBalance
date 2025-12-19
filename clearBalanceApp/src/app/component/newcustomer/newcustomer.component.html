@@ -2,7 +2,7 @@
 <ng-container *ngIf="(newCustomerState$ | async) as state" [ngSwitch]="state.dataState">
     <!-- Data Loaded State -->
     <ng-container *ngSwitchCase="DataState.LOADED">
-        <section class="newcustomer-section">
+        <section class="newcustomer-section" @slideBlur>
             <div class="container mt-4">
                 <!-- Breadcrumb Navigation -->
                 <div class="row justify-content-center card">
@@ -32,7 +32,7 @@
                         <div class="card-body p-4">
                             <!-- Form Title -->
                             <div class="text-center mb-4">
-                                <h2><i class="bi bi-person-plus-fill me-2"></i>New Customer</h2>
+                                <h2><i class="bi bi-person-plus-fill me-2" aria-hidden="true"></i><span class="visually-hidden">New Customer</span>New Customer</h2>
                             </div>
                             <!-- Error Alert -->
                             <div *ngIf="state.error"
@@ -43,59 +43,85 @@
                                     aria-label="Close"></button>
                             </div>
                             <!-- New Customer Form -->
-                            <form #newCustomerForm="ngForm" (ngSubmit)="createCustomer(newCustomerForm)" aria-label="New Customer Form">
+                            <form #newCustomerForm="ngForm" (ngSubmit)="createCustomer(newCustomerForm)" aria-label="New Customer Form" novalidate>
+                                <!-- General validation message for screen readers -->
+                                <div *ngIf="newCustomerForm.invalid && (newCustomerForm.dirty || newCustomerForm.touched)" class="visually-hidden" aria-live="polite">
+                                    Please correct the errors in the form before submitting.
+                                </div>
                                 <div class="row g-3">
                                     <!-- Name Field -->
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="name"><i class="bi bi-person me-2"></i>Name</label>
-                                            <input id="name" type="text" ngModel name="name" class="form-control" required aria-required="true" autocomplete="name">
+                                            <input id="name" type="text" ngModel name="name" class="form-control" required aria-required="true" autocomplete="name" #name="ngModel">
+                                            <div *ngIf="name.invalid && (name.dirty || name.touched)" class="text-danger small mt-1">
+                                                <span *ngIf="name.errors?.['required']">Name is required.</span>
+                                            </div>
                                         </div>
                                     </div>
                                     <!-- Email Field -->
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="email"><i class="bi bi-envelope me-2"></i>Email</label>
-                                            <input id="email" type="email" ngModel name="email" class="form-control" required aria-required="true" autocomplete="email">
+                                            <input id="email" type="email" ngModel name="email" class="form-control" required email aria-required="true" autocomplete="email" #email="ngModel">
+                                            <div *ngIf="email.invalid && (email.dirty || email.touched)" class="text-danger small mt-1">
+                                                <span *ngIf="email.errors?.['required']">Email is required.</span>
+                                                <span *ngIf="email.errors?.['email']">Please enter a valid email address.</span>
+                                            </div>
                                         </div>
                                     </div>
                                     <!-- Address Field -->
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="address"><i class="bi bi-geo-alt me-2"></i>Address</label>
-                                            <input id="address" type="text" ngModel name="address" class="form-control" required aria-required="true" autocomplete="street-address">
+                                            <input id="address" type="text" ngModel name="address" class="form-control" required aria-required="true" autocomplete="street-address" #address="ngModel">
+                                            <div *ngIf="address.invalid && (address.dirty || address.touched)" class="text-danger small mt-1">
+                                                <span *ngIf="address.errors?.['required']">Address is required.</span>
+                                            </div>
                                         </div>
                                     </div>
                                     <!-- Phone Field -->
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="phone"><i class="bi bi-telephone me-2"></i>Phone</label>
-                                            <input id="phone" type="tel" ngModel name="phone" class="form-control" required aria-required="true" autocomplete="tel">
+                                            <input id="phone" type="tel" ngModel name="phone" class="form-control" required aria-required="true" autocomplete="tel" #phone="ngModel">
+                                            <div *ngIf="phone.invalid && (phone.dirty || phone.touched)" class="text-danger small mt-1">
+                                                <span *ngIf="phone.errors?.['required']">Phone is required.</span>
+                                            </div>
                                         </div>
                                     </div>
                                     <!-- Type Field -->
                                     <div class="col-md-6">
                                         <label for="type"><i class="bi bi-person-badge me-2"></i>Type</label>
-                                        <select id="type" name="type" ngModel="INDIVIDUAL" class="form-control" required aria-required="true">
+                                        <select id="type" name="type" ngModel="INDIVIDUAL" class="form-control" required aria-required="true" #type="ngModel">
                                             <option value="INDIVIDUAL">Individual</option>
                                             <option value="INSTITUTION">Institution</option>
                                         </select>
+                                        <div *ngIf="type.invalid && (type.dirty || type.touched)" class="text-danger small mt-1">
+                                            <span *ngIf="type.errors?.['required']">Type is required.</span>
+                                        </div>
                                     </div>
                                     <!-- Status Field -->
                                     <div class="col-md-6">
                                         <label for="status"><i class="bi bi-check-circle me-2"></i>Status</label>
-                                        <select id="status" name="status" ngModel="ACTIVE" class="form-control" required aria-required="true">
+                                        <select id="status" name="status" ngModel="ACTIVE" class="form-control" required aria-required="true" #status="ngModel">
                                             <option value="ACTIVE">Active</option>
                                             <option value="BANNED">Banned</option>
                                             <option value="PENDING">Pending</option>
                                             <option value="INACTIVE">Inactive</option>
                                         </select>
+                                        <div *ngIf="status.invalid && (status.dirty || status.touched)" class="text-danger small mt-1">
+                                            <span *ngIf="status.errors?.['required']">Status is required.</span>
+                                        </div>
                                     </div>
                                     <!-- Image URL Field -->
                                     <div class="col-md-12">
                                         <div class="form-group">
                                             <label for="imageUrl"><i class="bi bi-image me-2"></i>Image URL</label>
-                                            <input id="imageUrl" type="url" ngModel name="imageUrl" class="form-control" required aria-required="true" autocomplete="url">
+                                            <input id="imageUrl" type="url" ngModel name="imageUrl" class="form-control" required aria-required="true" autocomplete="url" #imageUrl="ngModel">
+                                            <div *ngIf="imageUrl.invalid && (imageUrl.dirty || imageUrl.touched)" class="text-danger small mt-1" style="color: #b00020 !important;">
+                                                <span *ngIf="imageUrl.errors?.['required']">Image URL is required.</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -103,7 +129,8 @@
                                 <div class="mt-4 text-center">
                                     <button
                                         [disabled]="state.dataState === DataState.LOADING || newCustomerForm.invalid || newCustomerForm.pristine || (isLoading$ | async)"
-                                        type="submit" class="btn btn-primary px-5">
+                                        type="submit" class="btn btn-primary px-5"
+                                        data-bs-toggle="tooltip" data-bs-placement="top" title="Save the new customer">
                                         <span *ngIf="isLoading$ | async" class="spinner-border spinner-border-sm"
                                             role="status" aria-hidden="true" style="margin-right: 5px;"></span>
                                         <span *ngIf="isLoading$ | async">Saving...</span>

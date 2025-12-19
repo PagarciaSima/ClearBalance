@@ -1,19 +1,24 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { BehaviorSubject, catchError, map, Observable, of, startWith } from 'rxjs';
+import { slideBlur } from 'src/app/animations/animations';
 import { DataState } from 'src/app/enum/datastate.enum';
 import { Customer } from 'src/app/interface/customer';
 import { CustomHttpResponse } from 'src/app/interface/customhttpresponse';
 import { State } from 'src/app/interface/state';
 import { User } from 'src/app/interface/user';
 import { CustomerService } from 'src/app/service/customer.service';
+import { TooltipService } from 'src/app/service/tooltip.service';
 
 @Component({
   selector: 'app-newcustomer',
   templateUrl: './newcustomer.component.html',
-  styleUrls: ['./newcustomer.component.css']
+  styleUrls: ['./newcustomer.component.css'],
+  animations: [
+    slideBlur
+  ]
 })
-export class NewcustomerComponent implements OnInit {
+export class NewcustomerComponent implements OnInit, AfterViewInit {
 
   newCustomerState$: Observable<State<CustomHttpResponse<Customer & User >>> | null = null;
   private dataSubject = new BehaviorSubject<any>(null);
@@ -21,12 +26,27 @@ export class NewcustomerComponent implements OnInit {
   isLoading$ = this.isLoadingSubject.asObservable();
   readonly DataState = DataState;
 
-  constructor(private customerService: CustomerService) { }
+  constructor(private customerService: CustomerService, private tooltipService: TooltipService) { }
+  
+  /**
+   * Initializes Bootstrap tooltips after the view is fully initialized.
+   */
+  ngAfterViewInit(): void {
+    this.tooltipService.initialize();
+  }
 
+  /**
+   * Initializes the component by setting up the new customer state observable.
+   */
   ngOnInit(): void {
     this.newCustomerState$ = of({ dataState: DataState.LOADED, appData: null });
   }
 
+  /**
+   * Creates a new customer using the provided form data.
+   *
+   * @param newCustomerForm - The form containing new customer data
+   */
   createCustomer(newCustomerForm: NgForm): void {
     this.isLoadingSubject.next(true);
     this.newCustomerState$ = this.customerService.newCustomers$(newCustomerForm.value)

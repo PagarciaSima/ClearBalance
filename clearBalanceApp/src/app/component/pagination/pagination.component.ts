@@ -10,6 +10,10 @@ export class PaginationComponent {
     @Input() totalPages: number = 1;
     @Input() pageSize: number = 10;
     @Input() pageSizeOptions: number[] = [5, 10, 20];
+    /**
+     * Total number of items in the dataset (for display).
+     */
+    @Input() totalItems: number = 0;
     @Output() pageChange = new EventEmitter<number>();
     @Output() pageSizeChange = new EventEmitter<number>();
 

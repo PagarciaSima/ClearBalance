@@ -28,6 +28,28 @@ export class CustomerService {
       );
   }
 
+
+  /**
+   * Searches for customers by name with pagination support.
+   *
+   * @param name - The name (or partial name) of the customer to search for. If omitted, returns all customers.
+   * @param page - The page number to retrieve (default is 0)
+   * @param size - The number of customers per page (default is 10)
+   * @returns An Observable emitting a CustomHttpResponse containing the paginated customer data
+   */
+  searchCustomers$(name?: string, page: number = 0, size: number = 10): Observable<CustomHttpResponse<CustomerPage>> {
+    const params = [
+      name ? `name=${encodeURIComponent(name)}` : '',
+      `page=${page}`,
+      `size=${size}`
+    ].filter(Boolean).join('&');
+    return this.http.get<CustomHttpResponse<CustomerPage>>(`${this.server}/customer/search?${params}`)
+      .pipe(
+        tap(console.log),
+        catchError(this.handleError)
+      );
+  }
+
   /**
  * Creates a new customer by sending a POST request to the backend.
  *
@@ -58,18 +80,44 @@ export class CustomerService {
   }
 
   /**
- * Handles HTTP errors from service requests.
- * Determines if the error originated from client-side or server-side and formats an appropriate error message.
- * 
- * @param error - The HttpErrorResponse object containing error details
- * @returns An Observable that throws a formatted error message string
- * 
- * @remarks
- * - For client-side errors (ErrorEvent), returns the error message
- * - For server-side errors, prioritizes custom reason from error.error.reason
- * - Falls back to standard HTTP error status and message if no custom reason exists
- */
+   * Retrieves a customer by their unique ID from the backend.
+   *
+   * @param id - The unique identifier of the customer to retrieve
+   * @returns An Observable emitting a CustomHttpResponse containing the user and customer data
+   */
+  getCustomer$(id: number): Observable<CustomHttpResponse<{ user: User; customer: Customer }>> {
+    return this.http.get<CustomHttpResponse<{ user: User; customer: Customer }>>(
+      `${this.server}/customer/get/${id}`
+    ).pipe(
+      tap(console.log),
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Updates an existing customer by sending a PUT request to the backend.
+   *
+   * @param customer The customer object containing updated information.
+   * @returns Observable containing the backend response with the authenticated user and updated customer.
+   */
+  updateCustomer(customer: Customer): Observable<CustomHttpResponse<{ user: User; customer: Customer }>> {
+    return this.http.put<CustomHttpResponse<{ user: User; customer: Customer }>>(`${this.server}/customer/update`, customer);
+  }
+
+  /**
+   * Handles HTTP errors from service requests.
+   * Determines if the error originated from client-side or server-side and formats an appropriate error message.
+   * 
+   * @param error - The HttpErrorResponse object containing error details
+   * @returns An Observable that throws a formatted error message string
+   * 
+   * @remarks
+   * - For client-side errors (ErrorEvent), returns the error message
+   * - For server-side errors, prioritizes custom reason from error.error.reason
+   * - Falls back to standard HTTP error status and message if no custom reason exists
+   */
   handleError(error: HttpErrorResponse): Observable<never> {
     return throwError(() => error);
   }
+
 }

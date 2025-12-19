@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Date;
 
 import com.clear.balance.clearBalance.domain.invoice.Invoice;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import jakarta.persistence.CascadeType;
@@ -39,6 +40,7 @@ public class Customer {
     private String imageUrl;
     private Date createdAt;
     @OneToMany(mappedBy = "customer", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JsonIgnore
     private Collection<Invoice> invoices;
 
 }

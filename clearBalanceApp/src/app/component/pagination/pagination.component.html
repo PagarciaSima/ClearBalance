@@ -1,4 +1,4 @@
-<nav *ngIf="totalPages > 1" class="mt-3 mb-3">
+<nav class="mt-3 mb-3" aria-label="Pagination">
   <div class="d-flex flex-column flex-md-row align-items-center justify-content-between px-3">
     <ul class="pagination justify-content-center mb-2 mb-md-0">
       <li class="page-item" [class.disabled]="currentPage === 1">
@@ -17,7 +17,11 @@
         <button class="page-link" (click)="goToLast()">Last</button>
       </li>
     </ul>
-    <div class="ms-md-3 mt-2 mt-md-0">
+    <div class="ms-md-3 mt-2 mt-md-0 d-flex align-items-center">
+      <span class="me-3 text-nowrap small text-secondary d-flex align-items-center">
+        <i class="bi bi-list-ul me-1"></i>
+        <span class="text-white">{{ totalItems }} result{{ totalItems === 1 ? '' : 's' }}</span>
+      </span>
       <label for="pageSizeSelect" class="me-2">Page size:</label>
       <select id="pageSizeSelect" class="form-select d-inline-block w-auto" [(ngModel)]="pageSize" (change)="handlePageSizeChange($event)">
         <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</option>

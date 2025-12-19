@@ -469,6 +469,7 @@
                         [totalPages]="eventsPage?.totalPages ?? 1"
                         [pageSize]="eventsPageSize"
                         [pageSizeOptions]="[5, 10, 20]"
+                        [totalItems]="eventsPage?.totalElements ?? 0"
                         (pageChange)="onPageChange(($event ? $event : 1) - 1)"
                         (pageSizeChange)="onPageSizeChange($event)">
                      </app-pagination>
