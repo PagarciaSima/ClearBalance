@@ -1,1 +1,191 @@
-<p>invoice works!</p>
+<!-- Invoice Component Template -->
+<ng-container *ngIf="(invoiceState$ | async) as state" [ngSwitch]="state.dataState">
+    <!-- Show invoice only when data is loaded -->
+    <ng-container *ngSwitchCase="DataState.LOADED">
+        <section>
+            <div class="container mt-4">
+                <!-- Breadcrumb Navigation -->
+                <div class="row card" [@slideBlur]>
+                    <nav aria-label="breadcrumb" style="margin-top: 8px;">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item">
+                                <a [routerLink]="['/']">
+                                    <i class="bi bi-house-door me-2"></i>Home
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a [routerLink]="['/invoices']">
+                                    <i class="bi bi-receipt me-2"></i>Invoices
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item active text-white" aria-current="page">
+                                <i class="bi bi-file-earmark-text me-2"></i>
+                                {{ state?.appData?.data?.invoice?.invoiceNumber }}
+                            </li>
+                        </ol>
+                    </nav>
+                </div>
+
+                <!-- Invoice Card -->
+                <div class="row card">
+                    <div class="col-md-12">
+                        <div class="invoice">
+                            <!-- Export PDF Button -->
+                            <div class="invoice-company text-inverse f-w-600">
+                                <span>
+                                    <!-- Accessible export button -->
+                                    <button type="button"
+                                        (click)="exportAsPDF()"
+                                        class="btn btn-sm btn-primary m-b-10 p-l-5"
+                                        style="font-weight: 500;background-color: #d6e0e5;color: #ea0c4b;"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-title="Export invoice as PDF"
+                                        aria-label="Export invoice as PDF">
+                                        <i class="bi bi-file-earmark-pdf-fill" style="color: #ea0c4b;" aria-hidden="true"></i>
+                                        <span class="text-white ms-2">Export as PDF</span>
+                                    </button>
+                                </span>
+                            </div>
+                            <hr class="text-white">
+
+                            <div id="invoice">
+                                <!-- Header: From, To, Invoice Details -->
+                                <div class="invoice-header text-white">
+                                    <!-- Sender Info -->
+                                    <div class="invoice-from">
+                                        <small>FROM</small>
+                                        <address class="m-t-5 m-b-5 text-white">
+                                            <strong class="text-inverse">
+                                                <i class="bi bi-building me-1"></i>ClearBalancea, Inc.
+                                            </strong><br>
+                                            <i class="bi bi-geo-alt me-1"></i>123 Main Steet<br>
+                                            <i class="bi bi-geo me-1"></i>Philadelphia, Pennsylvania 15886<br>
+                                            <i class="bi bi-telephone me-1"></i>Phone: (123) 456-7890<br>
+                                            <i class="bi bi-printer me-1"></i>Fax: (123) 456-7890
+                                        </address>
+                                    </div>
+                                    <!-- Customer Info -->
+                                    <div class="invoice-to text-white">
+                                        <small>TO</small>
+                                        <address class="m-t-5 m-b-5">
+                                            <strong class="text-inverse">
+                                                <i class="bi bi-person me-1"></i>{{ state?.appData?.data?.customer?.name }}
+                                            </strong><br>
+                                            <i class="bi bi-geo-alt me-1"></i>Address: {{ state?.appData?.data?.customer?.address }} <br>
+                                            <i class="bi bi-envelope me-1"></i>Email: {{ state?.appData?.data?.customer?.email }} <br>
+                                            <i class="bi bi-telephone me-1"></i>Phone: {{ state?.appData?.data?.customer?.phone }} <br>
+                                            <i class="bi bi-info-circle me-1"></i>Status: 
+                                            <span class="badge bg-success">
+                                                {{ state?.appData?.data?.invoice?.status }}
+                                            </span>
+                                        </address>
+                                    </div>
+                                    <!-- Invoice Details -->
+                                    <div class="invoice-date text-white" role="region" aria-label="Invoice details">
+                                        <small>
+                                            <i class="bi bi-hash me-1" aria-hidden="true"></i>
+                                            <span>Invoice Number: #{{ state?.appData?.data?.invoice?.invoiceNumber }}</span>
+                                        </small>
+                                        <div class="date text-inverse m-t-5">
+                                            <i class="bi bi-calendar-event me-1" aria-hidden="true"></i>
+                                            <span>Invoice Date: {{ state?.appData?.data?.invoice?.date | date: 'mediumDate' }}</span>
+                                        </div>
+                                        <div class="invoice-detail">
+                                            <i class="bi bi-hourglass-split me-1" aria-hidden="true"></i>
+                                            <span>Due Date: 30 Days from Invoice Date</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Invoice Table -->
+                                <div class="invoice-content">
+                                    <div class="table-responsive">
+                                        <table class="table table-invoice">
+                                            <caption class="visually-hidden">Invoice services and totals</caption>
+                                            <thead>
+                                                <tr>
+                                                    <th class="text-center" width="10%" scope="col">
+                                                        <i class="bi bi-hash" title="Number" aria-hidden="true"></i>
+                                                        <span class="visually-hidden">ID</span>
+                                                        ID
+                                                    </th>
+                                                    <th scope="col">
+                                                        <i class="bi bi-gear" title="Provided Services" aria-hidden="true"></i>
+                                                        <span class="visually-hidden">Provided Services</span>
+                                                        Provided Services
+                                                    </th>
+                                                    <th class="text-center" width="10%" scope="col">
+                                                        <i class="bi bi-currency-dollar" title="Rate" aria-hidden="true"></i>
+                                                        <span class="visually-hidden">Rate</span>
+                                                        RATE
+                                                    </th>
+                                                    <th class="text-right" width="20%" scope="col">
+                                                        <i class="bi bi-cash-stack" title="Total" aria-hidden="true"></i>
+                                                        <span class="visually-hidden">Total</span>
+                                                        TOTAL
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- List of services in the invoice -->
+                                                <tr *ngFor="let service of state?.appData?.data?.invoice?.services?.split(',')">
+                                                    <td class="text-center">{{ service.split(' ')[0] }}</td>
+                                                    <td>
+                                                        <span class="text-inverse">{{ service.split(' ')[1] }} {{ service.split(' ')[2] }}</span><br>
+                                                    </td>
+                                                    <td class="text-center">1</td>
+                                                    <td class="text-right">{{ service.split(' ')[3] }}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <!-- Invoice Price Summary -->
+                                    <div class="invoice-price text-white">
+                                        <div class="invoice-price-left">
+                                            <div class="invoice-price-row">
+                                                <div class="sub-price">
+                                                    <small>SUBTOTAL</small>
+                                                    <span class="text-inverse">
+                                                        <i class="fa fa-calculator" title="Subtotal"></i> ${{ state?.appData?.data?.invoice?.total }}
+                                                    </span>
+                                                </div>
+                                                <div class="sub-price">
+                                                    <i class="fa fa-plus text-muted"></i>
+                                                </div>
+                                                <div class="sub-price">
+                                                    <small><i class="fa fa-percent" title="Tax"></i> TAX (5.4%)</small>
+                                                    <span class="text-inverse">
+                                                        ${{ (state?.appData?.data?.invoice?.total ?? 0) * (5.4/100) | number: '.2-2'}}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="invoice-price-right">
+                                            <small><i class="fa fa-coins" title="Total"></i> TOTAL</small> 
+                                            <span class="f-w-600">
+                                                ${{ (state?.appData?.data?.invoice?.total ?? 0) * (5.4/100) + (state?.appData?.data?.invoice?.total ?? 0) | number: '.2-2' }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Invoice Footer -->
+                                <div class="invoice-footer">
+                                    <p class="text-center m-b-5 f-w-600">
+                                        THANK YOU FOR YOUR BUSINESS
+                                    </p>
+                                    <p class="text-center">
+                                        <span class="m-r-10"><i class="fa fa-fw fa-lg fa-globe"></i> clearbalance.com</span> <br>
+                                        <span class="m-r-10"><i class="fa fa-fw fa-lg fa-phone-volume"></i> Telephone:(123) 456-7890</span><br>
+                                        <span class="m-r-10"><i class="fa fa-fw fa-lg fa-envelope"></i> Email: billing@clearbalance.com</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </ng-container>
+</ng-container>

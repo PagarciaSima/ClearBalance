@@ -22,8 +22,8 @@ import { TooltipService } from 'src/app/service/tooltip.service';
 })
 export class InvoicesComponent implements OnInit {
 
-  invoicesState$!: Observable<State<CustomHttpResponse<{ user: User; page: Page<Invoice> | null }> | null>>;
-  private dataSubject = new BehaviorSubject<CustomHttpResponse<{ user: User; page: Page<Invoice> | null }> | null>(null);
+  invoicesState$!: Observable<State<CustomHttpResponse<{ user: User; page: Page<Invoice> } | null>>>;
+  private dataSubject = new BehaviorSubject<CustomHttpResponse<{ user: User; page: Page<Invoice> }> | null>(null);
   private isLoadingSubject = new BehaviorSubject<boolean>(false);
   isLoading$ = this.isLoadingSubject.asObservable();
   readonly DataState = DataState;

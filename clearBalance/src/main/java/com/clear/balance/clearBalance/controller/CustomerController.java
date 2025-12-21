@@ -455,15 +455,19 @@ public class CustomerController {
 	    log.debug("Fetching invoice with ID: {}", id);
 	    final Invoice invoice = customerService.getInvoice(id);
 	    log.info("Invoice {} successfully retrieved", id);
+	    
+	    final Customer customer = invoice.getCustomer();
+	    log.debug("Associated customer for invoice {}: {}", id, customer);
 
 	    // Build response
 	    HttpResponse response = HttpResponse.builder()
 	            .timeStamp(LocalDateTime.now().toString())
 	            .data(
-	                    Map.of(
-	                            "user", userDto,
-	                            "invoice", invoice
-	                    )
+                    Map.of(
+                        "user", userDto,
+                        "invoice", invoice,
+                        "customer", customer
+                    )
 	            )
 	            .message("Invoice retrieved")
 	            .status(HttpStatus.OK)

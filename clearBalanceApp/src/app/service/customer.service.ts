@@ -1,11 +1,12 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { catchError, Observable, tap, throwError } from 'rxjs';
+import { catchError, Observable, tap, throwError, map } from 'rxjs';
 import { CustomHttpResponse } from '../interface/customhttpresponse';
 import { Customer, CustomerPage } from '../interface/customer';
 import { Stats } from '../interface/stats';
 import { User } from '../interface/user';
 import { Invoice } from '../interface/invoice';
+import { Page } from '../interface/page';
 
 @Injectable({
   providedIn: 'root'
@@ -137,12 +138,12 @@ export class CustomerService {
   }
 
   /**
- * Adds an invoice to a specific customer by sending a POST request to the backend.
- *
- * @param customerId - The unique identifier of the customer
- * @param invoice - The invoice object to add to the customer
- * @returns An Observable emitting a CustomHttpResponse containing the user and updated customers list
- */
+  * Adds an invoice to a specific customer by sending a POST request to the backend.
+  *
+  * @param customerId - The unique identifier of the customer
+  * @param invoice - The invoice object to add to the customer
+  * @returns An Observable emitting a CustomHttpResponse containing the user and updated customers list
+  */
   addInvoiceToCustomer$(customerId: number, invoice: Invoice): Observable<CustomHttpResponse<{ user: User; customers: Customer[] }>> {
     return this.http.post<CustomHttpResponse<{ user: User; customers: Customer[] }>>(
       `${this.server}/customer/invoice/addtocustomer/${customerId}`,
@@ -160,9 +161,51 @@ export class CustomerService {
    * @param size - The number of invoices per page (default is 10)
    * @returns An Observable emitting a CustomHttpResponse containing the user and paginated invoices
    */
-  getInvoices$(page: number = 0, size: number = 10): Observable<CustomHttpResponse<{ user: User; page: any }>> {
+  getInvoices$(page: number = 0, size: number = 10): Observable<CustomHttpResponse<{ user: User; page: Page<Invoice> }>> {
     return this.http.get<CustomHttpResponse<{ user: User; page: any }>>(
       `${this.server}/customer/invoice/list?page=${page}&size=${size}`
+    ).pipe(
+      map(response => {
+        // Si la respuesta no es paginada, la adaptamos
+        if (response && response.data && response.data.page && !('content' in response.data.page)) {
+          const invoice = response.data.page as Invoice;
+          response.data.page = {
+            content: [invoice],
+            empty: false,
+            first: true,
+            last: true,
+            number: 0,
+            numberOfElements: 1,
+            pageable: {
+              pageNumber: 0,
+              pageSize: 1,
+              offset: 0,
+              paged: true,
+              unpaged: false,
+              sort: { empty: true, sorted: false, unsorted: true }
+            },
+            size: 1,
+            sort: { empty: true, sorted: false, unsorted: true },
+            totalElements: 1,
+            totalPages: 1
+          };
+        }
+        return response as CustomHttpResponse<{ user: User; page: Page<Invoice> }>;
+      }),
+      tap(console.log),
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Fetches a single invoice by its ID from the server.
+   *
+   * @param invoiceId - The ID of the invoice to retrieve
+   * @returns An Observable emitting a CustomHttpResponse containing the invoice, customer, and user data
+   */
+  getInvoice$(invoiceId: number): Observable<CustomHttpResponse<{ user: User; invoice: Invoice; customer: Customer }>> {
+    return this.http.get<CustomHttpResponse<{ user: User; invoice: Invoice; customer: Customer }>>(
+      `${this.server}/customer/invoice/get/${invoiceId}`
     ).pipe(
       tap(console.log),
       catchError(this.handleError)

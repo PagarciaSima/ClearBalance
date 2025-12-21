@@ -30,7 +30,7 @@ const routes: Routes = [
   { path: 'invoices/new', component: NewinvoiceComponent, canActivate: [authenticationGuard] },
   { path: 'invoices', component: InvoicesComponent, canActivate: [authenticationGuard] },
   { path: 'customer/:id', component: CustomerComponent, canActivate: [authenticationGuard] },
-  { path: 'invoices/id/:invoiceNumber', component: InvoiceComponent, canActivate: [authenticationGuard] },
+  { path: 'invoices/:id/:invoiceNumber', component: InvoiceComponent, canActivate: [authenticationGuard] },
   { path: '', component: HomeComponent, canActivate: [authenticationGuard], pathMatch: 'full' },
   { path: '**', component: PageNotFoundComponent},
 ];
