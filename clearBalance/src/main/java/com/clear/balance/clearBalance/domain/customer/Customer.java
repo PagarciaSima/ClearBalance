@@ -40,7 +40,7 @@ public class Customer {
     private String imageUrl;
     private Date createdAt;
     @OneToMany(mappedBy = "customer", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JsonIgnore
+    
     private Collection<Invoice> invoices;
 
 }

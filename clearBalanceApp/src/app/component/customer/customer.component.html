@@ -34,7 +34,7 @@
                                             <h4 class="my-0 text-center text-white">{{ state?.appData?.data?.customer?.name }}</h4>
                                             <p class="mb-2 text-center" style="font-size: 13px;">{{ state?.appData?.data?.customer?.email }}</p>
                                             <img [src]="state?.appData?.data?.customer?.imageUrl"
-                                                style="max-height: 280px; max-width: 280px; object-fit: cover; margin-bottom: 10px;"
+                                                style="height: 280px; width: 280px; object-fit: cover; margin-bottom: 10px;"
                                                 class="rounded-circle avatar-lg img-thumbnail d-block mx-auto" alt="profile-image">
                                             <span class="badge mt-2"
                                                 [ngClass]="[
@@ -72,7 +72,10 @@
                                         <ul class="list-group">
                                             <li class="list-group-item d-flex justify-content-between align-items-center"
                                                 style="font-size: 20px;">
-                                                Total Billed
+                                                Total Billed 
+                                                <span class="" style="font-size: 20px;">
+                                                    {{ getTotalInvoices() | currency }}
+                                                </span>
                                                 <span class="badge bg-success" style="font-size: 20px;"></span>
                                             </li>
                                         </ul>

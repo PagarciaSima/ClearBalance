@@ -1,1 +1,128 @@
-<p>newinvoice works!</p>
+<ng-container *ngIf="(newInvoiceState$ | async) as state" [ngSwitch]="state.dataState">
+    <ng-container *ngSwitchCase="DataState.LOADED">
+        <section class="newinvoice-section" @slideBlur aria-labelledby="new-invoice-title" role="main">
+            <div class="container mt-4">
+                <!-- Breadcrumb Navigation -->
+                <div class="row justify-content-center card" role="navigation" aria-label="Breadcrumb">
+                    <nav aria-label="breadcrumb" style="margin-top: 8px;">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item">
+                                <a [routerLink]="['/']" data-bs-toggle="tooltip" data-bs-placement="left" title="Go to home page">
+                                    <i class="bi bi-house-door me-2" aria-hidden="true"></i><span class="visually-hidden">Home</span>Home
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a [routerLink]="['/invoices']" data-bs-toggle="tooltip" data-bs-placement="left" title="Go to invoices">
+                                    <i class="bi bi-receipt me-2" aria-hidden="true"></i><span class="visually-hidden">Invoices</span>Invoices
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item active" aria-current="page">
+                                <i class="bi bi-file-earmark-plus-fill me-2" aria-hidden="true"></i><span class="text-white">New</span>
+                            </li>
+                        </ol>
+                    </nav>
+                </div>
+                <!-- New Invoice Form Card -->
+                <div class="row justify-content-center">
+                    <div class="card">
+                        <div class="card-body p-4">
+                            <!-- Form Title -->
+                            <div class="text-center mb-4">
+                                <h2 id="new-invoice-title"><i class="bi bi-receipt me-2" aria-hidden="true"></i><span class="visually-hidden">New Invoice</span>New Invoice</h2>
+                            </div>
+                            <!-- Error Alert -->
+                            <div *ngIf="state.error"
+                                class="alert alert-danger bg-danger text-light border-0 alert-dismissible fade show"
+                                role="alert">
+                                {{ state.error }}
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"
+                                    aria-label="Close"></button>
+                            </div>
+                            <!-- Success Alert -->
+                            <div *ngIf="state.appData?.message"
+                                class="alert alert-success bg-success text-light border-0 alert-dismissible fade show"
+                                role="alert">
+                                {{ state.appData?.message }}
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"
+                                    aria-label="Close"></button>
+                            </div>
+                            <!-- New Invoice Form -->
+                            <form #invoiceForm="ngForm" (ngSubmit)="createInvoice(invoiceForm)" aria-label="New Invoice Form" novalidate autocomplete="off" role="form" >
+                                <fieldset class="row g-3" aria-describedby="new-invoice-title">
+                                    <!-- Services Field -->
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label for="services"><i class="bi bi-list-task me-2" aria-hidden="true"></i>Services <span class="text-danger" aria-hidden="true">*</span></label>
+                                            <input id="services" type="text" ngModel name="services" class="form-control" required aria-required="true" #services="ngModel" aria-describedby="servicesHelp" aria-label="Services">
+                                            <div *ngIf="services.invalid && (services.dirty || services.touched)" class="text-danger small mt-1">
+                                                <span *ngIf="services.errors?.['required']">Services is required.</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Customer Field -->
+                                    <div class="col-md-6">
+                                        <label for="customerId"><i class="bi bi-person me-2" aria-hidden="true"></i>Customer <span class="text-danger" aria-hidden="true">*</span></label>
+                                        <select id="customerId" name="customerId" ngModel class="form-control select-cl" required aria-required="true" #customerId="ngModel" aria-label="Customer" aria-describedby="customerHelp">
+                                            <option value="" disabled hidden>Select customer</option>
+                                            <option *ngFor="let customer of state?.appData?.data?.customers" [ngValue]="customer.id" class="select-cl">{{ customer.name }}</option>
+                                        </select>
+                                        <div *ngIf="customerId.invalid && (customerId.dirty || customerId.touched)" class="text-danger small mt-1">
+                                            <span *ngIf="customerId.errors?.['required']">Customer is required.</span>
+                                        </div>
+                                    </div>
+                                    <!-- Total Field -->
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="total"><i class="bi bi-cash-stack me-2" aria-hidden="true"></i>Total <span class="text-danger" aria-hidden="true">*</span></label>
+                                            <input id="total" type="number" ngModel name="total" class="form-control" required aria-required="true" #total="ngModel" aria-describedby="totalHelp" aria-label="Total">
+                                            <div *ngIf="total.invalid && (total.dirty || total.touched)" class="text-danger small mt-1">
+                                                <span *ngIf="total.errors?.['required']">Total is required.</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Date Field -->
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="date"><i class="bi bi-calendar-date me-2" aria-hidden="true"></i>Date <span class="text-danger" aria-hidden="true">*</span></label>
+                                            <input id="date" type="date" ngModel name="date" class="form-control" required aria-required="true" #date="ngModel" aria-describedby="dateHelp" aria-label="Date">
+                                            <div *ngIf="date.invalid && (date.dirty || date.touched)" class="text-danger small mt-1">
+                                                <span *ngIf="date.errors?.['required']">Date is required.</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Status Field -->
+                                    <div class="col-md-6">
+                                        <label for="status"><i class="bi bi-check-circle me-2" aria-hidden="true"></i>Status <span class="text-danger" aria-hidden="true">*</span></label>
+                                        <select id="status" name="status" ngModel class="form-control" required aria-required="true" #status="ngModel" aria-label="Status" aria-describedby="statusHelp">
+                                            <option value="" disabled hidden>Select status</option>
+                                            <option value="PENDING">Pending</option>
+                                            <option value="PAID">Paid</option>
+                                            <option value="CANCELED">Canceled</option>
+                                            <option value="OVERDUE">Overdue</option>
+                                        </select>
+                                        <div *ngIf="status.invalid && (status.dirty || status.touched)" class="text-danger small mt-1">
+                                            <span *ngIf="status.errors?.['required']">Status is required.</span>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                                <!-- Submit Button -->
+                                <div class="mt-4 text-center">
+                                    <button [disabled]="state.dataState === DataState.LOADING || invoiceForm.invalid || invoiceForm.pristine || (isLoading$ | async)"
+                                        type="submit" class="btn btn-primary px-5" aria-label="Save Invoice"
+                                        data-bs-toggle="tooltip" data-bs-placement="top" title="Save the new invoice">
+                                        <span *ngIf="isLoading$ | async" class="spinner-border spinner-border-sm"
+                                            role="status" aria-hidden="true" style="margin-right: 5px;"></span>
+                                        <span *ngIf="isLoading$ | async">Saving...</span>
+                                        <span *ngIf="!(isLoading$ | async)">Save Invoice</span>
+                                    </button>
+                                </div>
+                            </form>
+                            <!-- End New Invoice Form -->
+                        </div>
+                    </div>
+                </div>
+                <!-- End New Invoice Form Card -->
+            </div>
+        </section>
+    </ng-container>
+</ng-container>

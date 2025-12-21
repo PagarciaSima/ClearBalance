@@ -202,12 +202,15 @@ public class CustomerController {
 	    // Retrieve customer
 	    Customer customer = customerService.getCustomer(id);
 	    log.info("Customer found with ID: {}", customer.getId());
+	    
+	    Collection<Invoice> invoices = customer.getInvoices();
 
 	    HttpResponse httpResponse = HttpResponse.builder()
 	            .timeStamp(LocalDateTime.now().toString())
 	            .data(Map.of(
 	                    "user", userDto,
-	                    "customer", customer    
+	                    "customer", customer,
+	                    "invoices", invoices
 	            ))
 	            .message("Customer retrieved successfully")
 	            .status(HttpStatus.OK)
@@ -384,7 +387,6 @@ public class CustomerController {
 	    log.debug("Response prepared successfully for user ID: {}", userDto.getId());
 	    return ResponseEntity.ok(response);
 	}
-
 
 
 	/**

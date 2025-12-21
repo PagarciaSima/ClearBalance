@@ -1,10 +1,11 @@
+
 import { Component, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { Observable, BehaviorSubject, catchError, map, of, startWith } from 'rxjs';
+import { BehaviorSubject, catchError, map, Observable, of, startWith } from 'rxjs';
 import { slideBlur } from 'src/app/animations/animations';
 import { DataState } from 'src/app/enum/datastate.enum';
-import { Customer, CustomerPage } from 'src/app/interface/customer';
+import { Customer } from 'src/app/interface/customer';
 import { CustomHttpResponse } from 'src/app/interface/customhttpresponse';
 import { State } from 'src/app/interface/state';
 import { User } from 'src/app/interface/user';
@@ -47,10 +48,19 @@ export class CustomerComponent implements OnInit {
     this.isLoading$ = this.isLoadingSubject.asObservable();
   }
 
+  /**
+   * Initializes tooltips after the view has been fully initialized.
+   */
   ngAfterViewInit(): void {
       this.tooltipService.initialize();
   }
 
+  /**
+   * Fetches customer details based on the provided customer ID.
+   *
+   * @param customerId - The ID of the customer to retrieve
+   * @returns An Observable emitting the state of the customer details retrieval
+   */
   getCustomerDetails(customerId: number): Observable<State<CustomHttpResponse<{ user: User; customer: Customer }>>> {
     return this.customerService.getCustomer$(customerId)
       .pipe(
@@ -64,6 +74,11 @@ export class CustomerComponent implements OnInit {
       );
   }
 
+  /**
+   * Updates customer information based on the provided form data.
+   *
+   * @param customerForm - The form containing updated customer information
+   */
   updateCustomer(customerForm: NgForm): void {
     this.isLoadingSubject.next(true);
     this.customerState$ = this.customerService.updateCustomer(customerForm.value)
@@ -91,5 +106,14 @@ export class CustomerComponent implements OnInit {
       const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
       window.open(mapsUrl, '_blank', 'noopener,noreferrer');
     }
+  }
+
+  /**
+   * Calculates the total amount of all invoices for the current customer.
+   * @returns The sum of all invoice totals, or 0 if none.
+   */
+  getTotalInvoices(): number {
+    const invoices = this.dataSubject.value?.data?.customer?.invoices || [];
+    return invoices.reduce((sum, invoice) => sum + (invoice.total || 0), 0);
   }
 }

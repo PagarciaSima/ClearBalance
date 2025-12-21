@@ -6,7 +6,7 @@ export interface CustomHttpResponse<T> {
     statusCode: number;
     status: string;
     reason?: string;
-    message: string;
+    message: string | null;
     developerMessage?: string;
     data?: T;
 }
