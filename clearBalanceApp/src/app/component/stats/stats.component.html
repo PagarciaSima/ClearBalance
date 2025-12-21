@@ -59,7 +59,7 @@
             <div class="stat-content">
               <h3 class="stat-number" aria-live="polite">
                 <ng-container *ngIf="!loading && stats; else loadingOrErrorBilled">
-                  ${{ stats.totalBilled }}
+                  {{ stats.totalBilled | currency }}
                 </ng-container>
                 <ng-template #loadingOrErrorBilled>
                   <span *ngIf="loading">...</span>

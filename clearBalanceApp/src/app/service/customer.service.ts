@@ -154,6 +154,22 @@ export class CustomerService {
   }
 
   /**
+   * Retrieves a paginated list of invoices from the backend.
+   *
+   * @param page - The page number to retrieve (default is 0)
+   * @param size - The number of invoices per page (default is 10)
+   * @returns An Observable emitting a CustomHttpResponse containing the user and paginated invoices
+   */
+  getInvoices$(page: number = 0, size: number = 10): Observable<CustomHttpResponse<{ user: User; page: any }>> {
+    return this.http.get<CustomHttpResponse<{ user: User; page: any }>>(
+      `${this.server}/customer/invoice/list?page=${page}&size=${size}`
+    ).pipe(
+      tap(console.log),
+      catchError(this.handleError)
+    );
+  }
+
+  /**
    * Handles HTTP errors from service requests.
    * Determines if the error originated from client-side or server-side and formats an appropriate error message.
    * 

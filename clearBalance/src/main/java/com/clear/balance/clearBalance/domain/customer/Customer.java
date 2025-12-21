@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.Date;
 
 import com.clear.balance.clearBalance.domain.invoice.Invoice;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import jakarta.persistence.CascadeType;

@@ -1,1 +1,123 @@
-<p>invoices works!</p>
+<!-- ========================= INVOICES COMPONENT TEMPLATE ========================= -->
+<ng-container *ngIf="(invoicesState$ | async) as state" [ngSwitch]="state.dataState">
+
+  <!-- ========================= LOADED STATE ========================= -->
+  <ng-container *ngSwitchCase="DataState.LOADED">
+    <section>
+      <div class="container mt-4">
+        <div class="row card" [@slideBlur]>
+
+          <!-- ========================= PROGRESS BAR ========================= -->
+          <div class="col-12 mt-5" *ngIf="isLoading$ | async">
+            <div class="progress" role="progressbar" aria-label="Invoice data loading progress" aria-valuenow="100"
+              aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" style="width: 100%;">
+                <span class="visually-hidden">Loading...</span>
+                Loading...
+              </div>
+            </div>
+          </div>
+
+          <!-- ========================= HEADER ROW ========================= -->
+          <div class="col mt-3">
+            <h4 class="fw-bold text-start text-white">
+              <i class="bi bi-receipt me-2" aria-hidden="true"></i>Invoices
+            </h4>
+          </div>
+          <div class="col">
+            <div class="fw-bold text-end">
+              <button type="button" class="mb-3 btn btn-link p-0 border-0 bg-transparent" data-bs-toggle="tooltip"
+                data-bs-placement="top" title="Export invoices to Excel" aria-label="Export invoices to Excel">
+                <i class="bi bi-file-earmark-excel success-icon fs-1 mb-0" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- ========================= INVOICES TABLE ========================= -->
+          <div class="col-12">
+            <table class="table table-hover" aria-label="Invoices list">
+              <thead>
+                <tr>
+                  <th scope="col">
+                    <i class="bi bi-hash me-2" aria-hidden="true"></i>Invoice Number
+                  </th>
+                  <th scope="col">
+                    <i class="bi bi-briefcase me-2" aria-hidden="true"></i>Service
+                  </th>
+                  <th scope="col">
+                    <i class="bi bi-circle-fill me-2" aria-hidden="true"></i>Status
+                  </th>
+                  <th scope="col">
+                    <i class="bi bi-calendar-event me-2" aria-hidden="true"></i>Date
+                  </th>
+                  <th scope="col">
+                    <i class="bi bi-currency-dollar me-2" aria-hidden="true"></i>Total
+                  </th>
+                  <th scope="col">
+                    <i class="bi bi-gear me-2" aria-hidden="true"></i>Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="table-body">
+                <tr *ngFor="let invoice of state.appData?.data?.page?.content">
+                  <td>{{ invoice.invoiceNumber }}</td>
+                  <td>{{ invoice.services }}</td>
+                  <td>
+                    <span class="badge"
+                      [ngClass]="[
+                        invoice.status === 'PAID' ? ' bg-success' : '',
+                        invoice.status === 'PENDING' ? ' bg-primary' : '',
+                        invoice.status === 'CANCELED' ? ' bg-danger' : '',
+                        invoice.status === 'OVERDUE' ? ' bg-warning' : ''
+                      ]">
+                      {{ invoice.status }}
+                    </span>
+                  </td>
+                  <td>{{ invoice.date | date: 'mediumDate' }}</td>
+                  <td>{{ invoice.total | currency:'USD' }}</td>
+                  <td>
+                    <button [routerLink]="['/invoices', invoice.id, invoice.invoiceNumber]"
+                            type="button"
+                            class="btn btn-info btn-sm"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="top"
+                            [attr.title]="'Print invoice ' + invoice.invoiceNumber">
+                      <i class="bi bi-printer me-1" aria-hidden="true"></i>Print
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <!-- ========================= PAGINATION ========================= -->
+            <app-pagination
+              [currentPage]="(state.appData?.data?.page?.number ?? 0) + 1"
+              [totalPages]="state.appData?.data?.page?.totalPages ?? 1"
+              [pageSize]="invoicePageSize"
+              [pageSizeOptions]="[5, 10, 20]"
+              [totalItems]="state.appData?.data?.page?.totalElements ?? 0"
+              (pageChange)="onInvoicePageChange($event - 1)"
+              (pageSizeChange)="onInvoicePageSizeChange($event)">
+            </app-pagination>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  </ng-container>
+
+  <!-- ========================= LOADING STATE ========================= -->
+  <ng-container *ngSwitchCase="DataState.LOADING">
+    <div class="text-center mt-5">
+      <span class="spinner-border" role="status" aria-hidden="true"></span>
+      <span>Loading invoices...</span>
+    </div>
+  </ng-container>
+
+  <!-- ========================= ERROR STATE ========================= -->
+  <ng-container *ngSwitchCase="DataState.ERROR">
+    <div class="alert alert-danger mt-5" role="alert">
+      {{ state.error }}
+    </div>
+  </ng-container>
+
+</ng-container>
