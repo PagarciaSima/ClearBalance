@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 import { BehaviorSubject, catchError, map, of, startWith, switchMap } from 'rxjs';
 import { Observable } from 'rxjs/internal/Observable';
+import { slideBlur } from 'src/app/animations/animations';
 import { DataState } from 'src/app/enum/datastate.enum';
 import { Customer } from 'src/app/interface/customer';
 import { CustomHttpResponse } from 'src/app/interface/customhttpresponse';
@@ -16,7 +17,8 @@ const INVOICE_ID = 'id';
 @Component({
   selector: 'app-invoice',
   templateUrl: './invoice.component.html',
-  styleUrls: ['./invoice.component.css']
+  styleUrls: ['./invoice.component.css'],
+  animations: [ slideBlur]
 })
 export class InvoiceComponent {
   invoiceState$!: Observable<State<CustomHttpResponse<{ user: User; invoice: Invoice; customer: Customer }>>>;
@@ -63,7 +65,30 @@ export class InvoiceComponent {
     );
   }
 
+  /**
+   * Exports the current invoice as a PDF file by downloading it from the server.
+   */
   exportAsPDF(): void {
-
+    const invoiceId = this.dataSubject.value?.data?.invoice?.id;
+    const invoiceNumber = this.dataSubject.value?.data?.invoice?.invoiceNumber ?? 'unknown';
+    if (!invoiceId) {
+      console.error('No invoice ID found');
+      return;
+    }
+    this.customerService.downloadInvoicePdf$(invoiceId).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `invoice-${invoiceNumber}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        console.error('Error downloading PDF:', err);
+      }
+    });
   }
 }

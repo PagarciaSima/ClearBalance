@@ -6,6 +6,7 @@ import { Customer, CustomerPage } from '../interface/customer';
 import { Stats } from '../interface/stats';
 import { User } from '../interface/user';
 import { Invoice } from '../interface/invoice';
+import { InvoiceService } from '../interface/invoiceservice';
 import { Page } from '../interface/page';
 
 @Injectable({
@@ -122,22 +123,6 @@ export class CustomerService {
   }
 
   /**
-   * Creates a new invoice by sending a POST request to the backend.
-   *
-   * @param invoice - The invoice object to create
-   * @returns An Observable emitting a CustomHttpResponse containing the created invoice and user
-   */
-  createInvoice$(invoice: Invoice): Observable<CustomHttpResponse<{ user: User; invoice: Invoice }>> {
-    return this.http.post<CustomHttpResponse<{ user: User; invoice: Invoice }>>(
-      `${this.server}/invoice/create`,
-      invoice
-    ).pipe(
-      tap(console.log),
-      catchError(this.handleError)
-    );
-  }
-
-  /**
   * Adds an invoice to a specific customer by sending a POST request to the backend.
   *
   * @param customerId - The unique identifier of the customer
@@ -208,6 +193,21 @@ export class CustomerService {
       `${this.server}/customer/invoice/get/${invoiceId}`
     ).pipe(
       tap(console.log),
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Descarga el PDF de una factura generado por el backend (JasperReports).
+   *
+   * @param invoiceId - El ID de la factura
+   * @returns Observable con el blob del PDF
+   */
+  downloadInvoicePdf$(invoiceId: number): Observable<Blob> {
+    return this.http.get(`${this.server}/customer/invoice/${invoiceId}/pdf`, {
+      responseType: 'blob'
+    }).pipe(
+      tap(() => console.log('PDF downloaded for invoice', invoiceId)),
       catchError(this.handleError)
     );
   }

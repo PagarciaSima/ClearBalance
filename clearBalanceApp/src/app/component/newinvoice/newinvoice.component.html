@@ -49,19 +49,49 @@
                             <!-- New Invoice Form -->
                             <form #invoiceForm="ngForm" (ngSubmit)="createInvoice(invoiceForm)" aria-label="New Invoice Form" novalidate autocomplete="off" role="form" >
                                 <fieldset class="row g-3" aria-describedby="new-invoice-title">
-                                    <!-- Services Field -->
-                                    <div class="col-md-12">
-                                        <div class="form-group">
-                                            <label for="services"><i class="bi bi-list-task me-2" aria-hidden="true"></i>Services <span class="text-danger" aria-hidden="true">*</span></label>
-                                            <input id="services" type="text" ngModel name="services" class="form-control" required aria-required="true" #services="ngModel" aria-describedby="servicesHelp" aria-label="Services">
-                                            <div *ngIf="services.invalid && (services.dirty || services.touched)" class="text-danger small mt-1">
-                                                <span *ngIf="services.errors?.['required']">Services is required.</span>
+                                    <!-- Dynamic Services Subform for InvoiceService[] -->
+                                    <div class="col-md-12 border boder-white rounded-3 mt-3 p-3">
+                                        <div class="form-group mb-2">
+                                            <label class="form-label required"><i class="bi bi-list-task me-2" aria-hidden="true"></i>Services</label>
+                                            <div class="row g-2 align-items-end pt-2">
+                                                <div class="col-6 col-md-5">
+                                                    <label for="serviceDescriptionTemp" class="form-label required">
+                                                        <i class="bi bi-card-text me-2" aria-hidden="true"></i>Description
+                                                    </label>
+                                                    <input id="serviceDescriptionTemp" type="text" class="form-control" [(ngModel)]="serviceForm.description" name="serviceDescriptionTemp" aria-label="Service Description">
+                                                </div>
+                                                <div class="col-3 col-md-3">
+                                                    <label for="servicePriceTemp" class="form-label required">
+                                                        <i class="bi bi-currency-dollar me-2" aria-hidden="true"></i>Price
+                                                    </label>
+                                                    <input id="servicePriceTemp" type="number" class="form-control" [(ngModel)]="serviceForm.price" name="servicePriceTemp" aria-label="Service Price">
+                                                </div>
+                                                <div class="col-3 col-md-2">
+                                                    <label for="serviceQuantityTemp" class="form-label required">
+                                                        <i class="bi bi-stack me-2" aria-hidden="true"></i>Quantity
+                                                    </label>
+                                                    <input id="serviceQuantityTemp" type="number" class="form-control" [(ngModel)]="serviceForm.quantity" name="serviceQuantityTemp" aria-label="Service Quantity">
+                                                </div>
+                                                <div class="col-auto">
+                                                    <button type="button" class="btn btn-success" (click)="addService()" [disabled]="!serviceForm.description || !serviceForm.price || !serviceForm.quantity" data-bs-toggle="tooltip" data-bs-placement="top" title="Add service to invoice">
+                                                        <i class="bi bi-plus-lg"></i> Add
+                                                    </button>
+                                                </div>
                                             </div>
+                                            <div class="mt-2">
+                                                <ul class="list-group">
+                                                    <li *ngFor="let s of servicesList; let i = index" class="list-group-item d-flex justify-content-between align-items-center">
+                                                        <span>{{s.description}} - ${{s.price}} x {{s.quantity}}</span>
+                                                        <button type="button" class="btn btn-danger btn-sm" (click)="removeService(i)" aria-label="Remove service" data-bs-toggle="tooltip" data-bs-placement="top" title="Remove this service"><i class="bi bi-trash"></i></button>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                            <div *ngIf="servicesList.length === 0 && (invoiceForm.submitted || invoiceForm.dirty)" class="text-danger small mt-1">At least one service is required.</div>
                                         </div>
                                     </div>
                                     <!-- Customer Field -->
                                     <div class="col-md-6">
-                                        <label for="customerId"><i class="bi bi-person me-2" aria-hidden="true"></i>Customer <span class="text-danger" aria-hidden="true">*</span></label>
+                                        <label for="customerId" class="form-label required"><i class="bi bi-person me-2" aria-hidden="true"></i>Customer</label>
                                         <select id="customerId" name="customerId" ngModel class="form-control select-cl" required aria-required="true" #customerId="ngModel" aria-label="Customer" aria-describedby="customerHelp">
                                             <option value="" disabled hidden>Select customer</option>
                                             <option *ngFor="let customer of state?.appData?.data?.customers" [ngValue]="customer.id" class="select-cl">{{ customer.name }}</option>
@@ -70,20 +100,18 @@
                                             <span *ngIf="customerId.errors?.['required']">Customer is required.</span>
                                         </div>
                                     </div>
-                                    <!-- Total Field -->
+                                    <!-- Total Field (readonly, auto-calculated) -->
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="total"><i class="bi bi-cash-stack me-2" aria-hidden="true"></i>Total <span class="text-danger" aria-hidden="true">*</span></label>
-                                            <input id="total" type="number" ngModel name="total" class="form-control" required aria-required="true" #total="ngModel" aria-describedby="totalHelp" aria-label="Total">
-                                            <div *ngIf="total.invalid && (total.dirty || total.touched)" class="text-danger small mt-1">
-                                                <span *ngIf="total.errors?.['required']">Total is required.</span>
-                                            </div>
+                                            <label for="total"><i class="bi bi-cash-stack me-2" aria-hidden="true"></i>Subtotal</label>
+                                            <input id="total" type="number" class="form-control bg-light text-primary fw-bold border-0 mt-2" [value]="total" readonly aria-label="Total" tabindex="-1" style="background-color: #f5f5f5; color: #0d6efd; font-weight: bold; cursor: not-allowed;">
+                                            <input type="hidden" name="total" [ngModel]="total">
                                         </div>
                                     </div>
                                     <!-- Date Field -->
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="date"><i class="bi bi-calendar-date me-2" aria-hidden="true"></i>Date <span class="text-danger" aria-hidden="true">*</span></label>
+                                            <label for="date" class="form-label required"><i class="bi bi-calendar-date me-2" aria-hidden="true"></i>Date</label>
                                             <input id="date" type="date" ngModel name="date" class="form-control" required aria-required="true" #date="ngModel" aria-describedby="dateHelp" aria-label="Date">
                                             <div *ngIf="date.invalid && (date.dirty || date.touched)" class="text-danger small mt-1">
                                                 <span *ngIf="date.errors?.['required']">Date is required.</span>
@@ -92,7 +120,7 @@
                                     </div>
                                     <!-- Status Field -->
                                     <div class="col-md-6">
-                                        <label for="status"><i class="bi bi-check-circle me-2" aria-hidden="true"></i>Status <span class="text-danger" aria-hidden="true">*</span></label>
+                                        <label for="status" class="form-label required"><i class="bi bi-check-circle me-2" aria-hidden="true"></i>Status</label>
                                         <select id="status" name="status" ngModel class="form-control" required aria-required="true" #status="ngModel" aria-label="Status" aria-describedby="statusHelp">
                                             <option value="" disabled hidden>Select status</option>
                                             <option value="PENDING">Pending</option>

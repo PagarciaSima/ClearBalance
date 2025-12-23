@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport
+	xmlns="http://jasperreports.sourceforge.net/jasperreports"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports
+              http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+	name="services_subreport">
+
+	<field name="description" class="java.lang.String" />
+	<field name="price" class="java.lang.Double" />
+	<field name="quantity" class="java.lang.Integer" />
+
+	<detail>
+		<band height="30">
+			<!-- Descripción - MISMO TAMAÑO Y POSICIÓN AJUSTADA -->
+			<textField isStretchWithOverflow="true">
+				<reportElement x="0" y="0" width="186" height="30" /> <!-- x=14 (no 15) -->
+				<box>
+					<topPen lineWidth="0.0" />
+					<leftPen lineWidth="0.0" />
+					<bottomPen lineWidth="0.5" lineColor="#ECF0F1" />
+					<rightPen lineWidth="0.0" />
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="12" /> <!-- MISMO tamaño que header -->
+				</textElement>
+				<textFieldExpression><![CDATA[$F{description}]]></textFieldExpression>
+			</textField>
+
+			<!-- Cantidad - MISMO TAMAÑO Y POSICIÓN AJUSTADA -->
+			<textField>
+				<reportElement x="180" y="0" width="101" height="30" /> <!-- x=199 (no 200) -->
+				<box>
+					<topPen lineWidth="0.0" />
+					<leftPen lineWidth="0.0" />
+					<bottomPen lineWidth="0.5" lineColor="#ECF0F1" />
+					<rightPen lineWidth="0.0" />
+				</box>
+				<textElement textAlignment="Center"
+					verticalAlignment="Middle">
+					<font size="12" /> <!-- MISMO tamaño que header -->
+				</textElement>
+				<textFieldExpression><![CDATA[$F{quantity}]]></textFieldExpression>
+			</textField>
+
+			<!-- Precio Unit. - MISMO TAMAÑO Y POSICIÓN AJUSTADA -->
+			<textField isStretchWithOverflow="true">
+				<reportElement x="250" y="0" width="91" height="30" /> <!-- x=299 (no 300) -->
+				<box>
+					<topPen lineWidth="0.0" />
+					<leftPen lineWidth="0.0" />
+					<bottomPen lineWidth="0.5" lineColor="#ECF0F1" />
+					<rightPen lineWidth="0.0" />
+				</box>
+				<textElement textAlignment="Right"
+					verticalAlignment="Middle">
+					<font size="12" /> <!-- MISMO tamaño que header -->
+				</textElement>
+				<textFieldExpression>
+                    <![CDATA["€" + new java.text.DecimalFormat("#,##0.00").format($F{price})]]>
+				</textFieldExpression>
+			</textField>
+
+			<!-- Subtotal - MISMO TAMAÑO Y POSICIÓN AJUSTADA -->
+			<textField isStretchWithOverflow="true">
+				<reportElement x="365" y="0" width="101" height="30" /> <!-- x=399 (no 400) -->
+				<box>
+					<topPen lineWidth="0.0" />
+					<leftPen lineWidth="0.0" />
+					<bottomPen lineWidth="0.5" lineColor="#ECF0F1" />
+					<rightPen lineWidth="0.0" />
+				</box>
+				<textElement textAlignment="Right"
+					verticalAlignment="Middle">
+					<font size="12" /> <!-- MISMO tamaño que header -->
+				</textElement>
+				<textFieldExpression>
+                    <![CDATA["€" + new java.text.DecimalFormat("#,##0.00").format($F{price} * $F{quantity})]]>
+				</textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+
+</jasperReport>

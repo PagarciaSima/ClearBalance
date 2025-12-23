@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.clear.balance.clearBalance.domain.customer.Customer;
 import com.clear.balance.clearBalance.domain.invoice.Invoice;
+import com.clear.balance.clearBalance.domain.invoice.InvoiceService;
 import com.clear.balance.clearBalance.dto.stats.StatsDto;
 import com.clear.balance.clearBalance.exeception.ApiException;
 import com.clear.balance.clearBalance.repository.CustomerRepository;
@@ -170,27 +171,75 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     /**
-     * Creates and assigns an invoice to a specific customer.
+     * Creates a new invoice and associates it with an existing customer.
+     * <p>
+     * This method performs the following steps:
+     * <ul>
+     *   <li>Retrieves the customer by its identifier.</li>
+     *   <li>Generates a random invoice number.</li>
+     *   <li>Associates the invoice with the customer.</li>
+     *   <li>Associates each invoice service with the invoice.</li>
+     *   <li>Calculates the total amount of the invoice based on its services.</li>
+     *   <li>Persists the invoice and its services using cascade operations.</li>
+     * </ul>
      *
-     * @param id customer ID
-     * @param invoice invoice to assign and save
+     * @param customerId the identifier of the customer to whom the invoice will be added
+     * @param invoice the invoice to be created and persisted
+     * @throws EntityNotFoundException if the customer does not exist
      */
     @Override
     public void addInvoiceToCustomer(Long customerId, Invoice invoice) {
-        log.info("Adding invoice to customer with ID: {}", customerId);
+
+        log.info("Starting invoice creation for customerId={}", customerId);
 
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> {
-                    log.warn("Customer with ID {} not found - cannot add invoice", customerId);
+                    log.warn("Customer not found. customerId={}", customerId);
                     return new EntityNotFoundException("Customer not found");
                 });
 
-        invoice.setInvoiceNumber(RandomStringUtils.randomAlphanumeric(8).toUpperCase());
+        log.debug("Customer resolved. customerId={}, customerName={}",
+                customer.getId(), customer.getName());
+
+        // Generate invoice number and associate customer
+        String invoiceNumber = RandomStringUtils.randomAlphanumeric(8).toUpperCase();
+        invoice.setInvoiceNumber(invoiceNumber);
         invoice.setCustomer(customer);
+
+        log.debug("Invoice initialized. invoiceNumber={}, status={}, date={}",
+                invoiceNumber, invoice.getStatus(), invoice.getDate());
+
+        // Associate services with the invoice
+        int serviceCount = 0;
+        if (invoice.getServices() != null && !invoice.getServices().isEmpty()) {
+            for (InvoiceService service : invoice.getServices()) {
+                service.setInvoice(invoice);
+                serviceCount++;
+                log.trace("Service associated with invoice. description={}, price={}, quantity={}",
+                        service.getDescription(), service.getPrice(), service.getQuantity());
+            }
+        } else {
+            log.debug("Invoice has no services associated. invoiceNumber={}", invoiceNumber);
+        }
+
+        // Calculate total
+        double total = invoice.getServices() == null ? 0.0 :
+                invoice.getServices().stream()
+                        .mapToDouble(s -> s.getPrice() * s.getQuantity())
+                        .sum();
+
+        invoice.setTotal(total);
+
+        log.debug("Invoice total calculated. invoiceNumber={}, total={}, servicesCount={}",
+                invoiceNumber, total, serviceCount);
+
+        // Persist invoice
         invoiceRepository.save(invoice);
 
-        log.debug("Invoice {} added to customer {}", invoice.getInvoiceNumber(), customerId);
+        log.info("Invoice successfully created. invoiceNumber={}, customerId={}",
+                invoiceNumber, customerId);
     }
+
 
     /**
      * Retrieves an invoice by its unique ID.

@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+
+import { AfterViewChecked, Component, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Observable, BehaviorSubject, map, startWith, catchError, of } from 'rxjs';
 import { slideBlur } from 'src/app/animations/animations';
@@ -9,6 +10,10 @@ import { State } from 'src/app/interface/state';
 import { User } from 'src/app/interface/user';
 import { CustomerService } from 'src/app/service/customer.service';
 import { TooltipService } from 'src/app/service/tooltip.service';
+import { Invoice } from 'src/app/interface/invoice';
+import { InvoiceService } from 'src/app/interface/invoiceservice';
+
+declare var bootstrap: any;
 
 @Component({
   selector: 'app-newinvoice',
@@ -18,19 +23,21 @@ import { TooltipService } from 'src/app/service/tooltip.service';
     slideBlur
   ]
 })
-export class NewinvoiceComponent {
+export class NewinvoiceComponent implements OnInit, AfterViewChecked {
   newInvoiceState$: Observable<State<CustomHttpResponse<{ user: User; customers: Customer[] }>>> | null = null;
   private dataSubject = new BehaviorSubject<CustomHttpResponse<{ user: User; customers: Customer[] }> | null>(null);
   private isLoadingSubject = new BehaviorSubject<boolean>(false);
   isLoading$ = this.isLoadingSubject.asObservable();
   readonly DataState = DataState;
 
+  // Dynamic services subform state for InvoiceService[]
+  servicesList: InvoiceService[] = [];
+  serviceForm: InvoiceService = { description: '', price: 0, quantity: 1 };
+
   constructor(
     private customerService: CustomerService,
     private tooltipService: TooltipService
-  ) {
-
-  }
+  ) { }
 
   /**
    * Initializes the component by setting up the new invoice state observable and initializing tooltips.
@@ -39,6 +46,17 @@ export class NewinvoiceComponent {
     this.newInvoiceState$ = of({ dataState: DataState.LOADED, appData: null });
     this.tooltipService.initialize();
     this.getNewInvoiceData();
+  }
+
+   ngAfterViewChecked() {
+    // Inicializa todos los tooltips de Bootstrap en la vista
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.forEach((tooltipTriggerEl: HTMLElement) => {
+      if (!tooltipTriggerEl.getAttribute('data-bs-initialized')) {
+        new bootstrap.Tooltip(tooltipTriggerEl);
+        tooltipTriggerEl.setAttribute('data-bs-initialized', 'true');
+      }
+    });
   }
 
   /**
@@ -66,11 +84,18 @@ export class NewinvoiceComponent {
    * @param invoiceForm - The form containing new invoice data
    */
   createInvoice(newInvoiceForm: NgForm): void {
+    if (this.servicesList.length === 0) {
+      // Optionally show error or mark as invalid
+      return;
+    }
     if (this.dataSubject.value) {
       this.dataSubject.next({ ...this.dataSubject.value, message: null });
     }
     this.isLoadingSubject.next(true);
-    this.newInvoiceState$ = this.customerService.addInvoiceToCustomer$(newInvoiceForm.value.customerId, newInvoiceForm.value)
+    // Patch the services array and total into the form value
+    newInvoiceForm.form.patchValue({ services: this.servicesList, total: this.total });
+    const invoice: Invoice = { ...newInvoiceForm.value, services: this.servicesList, total: this.total };
+    this.newInvoiceState$ = this.customerService.addInvoiceToCustomer$(newInvoiceForm.value.customerId, invoice)
       .pipe(
         map(response => {
           console.log(response);
@@ -81,6 +106,7 @@ export class NewinvoiceComponent {
             total: '',
             date: ''
           });
+          this.servicesList = [];
           this.isLoadingSubject.next(false);
           this.dataSubject.next(response);
           return { dataState: DataState.LOADED, appData: this.dataSubject.value };
@@ -91,5 +117,33 @@ export class NewinvoiceComponent {
           return of({ dataState: DataState.LOADED, error })
         })
       )
+  }
+
+  /**
+   * Gets the total amount for the invoice based on the services list.
+   */
+  get total(): number {
+    return this.servicesList.reduce((sum, s) => sum + (s.price * s.quantity), 0);
+  }
+
+  /**
+ * Add a service to the list and reset the temp form
+ */
+  addService(): void {
+    if (this.serviceForm.description && this.serviceForm.price != null && this.serviceForm.quantity != null) {
+      this.servicesList.push({
+        description: this.serviceForm.description.trim(),
+        price: this.serviceForm.price,
+        quantity: this.serviceForm.quantity
+      });
+      this.serviceForm = { description: '', price: 0, quantity: 1 };
+    }
+  }
+
+  /**
+   * Remove a service from the list by index
+   */
+  removeService(index: number): void {
+    this.servicesList.splice(index, 1);
   }
 }

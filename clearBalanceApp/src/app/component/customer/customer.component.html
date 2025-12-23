@@ -35,15 +35,14 @@
                                             <p class="mb-2 text-center" style="font-size: 13px;">{{ state?.appData?.data?.customer?.email }}</p>
                                             <img [src]="state?.appData?.data?.customer?.imageUrl"
                                                 style="height: 280px; width: 280px; object-fit: cover; margin-bottom: 10px;"
-                                                class="rounded-circle avatar-lg img-thumbnail d-block mx-auto" alt="profile-image">
-                                            <span class="badge mt-2"
-                                                [ngClass]="[
-                                                    state?.appData?.data?.customer?.status === 'ACTIVE' ? ' bg-success' : '',
-                                                    state?.appData?.data?.customer?.status === 'PENDING' ? ' bg-primary' : '',
-                                                    state?.appData?.data?.customer?.status === 'BANNED' ? ' bg-danger' : '',
-                                                    state?.appData?.data?.customer?.status === 'INACTIVE' ? ' bg-info' : ''
-                                                ]"
-                                                style="font-size: 11px; height: 18px;">
+                                                class="rounded-circle avatar-lg img-thumbnail d-block mx-auto"
+                                                alt="profile-image">
+                                            <span class="badge mt-2" [ngClass]="[
+                                                state?.appData?.data?.customer?.status === 'ACTIVE' ? ' bg-success' : '',
+                                                state?.appData?.data?.customer?.status === 'PENDING' ? ' bg-primary' : '',
+                                                state?.appData?.data?.customer?.status === 'BANNED' ? ' bg-danger' : '',
+                                                state?.appData?.data?.customer?.status === 'INACTIVE' ? ' bg-info' : ''
+                                            ]" style="font-size: 11px; height: 18px;">
                                                 {{ state?.appData?.data?.customer?.status }}
                                             </span>
                                         </div>
@@ -52,13 +51,11 @@
                                 <!-- ===== INVOICES CARD ===== -->
                                 <div class="card mb-3">
                                     <div class="card-body">
-                                        <h5 class="card-title"><i class="bi bi-receipt-cutoff me-2"></i>Total Invoices
-                                        </h5>
+                                        <h5 class="card-title"><i class="bi bi-receipt-cutoff me-2"></i>Total Invoices</h5>
                                         <ul class="list-group">
-                                            <li class="list-group-item d-flex justify-content-between align-items-center"
-                                                style="font-size: 20px;">
+                                            <li class="list-group-item d-flex justify-content-between align-items-center" style="font-size: 20px;">
                                                 Total Current Invoices
-                                                <span class="" style="font-size: 20px;">
+                                                <span style="font-size: 20px;">
                                                     {{ state?.appData?.data?.customer?.invoices?.length }}
                                                 </span>
                                             </li>
@@ -68,12 +65,11 @@
                                 <!-- ===== BILLED CARD ===== -->
                                 <div class="card">
                                     <div class="card-body">
-                                        <h5 class="card-title"><i class="bi bi-cash-stack me-2"></i>Total Billed</h5>
+                                        <h5 class="card-title"><i class="bi bi-cash-stack me-2"></i>Subtotal Billed Amount</h5>
                                         <ul class="list-group">
-                                            <li class="list-group-item d-flex justify-content-between align-items-center"
-                                                style="font-size: 20px;">
-                                                Total Billed 
-                                                <span class="" style="font-size: 20px;">
+                                            <li class="list-group-item d-flex justify-content-between align-items-center" style="font-size: 20px;">
+                                                Subtotal Billed Amount
+                                                <span style="font-size: 20px;">
                                                     {{ getTotalInvoices() | currency }}
                                                 </span>
                                                 <span class="badge bg-success" style="font-size: 20px;"></span>
@@ -81,23 +77,20 @@
                                         </ul>
                                     </div>
                                 </div>
-                            </div>
-                            <!-- ========================= RIGHT COLUMN: PROFILE FORM ========================= -->
-                            <div class="col-xl-7">
+              </div>
+              <!-- ========================= RIGHT COLUMN: PROFILE FORM ========================= -->
+              <div class="col-xl-7">
                                 <div class="card mb-3">
                                     <div class="card-body">
-                                        <h5 class="card-title pb-3"><i class="bi bi-person-badge-fill me-2"></i>Profile
-                                            Details</h5>
+                                        <h5 class="card-title pb-3"><i class="bi bi-person-badge-fill me-2"></i>Profile Details</h5>
                                         <form #customerForm="ngForm" (ngSubmit)="updateCustomer(customerForm)">
                                             <!-- Hidden fields -->
-                                            <input type="hidden" [ngModel]="state?.appData?.data?.customer?.id"
-                                                name="id"
+                                            <input type="hidden" [ngModel]="state?.appData?.data?.customer?.id" name="id"
                                                 [disabled]="(state?.appData?.data?.user?.roleName === 'ROLE_USER') || !!(isLoading$ | async)">
-                                            <input type="hidden" [ngModel]="state?.appData?.data?.customer?.createdAt"
-                                                name="createdAt"
+                                            <input type="hidden" [ngModel]="state?.appData?.data?.customer?.createdAt" name="createdAt"
                                                 [disabled]="(state?.appData?.data?.user?.roleName === 'ROLE_USER') || !!(isLoading$ | async)">
-                                            <!-- Profile fields -->
-                                            <div class="row mb-3 mt-3">
+                      <!-- Profile fields -->
+                      <div class="row mb-3 mt-3">
                                                 <label for="name"
                                                     class="col-sm-3 col-form-label d-flex align-items-center">
                                                     <i class="bi bi-person-fill me-2 pe-2"></i>Name
@@ -156,26 +149,25 @@
                                                 </div>
                                             </div>
                                             <div class="row mb-3 pt-2">
-                                                <label for="address" class="col-sm-3 col-form-label d-flex align-items-center" id="address-label">
+                                                <label for="address"
+                                                    class="col-sm-3 col-form-label d-flex align-items-center"
+                                                    id="address-label">
                                                     <i class="bi bi-geo-alt-fill me-2 pe-2" aria-hidden="true"></i>
                                                     <span>Address</span>
                                                 </label>
                                                 <div class="col-sm-9">
-                                                    <div class="input-group" role="group" aria-labelledby="address-label">
-                                                        <input type="text"
-                                                            id="address"
+                                                    <div class="input-group" role="group"
+                                                        aria-labelledby="address-label">
+                                                        <input type="text" id="address"
                                                             [ngModel]="state?.appData?.data?.customer?.address"
                                                             name="address"
                                                             [disabled]="(state?.appData?.data?.user?.roleName === 'ROLE_USER') || !!(isLoading$ | async)"
-                                                            class="form-control"
-                                                            aria-label="Customer address"
+                                                            class="form-control" aria-label="Customer address"
                                                             autocomplete="street-address">
-                                                        <button type="button"
-                                                            class="btn btn-outline-info"
+                                                        <button type="button" class="btn btn-outline-info"
                                                             *ngIf="state?.appData?.data?.customer?.address"
                                                             (click)="viewOnMap(state?.appData?.data?.customer?.address)"
-                                                            data-bs-toggle="tooltip"
-                                                            data-bs-placement="top"
+                                                            data-bs-toggle="tooltip" data-bs-placement="top"
                                                             title="View on Google Maps"
                                                             aria-label="View address on Google Maps">
                                                             <i class="bi bi-map" aria-hidden="true"></i>
@@ -218,8 +210,7 @@
                                                 [disabled]="(state?.appData?.data?.user?.roleName === 'ROLE_USER') || !!(isLoading$ | async)"
                                                 type="submit" class="btn btn-primary float-end mt-3"
                                                 data-bs-toggle="tooltip" data-bs-placement="top" title="Save your changes">
-                                                <span *ngIf="isLoading$ | async"
-                                                    class="spinner-border spinner-border-sm" role="status"
+                                                <span *ngIf="isLoading$ | async" class="spinner-border spinner-border-sm" role="status"
                                                     aria-hidden="true" style="margin-right: 5px;"></span>
                                                 <span *ngIf="isLoading$ | async">Loading...</span>
                                                 <span *ngIf="!(isLoading$ | async)">Update</span>
@@ -242,34 +233,36 @@
                                                     <th scope="col"><i class="bi bi-briefcase me-2"></i>Service</th>
                                                     <th scope="col"><i class="bi bi-circle-fill me-2"></i>Status</th>
                                                     <th scope="col"><i class="bi bi-calendar-date me-2"></i>Date</th>
-                                                    <th scope="col"><i class="bi bi-currency-dollar me-2"></i>Total</th>
+                                                    <th scope="col"><i class="bi bi-currency-dollar me-2"></i>Subtotal</th>
                                                     <th scope="col"><i class="bi bi-gear me-2"></i>Action</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <tr *ngFor="let invoice of state?.appData?.data?.customer?.invoices">
                                                     <td>{{ invoice.invoiceNumber }}</td>
-                                                    <td>{{ invoice.services }}</td>
+                                                    <td>
+                                                        <ul class="mb-0 ps-3" *ngIf="invoice.services && invoice.services.length">
+                                                            <li *ngFor="let s of invoice.services">
+                                                                {{ s.description }} - ${{ s.price }} x {{ s.quantity }}
+                                                            </li>
+                                                        </ul>
+                                                    </td>
                                                     <td>
                                                         <span class="badge" [ngClass]="[
-                                                               invoice.status === 'PAID' ? ' bg-success' : '',
-                                                               invoice.status === 'PENDING' ? ' bg-primary' : '',
-                                                               invoice.status === 'OVERDUE' ? ' bg-warning' : '',
-                                                               invoice.status === 'CANCELED' ? ' bg-danger' : ''
-                                                            ]">
+                                                            invoice.status === 'PAID' ? ' bg-success' : '',
+                                                            invoice.status === 'PENDING' ? ' bg-primary' : '',
+                                                            invoice.status === 'OVERDUE' ? ' bg-warning' : '',
+                                                            invoice.status === 'CANCELED' ? ' bg-danger' : ''
+                                                        ]">
                                                             <i class="bi bi-circle-fill me-1"></i>{{ invoice.status }}
                                                         </span>
                                                     </td>
-                                                    <td><i class="bi bi-calendar me-1"></i>{{ invoice.date | date:
-                                                        'mediumDate' }}</td>
-                                                    <td><i class="bi bi-currency-dollar me-1"></i>{{ invoice.total }}
-                                                    </td>
+                                                    <td><i class="bi bi-calendar me-1"></i>{{ invoice.date | date: 'mediumDate' }}</td>
+                                                    <td><i class="bi bi-currency-dollar me-1"></i>{{ invoice.total }}</td>
                                                     <td>
                                                         <button type="button"
                                                             [routerLink]="['/invoices', invoice.id, invoice.invoiceNumber]"
-                                                            class="btn btn-info btn-sm"
-                                                            data-bs-toggle="tooltip"
-                                                            data-bs-placement="top"
+                                                            class="btn btn-info btn-sm" data-bs-toggle="tooltip" data-bs-placement="top"
                                                             [attr.title]="'Print invoice ' + invoice.invoiceNumber">
                                                             <i class="bi bi-printer me-1"></i>Print
                                                         </button>

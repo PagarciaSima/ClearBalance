@@ -28,6 +28,7 @@ import com.clear.balance.clearBalance.domain.user.User;
 import com.clear.balance.clearBalance.dto.stats.StatsDto;
 import com.clear.balance.clearBalance.dto.user.UserDto;
 import com.clear.balance.clearBalance.service.CustomerService;
+import com.clear.balance.clearBalance.service.InvoiceReportService;
 import com.clear.balance.clearBalance.service.UserService;
 
 import lombok.RequiredArgsConstructor;
@@ -44,6 +45,7 @@ public class CustomerController {
 	
 	private final CustomerService customerService;
 	private final UserService userService;
+	private final InvoiceReportService invoiceReportService;
 
 	/**
 	 * Retrieves a paginated list of customers along with the authenticated user's information.
@@ -477,6 +479,48 @@ public class CustomerController {
 	    log.debug("Response prepared for invoice {}: {}", id, response);
 
 	    return ResponseEntity.ok(response);
+	}
+	
+	/**
+	 * Downloads the invoice PDF for the given invoice ID.
+	 * <p>
+	 * This endpoint generates a PDF representation of the invoice using the
+	 * {@link InvoiceReportService} and returns it as a downloadable file.
+	 * </p>
+	 *
+	 * @param id the unique identifier of the invoice
+	 * @return a {@link ResponseEntity} containing:
+	 *         <ul>
+	 *           <li>HTTP 200 (OK) with the PDF file as a byte array if the invoice exists</li>
+	 *           <li>HTTP 404 (NOT FOUND) if the invoice does not exist or the PDF is empty</li>
+	 *           <li>HTTP 500 (INTERNAL SERVER ERROR) if an unexpected error occurs</li>
+	 *         </ul>
+	 *
+	 * The response includes the following headers:
+	 * <ul>
+	 *   <li><b>Content-Type</b>: application/pdf</li>
+	 *   <li><b>Content-Disposition</b>: attachment; filename="invoice_{id}.pdf"</li>
+	 *   <li><b>Content-Length</b>: size of the generated PDF in bytes</li>
+	 * </ul>
+	 */
+	@GetMapping("/invoice/{id}/pdf")
+	public ResponseEntity<byte[]> downloadInvoicePdf(@PathVariable Long id) {
+	    try {
+	        byte[] pdf = invoiceReportService.generateInvoicePdf(id);
+	        
+	        if (pdf == null || pdf.length == 0) {
+	            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+	        }
+	        
+	        return ResponseEntity.ok()
+	                .header("Content-Type", "application/pdf")
+	                .header("Content-Disposition", "attachment; filename=\"invoice_" + id + ".pdf\"")
+	                .header("Content-Length", String.valueOf(pdf.length))
+	                .body(pdf);
+	                
+	    } catch (Exception e) {
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+	    }
 	}
 	
 	/**

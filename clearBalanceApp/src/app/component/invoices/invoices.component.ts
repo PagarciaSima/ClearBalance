@@ -9,6 +9,7 @@ import { State } from 'src/app/interface/state';
 import { User } from 'src/app/interface/user';
 import { CustomerService } from 'src/app/service/customer.service';
 import { TooltipService } from 'src/app/service/tooltip.service';
+import { jsPDF } from 'jspdf';
 
 /**
  * Component for displaying the list of invoices.
