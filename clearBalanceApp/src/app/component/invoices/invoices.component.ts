@@ -9,7 +9,6 @@ import { State } from 'src/app/interface/state';
 import { User } from 'src/app/interface/user';
 import { CustomerService } from 'src/app/service/customer.service';
 import { TooltipService } from 'src/app/service/tooltip.service';
-import { jsPDF } from 'jspdf';
 
 /**
  * Component for displaying the list of invoices.
@@ -18,7 +17,7 @@ import { jsPDF } from 'jspdf';
   selector: 'app-invoices',
   templateUrl: './invoices.component.html',
   styleUrls: ['./invoices.component.css'],
-  animations: [ slideBlur],
+  animations: [slideBlur],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class InvoicesComponent implements OnInit {
@@ -42,6 +41,28 @@ export class InvoicesComponent implements OnInit {
   }
 
   /**
+   * Downloads all invoices as an Excel file by calling the service and triggers a file download in the browser.
+   */
+  downloadAllInvoicesExcel(): void {
+    this.customerService.downloadAllInvoicesExcel$().subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `all_invoices_${new Date().toISOString().replace(/[:.]/g, '-')}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        // Optionally, handle error (e.g., show a notification)
+        console.error('Failed to download Excel file', err);
+      }
+    });
+  }
+
+  /**
    * Loads all invoices from the backend and updates the component state.
    * @param page The page index (zero-based)
    * @param size The page size
@@ -62,6 +83,28 @@ export class InvoicesComponent implements OnInit {
           return of({ dataState: DataState.ERROR, error });
         })
       );
+  }
+
+  /**
+  * Downloads all invoices as a CSV file by calling the service and triggers a file download in the browser.
+  */
+  downloadAllInvoicesCsv(): void {
+    this.customerService.downloadAllInvoicesCsv$().subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `facturas_simple_${new Date().toISOString().replace(/[:.]/g, '-')}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        // Optionally, handle error (e.g., show a notification)
+        console.error('Failed to download CSV file', err);
+      }
+    });
   }
 
   /**

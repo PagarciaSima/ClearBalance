@@ -1,6 +1,7 @@
 package com.clear.balance.clearBalance.service.impl;
 
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.data.domain.Page;
@@ -264,13 +265,47 @@ public class CustomerServiceImpl implements CustomerService {
         return invoice;
     }
     
+    /**
+     * Retrieves global statistics of the system.
+     *
+     * <p>The statistics include:
+     * <ul>
+     *   <li>Total number of customers</li>
+     *   <li>Total number of invoices</li>
+     *   <li>Total billed amount across all invoices</li>
+     * </ul>
+     *
+     * @return a {@link StatsDto} containing global statistics data
+     */
     @Override
     public StatsDto getGlobalStats() {
-    	int totalCustomers = (int) customerRepository.count();
+        log.info("Fetching global system statistics...");
+
+        int totalCustomers = (int) customerRepository.count();
         int totalInvoices = (int) invoiceRepository.count();
-        double totalBilled = invoiceRepository.sumAllTotals(); 
+        double totalBilled = invoiceRepository.sumAllTotals();
+
+        log.info(
+            "Global stats retrieved - Customers: {}, Invoices: {}, Total billed: {}",
+            totalCustomers, totalInvoices, totalBilled
+        );
 
         return new StatsDto(totalCustomers, totalInvoices, totalBilled);
-	}
+    }
+
+    /**
+     * Retrieves all invoices from the system.
+     *
+     * @return a list of all {@link Invoice} entities
+     */
+    @Override
+    public List<Invoice> getAllInvoices() {
+        log.info("Fetching all invoices...");
+
+        List<Invoice> invoices = invoiceRepository.findAll();
+
+        log.info("Total invoices retrieved: {}", invoices.size());
+        return invoices;
+    }
 
 }

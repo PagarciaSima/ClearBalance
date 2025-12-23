@@ -40,10 +40,16 @@
             </h4>
           </div>
           <div class="col">
-            <div class="fw-bold text-end">
-              <button type="button" class="mb-3 btn btn-link p-0 border-0 bg-transparent" data-bs-toggle="tooltip"
-                data-bs-placement="top" title="Export invoices to Excel" aria-label="Export invoices to Excel">
+            <div class="fw-bold text-end" *ngIf="(state.appData?.data?.page?.content?.length || 0) > 0">
+              <button type="button" class="mb-3 btn btn-link p-0 border-0 bg-transparent me-2" data-bs-toggle="tooltip"
+                data-bs-placement="top" title="Export invoices to Excel" aria-label="Export invoices to Excel"
+                (click)="downloadAllInvoicesExcel()">
                 <i class="bi bi-file-earmark-excel success-icon fs-1 mb-0" aria-hidden="true"></i>
+              </button>
+              <button type="button" class="mb-3 btn btn-link p-0 border-0 bg-transparent" data-bs-toggle="tooltip"
+                data-bs-placement="top" title="Export invoices to CSV" aria-label="Export invoices to CSV"
+                (click)="downloadAllInvoicesCsv()">
+                <i class="bi bi-file-earmark-spreadsheet text-warning fs-1 mb-0" aria-hidden="true"></i>
               </button>
             </div>
           </div>

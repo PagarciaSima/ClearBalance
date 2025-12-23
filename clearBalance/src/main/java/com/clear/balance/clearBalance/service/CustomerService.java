@@ -1,5 +1,7 @@
 package com.clear.balance.clearBalance.service;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 
 import com.clear.balance.clearBalance.domain.customer.Customer;
@@ -21,5 +23,6 @@ public interface CustomerService {
     Page<Invoice> getInvoices(int page, int size);
     void addInvoiceToCustomer(Long id, Invoice invoice);
 	Invoice getInvoice(Long id);
+	List<Invoice> getAllInvoices();
 
 }

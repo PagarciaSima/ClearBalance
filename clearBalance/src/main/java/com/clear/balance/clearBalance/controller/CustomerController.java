@@ -3,12 +3,16 @@ package com.clear.balance.clearBalance.controller;
 import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentContextPath;
 
 import java.net.URI;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -521,6 +525,81 @@ public class CustomerController {
 	    } catch (Exception e) {
 	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 	    }
+	}
+	
+	/**
+	 * Generates an Excel file containing all invoices in the system.
+	 *
+	 * <p>The generated file is returned as a downloadable attachment
+	 * with a timestamp-based filename.
+	 *
+	 * @return a {@link ResponseEntity} containing the Excel file as a byte array
+	 */
+	@GetMapping("/invoices/excel")
+	public ResponseEntity<byte[]> generateAllInvoicesExcel() {
+	    log.info("Received request to generate Excel file for all invoices");
+
+	    byte[] excelBytes = invoiceReportService.generateAllInvoicesExcel();
+	    log.info("Excel file generated successfully ({} bytes)", excelBytes.length);
+
+	    String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+	    String filename = "all_invoices_" + timestamp + ".xlsx";
+
+	    log.info("Preparing Excel file download with filename: {}", filename);
+
+	    return ResponseEntity.ok()
+	            .header(
+	                HttpHeaders.CONTENT_DISPOSITION,
+	                "attachment; filename=\"" + filename + "\""
+	            )
+	            .contentType(
+	                MediaType.parseMediaType(
+	                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+	                )
+	            )
+	            .body(excelBytes);
+	}
+
+	/**
+	 * Generates a CSV file containing all invoices in a simplified format.
+	 * <p>
+	 * The CSV is returned as a downloadable file with UTF-8 encoding and a timestamp
+	 * in the filename to avoid collisions.
+	 * </p>
+	 *
+	 * Endpoint:
+	 * <ul>
+	 *   <li><b>GET</b> /invoices/csv</li>
+	 * </ul>
+	 *
+	 * Response:
+	 * <ul>
+	 *   <li>Content-Type: text/csv; charset=UTF-8</li>
+	 *   <li>Content-Disposition: attachment</li>
+	 * </ul>
+	 *
+	 * @return {@link ResponseEntity} containing the CSV file as a byte array
+	 */
+	@GetMapping("/invoices/csv")
+	public ResponseEntity<byte[]> generateAllInvoicesCSVSimple() {
+
+	    log.info("Starting CSV invoice generation");
+
+	    byte[] csvBytes = invoiceReportService.generateAllInvoicesCSVSimple();
+
+	    String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+	    String filename = "Invoices" + timestamp + ".csv";
+
+	    log.debug("Generated CSV filename: {}", filename);
+	    log.debug("CSV size in bytes: {}", csvBytes != null ? csvBytes.length : 0);
+
+	    log.info("CSV invoice generation completed successfully");
+
+	    return ResponseEntity.ok()
+	            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+	            .contentType(MediaType.parseMediaType("text/csv; charset=UTF-8"))
+	            .header(HttpHeaders.CONTENT_ENCODING, "UTF-8")
+	            .body(csvBytes);
 	}
 	
 	/**

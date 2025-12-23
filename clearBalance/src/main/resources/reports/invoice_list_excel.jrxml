@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="invoice_list_compact_excel">
+    
+    <property name="net.sf.jasperreports.export.xls.detect.cell.type" value="true"/>
+    <property name="net.sf.jasperreports.export.xls.remove.empty.space.between.columns" value="true"/>
+    <property name="net.sf.jasperreports.export.xls.auto.fit.column" value="true"/>
+    
+    <field name="invoiceNumber" class="java.lang.String"/>
+    <field name="date" class="java.util.Date"/>
+    <field name="status" class="java.lang.String"/>
+    <field name="total" class="java.lang.Double"/>
+    <field name="customer" class="com.clear.balance.clearBalance.dto.customer.CustomerDto"/>
+    <field name="services" class="java.util.List"/>
+    
+    <variable name="totalSum" class="java.lang.Double" calculation="Sum">
+        <variableExpression>
+            <![CDATA[$F{total} + ($F{total} * 0.054)]]>
+        </variableExpression>
+        <initialValueExpression><![CDATA[0.0]]></initialValueExpression>
+    </variable>
+    
+    <title>
+        <band height="35">
+            <staticText>
+                <reportElement x="0" y="5" width="842" height="20"/>
+                <textElement textAlignment="Center">
+                    <font size="12" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Invoice list]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="0" y="25" width="842" height="10"/>
+                <textElement textAlignment="Center">
+                    <font size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA[new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(new java.util.Date())]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+    
+    <columnHeader>
+        <band height="22">
+            <staticText>
+                <reportElement x="0" y="0" width="100" height="22" backcolor="#E8E8E8"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="9" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Invoice]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="100" y="0" width="70" height="22" backcolor="#E8E8E8"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="9" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Date]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="170" y="0" width="150" height="22" backcolor="#E8E8E8"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="9" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Customer]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="320" y="0" width="180" height="22" backcolor="#E8E8E8"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="9" isBold="true"/>
+                </textElement>
+                <text><![CDATA[E-mail]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="500" y="0" width="60" height="22" backcolor="#E8E8E8"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="9" isBold="true"/>
+                </textElement>
+                <text><![CDATA[State]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="560" y="0" width="60" height="22" backcolor="#E8E8E8"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="9" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Serv.]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="620" y="0" width="80" height="22" backcolor="#E8E8E8"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font size="9" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Total]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+    
+    <detail>
+        <band height="18">
+            <textField>
+                <reportElement x="0" y="0" width="100" height="18"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="9"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{invoiceNumber}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="100" y="0" width="70" height="18"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="9"/>
+                </textElement>
+                <textFieldExpression>
+                    <![CDATA[new java.text.SimpleDateFormat("dd/MM/yyyy").format($F{date})]]>
+                </textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="170" y="0" width="150" height="18"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="9"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{customer}.getName()]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="320" y="0" width="180" height="18"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="9"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{customer}.getEmail()]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="500" y="0" width="60" height="18"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="9"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{status}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="560" y="0" width="60" height="18"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="9"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{services}.size()]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="620" y="0" width="80" height="18"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font size="9"/>
+                </textElement>
+                <textFieldExpression>
+                    <![CDATA[new java.text.DecimalFormat("#,##0.00").format($F{total} + ($F{total} * 0.054))]]>
+                </textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+    
+    <summary>
+        <band height="25">
+            <staticText>
+                <reportElement x="500" y="5" width="120" height="18"/>
+                <textElement textAlignment="Right">
+                    <font size="9" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Total:]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="620" y="5" width="80" height="18"/>
+                <textElement textAlignment="Right">
+                    <font size="9" isBold="true"/>
+                </textElement>
+                <textFieldExpression>
+                    <![CDATA["€" + new java.text.DecimalFormat("#,##0.00").format($V{totalSum})]]>
+                </textFieldExpression>
+            </textField>
+        </band>
+    </summary>
+    
+</jasperReport>
