@@ -19,7 +19,7 @@ import { TooltipService } from 'src/app/service/tooltip.service';
   ]
 })
 export class CustomersComponent implements OnInit {
-
+ 
   searchTerm: string = '';
   customerPageSize: number = 10;
   customersState$!: Observable<State<CustomHttpResponse<CustomerPage>>>;
@@ -145,6 +145,50 @@ export class CustomersComponent implements OnInit {
       // @ts-ignore
       popoverTriggerList.forEach(el => new window.bootstrap.Popover(el));
     }, 0);
+  }
+
+  /**
+   * Downloads all customers as an Excel file by calling the service and triggers a file download in the browser.
+   */
+  downloadAllCustomersExcel(): void {
+    this.customerService.downloadAllCustomersExcel$().subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `customers_report_${new Date().toISOString().replace(/[:.]/g, '-')}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        // Optionally, handle error (e.g., show a notification)
+        console.error('Failed to download Excel file', err);
+      }
+    });
+  }
+
+  /**
+   * Downloads all customers as a CSV file by calling the service and triggers a file download in the browser.
+   */
+  downloadAllCustomersCsv(): void {
+    this.customerService.downloadAllCustomersCsv$().subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `customers_report_${new Date().toISOString().replace(/[:.]/g, '-')}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        // Optionally, handle error (e.g., show a notification)
+        console.error('Failed to download CSV file', err);
+      }
+    });
   }
 
   /**

@@ -33,6 +33,7 @@ import { NewcustomerComponent } from './component/newcustomer/newcustomer.compon
 import { NewinvoiceComponent } from './component/newinvoice/newinvoice.component';
 import { InvoicesComponent } from './component/invoices/invoices.component';
 import { InvoiceComponent } from './component/invoice/invoice.component';
+import { CacheInterceptor } from './interceptor/cache.interceptor';
 
 @NgModule({
   declarations: [
@@ -77,6 +78,11 @@ import { InvoiceComponent } from './component/invoice/invoice.component';
     {
       provide: HTTP_INTERCEPTORS,
       useClass: TokenInterceptor,
+      multi: true
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: CacheInterceptor,
       multi: true
     }
   ],
