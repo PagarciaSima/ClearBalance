@@ -1,1 +1,305 @@
-<p>register works!</p>
+<!-- Register Component Template -->
+<section *ngIf="(registerState$ | async) as state" [ngSwitch]="state.dataState">
+  <!-- Registration Form -->
+  <div *ngIf="!state.registerSuccess" class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-6 mt-3">
+        <div class="card">
+          <div class="card-body">
+            <!-- Header -->
+            <!-- UFO Animation -->
+            <app-ufo></app-ufo>
+            <div class="text-center">
+              <h2>
+                <i class="bi bi-safe me-2"></i>Clear Balance
+              </h2>
+              <h5 class="card-title mt-4 mb-5">Create an Account</h5>
+              <!-- Decorative person abduction animation -->
+              <div class="person-icon-container" role="img" aria-label="Decorative person being abducted animation">
+                <i class="bi bi-person-standing person-icon" aria-hidden="true"></i>
+                <div class="help-bubble" aria-hidden="true">HELP!</div>
+              </div>
+            </div>
+
+            <!-- Error Alert -->
+            <div *ngIf="state.dataState === DataState.ERROR" class="alert alert-danger bg-danger text-light border-0 alert-dismissible fade show" role="alert">
+              {{ state.error }}
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <!-- Registration Form Fields -->
+              <form #registerForm="ngForm" (ngSubmit)="register(registerForm)" aria-labelledby="register-title" autocomplete="off">
+              <!-- First Name -->
+              <div class="form-outline mb-4">
+                <label class="form-label" for="firstName">
+                  <i class="bi bi-person me-2" aria-hidden="true"></i>
+                  <span id="firstName-label">First Name</span>
+                </label>
+                <input
+                  type="text"
+                  [disabled]="state.dataState === DataState.LOADING"
+                  ngModel
+                  name="firstName"
+                  class="form-control"
+                  required
+                  minlength="2"
+                  placeholder="Enter your first name"
+                  id="firstName"
+                  aria-labelledby="firstName-label"
+                  #firstNameRef="ngModel"
+                  aria-describedby="firstNameError"
+                >
+                <div *ngIf="firstNameRef.errors?.['required'] && (firstNameRef.touched || firstNameRef.dirty)" id="firstNameError" class="text-danger mt-1" aria-live="polite">
+                  First name is required.
+                </div>
+              </div>
+
+              <!-- Last Name -->
+              <div class="form-outline mb-4">
+                <label for="lastName" class="form-label">
+                  <i class="bi bi-person-vcard me-2" aria-hidden="true"></i>
+                  <span id="lastName-label">Last name</span>
+                </label>
+                <input
+                  type="text"
+                  [disabled]="state.dataState === DataState.LOADING"
+                  ngModel
+                  name="lastName"
+                  class="form-control"
+                  required
+                  minlength="2"
+                  placeholder="Enter your last name"
+                  id="lastName"
+                  aria-labelledby="lastName-label"
+                  #lastNameRef="ngModel"
+                  aria-describedby="lastNameError"
+                >
+                <div *ngIf="lastNameRef.errors?.['required'] && (lastNameRef.touched || lastNameRef.dirty)" id="lastNameError" class="text-danger mt-1" aria-live="polite">
+                  Last name is required.
+                </div>
+              </div>
+
+              <!-- Email Address -->
+              <div class="form-outline mb-4">
+                <label for="email" class="form-label">
+                  <i class="bi bi-envelope me-2" aria-hidden="true"></i>
+                  <span id="email-label">Email Address</span>
+                </label>
+                <input
+                  type="email"
+                  [disabled]="state.dataState === DataState.LOADING"
+                  ngModel
+                  name="email"
+                  class="form-control"
+                  required
+                  minlength="3"
+                  placeholder="Enter your email address"
+                  id="email"
+                  aria-labelledby="email-label"
+                  aria-describedby="emailHelp emailError"
+                  autocomplete="username"
+                  #emailRef="ngModel"
+                >
+                <div *ngIf="emailRef.errors?.['required'] && (emailRef.touched || emailRef.dirty)" id="emailError" class="text-danger mt-1" aria-live="polite">
+                  Email is required.
+                </div>
+              </div>
+
+              <!-- Password -->
+              <div class="form-outline mb-4">
+                <label for="password" class="form-label">
+                  <i class="bi bi-lock me-2" aria-hidden="true"></i>
+                  <span id="password-label">Password</span>
+                </label>
+                <div class="input-group">
+                  <input
+                    [type]="showPassword ? 'text' : 'password'"
+                    [disabled]="state.dataState === DataState.LOADING"
+                    ngModel
+                    name="password"
+                    class="form-control"
+                    required
+                    minlength="4"
+                    placeholder="Enter your password"
+                    id="password"
+                    autocomplete="new-password"
+                    aria-required="true"
+                    aria-invalid="false"
+                    aria-labelledby="password-label"
+                    aria-describedby="password-toggle passwordError"
+                    #passwordRef="ngModel"
+                    (ngModelChange)="onPasswordInput(registerForm)"
+                  >
+                  <!-- Toggle Password Visibility Button -->
+                  <button
+                    class="btn btn-primary"
+                    type="button"
+                    id="password-toggle"
+                    (click)="showPassword = !showPassword"
+                    [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+                    [attr.aria-pressed]="showPassword"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                    title="Toggle password visibility"
+                    tabindex="0"
+                    role="button"
+                  >
+                    <i
+                      [class]="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"
+                      aria-hidden="true"
+                    ></i>
+                  </button>
+                </div>
+                <div *ngIf="passwordRef.errors?.['required'] && (passwordRef.touched || passwordRef.dirty)" id="passwordError" class="form-text text-danger mt-1" aria-live="polite">
+                  Password is required.
+                </div>
+              </div>
+
+              <!-- Confirm Password -->
+              <div class="form-outline mb-4">
+                <label for="confirmPassword" class="form-label">
+                  <i class="bi bi-lock-fill me-2" aria-hidden="true"></i>
+                  <span id="confirmPassword-label">Confirm Password</span>
+                </label>
+                <div class="input-group">
+                  <input
+                    [type]="showConfirmPassword ? 'text' : 'password'"
+                    [disabled]="state.dataState === DataState.LOADING"
+                    ngModel
+                    name="confirmPassword"
+                    class="form-control"
+                    required
+                    minlength="4"
+                    placeholder="Confirm your password"
+                    id="confirmPassword"
+                    autocomplete="new-password"
+                    aria-required="true"
+                    aria-invalid="false"
+                    aria-labelledby="confirmPassword-label"
+                    aria-describedby="confirm-password-toggle confirmPasswordError"
+                    #confirmPasswordRef="ngModel"
+                    (ngModelChange)="onPasswordInput(registerForm)"
+                  >
+                  <!-- Toggle Confirm Password Visibility Button -->
+                  <button
+                    class="btn btn-primary"
+                    type="button"
+                    id="confirm-password-toggle"
+                    (click)="showConfirmPassword = !showConfirmPassword"
+                    [attr.aria-label]="showConfirmPassword ? 'Hide password' : 'Show password'"
+                    [attr.aria-pressed]="showConfirmPassword"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                    title="Toggle password visibility"
+                    tabindex="0"
+                    role="button"
+                  >
+                    <i
+                      [class]="showConfirmPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"
+                      aria-hidden="true"
+                    ></i>
+                  </button>
+                </div>
+                <div *ngIf="confirmPasswordRef.errors?.['required'] && (confirmPasswordRef.touched || confirmPasswordRef.dirty)" id="confirmPasswordError" class="form-text text-danger mt-1" aria-live="polite">
+                  Confirm password is required.
+                </div>
+                <!-- Password Mismatch Alert -->
+                <div *ngIf="passwordMismatch && (registerForm.controls['confirmPassword']?.touched || registerForm.controls['confirmPassword']?.dirty) && (registerForm.controls['password']?.touched || registerForm.controls['password']?.dirty)" class="text-danger mt-2" role="alert" aria-live="polite">
+                  Passwords do not match.
+                </div>
+              </div>
+
+              <!-- Submit Button -->
+              <div class="d-flex justify-content-center mb-4">
+                <button
+                  [disabled]="state.dataState === DataState.LOADING || registerForm.invalid || registerForm.pristine"
+                  type="submit"
+                  class="btn btn-primary w-100"
+                  aria-label="Create Account"
+                  data-bs-toggle="tooltip"
+                  data-bs-placement="top"
+                  title="Create your new account"
+                >
+                  <span *ngIf="state.dataState === DataState.LOADING" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  <span *ngIf="state.dataState === DataState.LOADING">Saving...</span>
+                  <span *ngIf="!(state.dataState === DataState.LOADING)">
+                    <i class="bi bi-person-plus me-2"></i>Create Account
+                  </span>
+                </button>
+              </div>
+            </form>
+
+            <!-- Links: Login & Forgot Password -->
+            <div class="row mb-4">
+              <div class="col d-flex justify-content-center">
+                <a
+                  [ngStyle]="{'pointer-events' : state.dataState === DataState.LOADING ? 'none' : 'auto'}"
+                  [routerLink]="['/login']"
+                  data-bs-toggle="tooltip"
+                  data-bs-placement="top"
+                  title="Go to account login page"
+                >
+                  <i class="bi bi-box-arrow-in-right me-2"></i>Account Login
+                </a>
+              </div>
+              <div class="col">
+                <a
+                  [ngStyle]="{'pointer-events' : state.dataState === DataState.LOADING ? 'none' : 'auto'}"
+                  [routerLink]="['/resetpassword']"
+                  data-bs-toggle="tooltip"
+                  data-bs-placement="top"
+                  title="Forgot your password? Reset it here."
+                >
+                  <i class="bi bi-key me-2"></i>Forgot password?
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Screen -->
+  <div *ngIf="state.registerSuccess" class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-6 mt-3">
+        <div class="card">
+          <div class="card-body">
+            <!-- Success Header -->
+            <div class="text-center">
+              <h2>
+                <i class="bi bi-safe me-2"></i>Clear Balance
+              </h2>
+              <h5 class="card-title mt-4 mb-4">{{ state.message }}</h5>
+              <i class="bi bi-check-circle-fill success-icon"></i>
+              <p class="mt-2" style="font-size: 20px;">Please access your email and confirm your account.</p>
+            </div>
+
+            <!-- Success Links -->
+            <div class="row mb-4">
+              <div class="col d-flex justify-content-center">
+                <a [routerLink]="['/login']"
+                   data-bs-toggle="tooltip"
+                   data-bs-placement="top"
+                   title="Go to account login page">
+                  <i class="bi bi-box-arrow-in-right me-2"></i>Account Login
+                </a>
+              </div>
+              <div class="col">
+                <a style="color: #0D6EFD; text-decoration: underline; cursor: pointer;"
+                   data-bs-toggle="tooltip"
+                   data-bs-placement="top"
+                   title="Create another account"
+                   (click)="createAccountForm()"
+                >
+                  <i class="bi bi-person-plus me-2"></i>Create another account
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

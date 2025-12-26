@@ -138,7 +138,7 @@ public class UserController {
 							HttpResponse.builder()
 							.timeStamp(LocalDateTime.now().toString())
 							.data(Map.of("user", userDto))
-							.message(String.format("User account created for user %s", user.getFirstName()))
+							.message(String.format("User account created for user %s", user.getEmail()))
 							.status(HttpStatus.CREATED).statusCode(HttpStatus.CREATED.value())
 							.build());
 

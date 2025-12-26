@@ -1,0 +1,152 @@
+
+/* ================================================
+   Person Abduction Animation
+   ================================================ */
+
+.person-icon-container {
+  position: relative;
+  margin: 20px 0;
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.person-icon {
+  font-size: 48px;
+  color: rgba(255, 255, 255, 0.8);
+  transition: all 0.5s ease;
+  animation: personIdle 3s ease-in-out infinite;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+/* ================================================
+   Help Bubble Styles
+   ================================================ */
+
+.help-bubble {
+  position: absolute;
+  top: -50px;
+  left: 50%;
+  transform: translateX(-50%) scale(0);
+  background: white;
+  color: #e63946;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.help-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid white;
+}
+
+.person-icon.being-abducted ~ .help-bubble {
+  animation: helpBubbleAppear 3s ease-out forwards;
+}
+
+/* ================================================
+   Animations
+   ================================================ */
+
+@keyframes helpBubbleAppear {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) scale(0);
+  }
+  10% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+  20%, 80% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1) translateY(0);
+  }
+  90% {
+    opacity: 0.5;
+    transform: translateX(-50%) scale(0.8) translateY(-50px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.3) translateY(-100px);
+  }
+}
+
+@keyframes personIdle {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes abductPerson {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  }
+  30% {
+    opacity: 0.8;
+    transform: translateY(-50px) scale(0.9);
+    filter: drop-shadow(0 0 20px rgba(138, 255, 230, 0.8));
+  }
+  70% {
+    opacity: 0.3;
+    transform: translateY(-150px) scale(0.5) rotate(180deg);
+    filter: drop-shadow(0 0 30px rgba(138, 255, 230, 1));
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-250px) scale(0.1) rotate(360deg);
+    filter: drop-shadow(0 0 40px rgba(138, 255, 230, 1));
+  }
+}
+
+@keyframes personReappear {
+  0% {
+    opacity: 0;
+    transform: translateY(50px) scale(0.3);
+    filter: blur(5px);
+  }
+  60% {
+    opacity: 0.8;
+    transform: translateY(-10px) scale(1.1);
+    filter: blur(0px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0px);
+  }
+}
+
+/* ================================================
+   Animation States
+   ================================================ */
+
+.person-icon.being-abducted {
+  animation: abductPerson 3.5s ease-in forwards !important;
+}
+
+.person-icon:not(.being-abducted):not(.reappearing) {
+  animation: personIdle 3s ease-in-out infinite;
+}
+
+.person-icon.reappearing {
+  animation: personReappear 1s ease-out forwards !important;
+}

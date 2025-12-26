@@ -41,6 +41,15 @@ export class UserService {
   }
 
   /**
+   * Registers a new user by sending a POST request to the backend /register endpoint.
+   * @param user The user object containing registration details.
+   * @returns An Observable of the HTTP response containing the created user data.
+   */
+  registerUser$(user: User): Observable<CustomHttpResponse<Profile>> {
+    return this.http.post<CustomHttpResponse<Profile>>(`${this.server}/user/register`, user);
+  }
+
+  /**
    * Sends a verification code to the server to validate multi-factor authentication.
    * @param email - The user's email address
    * @param code - The verification code sent to the user
@@ -92,7 +101,7 @@ export class UserService {
    */
   update$(user: User): Observable<CustomHttpResponse<Profile>> {
     const headers = new HttpHeaders()
-      .set('Content-Type', 'application/json'); 
+      .set('Content-Type', 'application/json');
 
     return this.http.patch<CustomHttpResponse<Profile>>(
       `${this.server}/user/update`,
@@ -148,18 +157,18 @@ export class UserService {
   refreshToken$(token: string): Observable<CustomHttpResponse<Profile>> {
     return this.http.get<CustomHttpResponse<Profile>>(
       `${this.server}/user/refresh/token`,
-      { 
-        headers: { 
-          Authorization: `Bearer ${token}`  
-        } 
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
       }
     ).pipe(
       tap(response => {
-        console.log('Refresh Token Response:', response); 
+        console.log('Refresh Token Response:', response);
         localStorage.removeItem(Key.TOKEN);
         localStorage.removeItem(Key.REFRESH_TOKEN);
-        
-        localStorage.setItem(Key.TOKEN, response.data?.access_token ||  '');
+
+        localStorage.setItem(Key.TOKEN, response.data?.access_token || '');
         localStorage.setItem(Key.REFRESH_TOKEN, response.data?.refresh_token || '');
       }),
       catchError(this.handleError)

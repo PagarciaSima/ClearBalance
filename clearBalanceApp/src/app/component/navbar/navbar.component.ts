@@ -15,7 +15,7 @@ export class NavbarComponent implements AfterViewInit, OnInit {
   stars: { top: string; left: string; delay: string }[] = [];
   userFullName: string = '';
   profile: Profile | null = null;
-  
+
   constructor(
     private tooltipService: TooltipService,
     private router: Router,
@@ -24,11 +24,24 @@ export class NavbarComponent implements AfterViewInit, OnInit {
     this.generateStars(8);
   }
 
+  /**
+   * Initializes the component by checking authentication status and fetching user profile if authenticated.
+   * This method is called once the component is created.
+   */
   ngOnInit(): void {
-    this.getCurrentUser();
-    this.listenProfileUpdates();
+    if (this.isAuthenticated()) {
+      this.getCurrentUser();
+      this.listenProfileUpdates();
+    }
   }
 
+  /**
+   * Checks if the user is authenticated by verifying the presence of the token in localStorage.
+   * @returns True if the user is authenticated, false otherwise.
+   */
+  private isAuthenticated(): boolean {
+    return !!localStorage.getItem(Key.TOKEN);
+  }
   /**
    * Listens for profile updates from the UserService.
    * Updates the userFullName and profile properties when a new profile is received.
