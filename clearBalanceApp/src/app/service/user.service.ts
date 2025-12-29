@@ -9,11 +9,13 @@ import { Key } from '../enum/key.enum';
 import { UpdatePasswordForm } from '../interface/updatePasswordForm';
 import { profileSettingsForm } from '../interface/profileSettingsForm';
 import { JwtHelperService } from '@auth0/angular-jwt';
+import { AccountType } from '../interface/verifyState';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
+
   private readonly server: string = 'http://localhost:8080';
   private readonly jwtHelper = new JwtHelperService();
 
@@ -68,6 +70,39 @@ export class UserService {
   }
 
   /**
+   * Verifies the user's account or password reset using a provided key and type.
+   * @param key - The verification key sent to the user
+   * @param type - The type of verification (e.g., 'account' or 'password')
+   * @returns An Observable emitting a CustomHttpResponse containing the user's Profile
+   */
+  verifyAccountOrPassword$(key: string, type: AccountType): Observable<CustomHttpResponse<Profile>> {
+    return this.http.get<CustomHttpResponse<Profile>>(
+      `${this.server}/user/verify/code/${type}/${key}`
+    ).pipe(
+      tap(console.log),
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Sends a request to set a new password for the user.
+   * @param form - Object containing the userId, new password, and its confirmation
+   * @returns An Observable emitting a CustomHttpResponse indicating the result of the operation
+   * 
+   * @remarks
+   * - Utilizes HttpClient to send a PUT request to /user/new/password
+   * - Pipes the response to log it and handle any potential errors using handleError method
+   */
+  renewPassword$(form: {userId: number, password: string, confirmPassword: string}): Observable<CustomHttpResponse<Profile>> {
+    return this.http.put<CustomHttpResponse<Profile>>(
+      `${this.server}/user/new/password`, form
+    ).pipe(
+      tap(console.log),
+      catchError(this.handleError)
+    );
+  }
+
+  /**
    * Retrieves the profile information of the user from the server.
    * @returns An Observable emitting a CustomHttpResponse containing the user's Profile
    * 
@@ -119,21 +154,22 @@ export class UserService {
   }
 
   /**
-   * Handles HTTP errors from service requests.
-   * Determines if the error originated from client-side or server-side and formats an appropriate error message.
-   * 
-   * @param error - The HttpErrorResponse object containing error details
-   * @returns An Observable that throws a formatted error message string
-   * 
+   * Sends a password reset request to the backend for the given email address.
+   * @param email - The user's email address to reset the password for.
+   * @returns An Observable emitting a CustomHttpResponse with the backend's message.
+   *
    * @remarks
-   * - For client-side errors (ErrorEvent), returns the error message
-   * - For server-side errors, prioritizes custom reason from error.error.reason
-   * - Falls back to standard HTTP error status and message if no custom reason exists
+   * - Utilizes HttpClient to send a GET request to the /user/resetpassword/{email} endpoint.
+   * - Pipes the response to log it and handle any potential errors using handleError method.
    */
-  handleError(error: HttpErrorResponse): Observable<never> {
-    return throwError(() => error);
+  requestPasswordReset$(email: string): Observable<CustomHttpResponse<Profile>> {
+    return this.http.get<CustomHttpResponse<Profile>>(`${this.server}/user/resetpassword/${encodeURIComponent(email)}`)
+      .pipe(
+        tap(console.log),
+        catchError(this.handleError)
+      );
   }
-
+  
   /**
    * Checks if the user is currently authenticated based on the presence and validity of the JWT token.
    * @returns A boolean indicating whether the user is authenticated (true) or not (false)
@@ -287,6 +323,22 @@ export class UserService {
       tap(console.log),
       catchError(this.handleError)
     );
+  }
+
+  /**
+   * Handles HTTP errors from service requests.
+   * Determines if the error originated from client-side or server-side and formats an appropriate error message.
+   * 
+   * @param error - The HttpErrorResponse object containing error details
+   * @returns An Observable that throws a formatted error message string
+   * 
+   * @remarks
+   * - For client-side errors (ErrorEvent), returns the error message
+   * - For server-side errors, prioritizes custom reason from error.error.reason
+   * - Falls back to standard HTTP error status and message if no custom reason exists
+   */
+  handleError(error: HttpErrorResponse): Observable<never> {
+    return throwError(() => error);
   }
 
 }

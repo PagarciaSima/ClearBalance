@@ -27,7 +27,7 @@ export class CacheInterceptor implements HttpInterceptor {
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     // Bypass caching for authentication-related endpoints
     if (req.url.includes('verify') || req.url.includes('login') || req.url.includes('register')
-        || req.url.includes('refresh') || req.url.includes('resetpassword')) {
+        || req.url.includes('refresh') || req.url.includes('resetpassword') || req.url.includes('new/password')) {
       return next.handle(req);
     }
     // Clear cache for non-GET requests

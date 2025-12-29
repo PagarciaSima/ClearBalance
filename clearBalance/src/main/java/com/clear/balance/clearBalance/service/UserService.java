@@ -33,5 +33,6 @@ public interface UserService {
 	void updateAccountSettings(Long id, Boolean enabled, Boolean notLocked);
 	UserDto toggleMfa(String email);
 	UserDto updateImage(UserDto userDto, MultipartFile image);
+	UserDto updatePassword(Long userId, String password, String confirmPassword);
 
 }

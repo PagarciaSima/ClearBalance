@@ -15,6 +15,8 @@ import javax.management.InstanceNotFoundException;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,6 +61,8 @@ public class UserServiceImpl implements UserService {
 	private final TwoFactorVerificationRepository twoFactorVerificationRepository;
 	private final ResetPasswordVerificationRepository resetPasswordVerificationRepository;
 	private final SmsUtils smsUtils;
+	@Value("${frontend.url}")
+	private String frontendBaseUrl;
 
 	/**
 	 * Creates a new user in the system.
@@ -262,13 +266,13 @@ public class UserServiceImpl implements UserService {
 	 * Constructs a verification URL for a given key and type.
 	 *
 	 * @param key  the verification key
-	 * @param type the type of verification (e.g., "email", "phone")
+	 * @param type the type of verification (e.g., "account", "password")
 	 * @return the full verification URL as a String
 	 */
 	private String getVerificationUrl(String key, String type) {
-		String url = fromCurrentContextPath().path("/user/verify/" + type + "/" + key).toUriString();
-		log.debug("Generated verification URL: {}", url);
-		return url;
+	    String url = frontendBaseUrl + "/user/verify/" + type + "/" + key;
+	    log.debug("Generated verification URL: {}", url);
+	    return url;
 	}
 
 	/**
@@ -453,14 +457,14 @@ public class UserServiceImpl implements UserService {
 	public UserDto verifyPassword(String key) {
 	    log.info("Verifying password reset key: {}", key);
 	    
-	    // Buscar por el UUID (parte final de la URL)
+	    // Search by UUID
 	    ResetPasswordVerification verification = resetPasswordVerificationRepository.findByUrlContaining(key)
 	            .orElseThrow(() -> {
 	                log.error("Invalid password reset key: {}", key);
 	                return new ApiException("Invalid password reset link. Please request a new one.");
 	            });
 	    
-	    // Verificar si ha expirado
+	    // Verify expiration
 	    if (verification.getExpirationDate().isBefore(LocalDateTime.now())) {
 	        log.warn("Password reset link has expired for key: {}", key);
 	        resetPasswordVerificationRepository.delete(verification);
@@ -671,6 +675,43 @@ public class UserServiceImpl implements UserService {
 	    userRepository.save(user);
 
 	    log.info("Password updated successfully for user {}", user.getEmail());
+	}
+	
+	/**
+	 * Updates the password of an existing user.
+	 * <p>
+	 * This method retrieves the user by its identifier, validates that the provided
+	 * password and confirmation match, encodes the new password, and persists the
+	 * change in the database.
+	 * </p>
+	 *
+	 * @param userId          the unique identifier of the user whose password will be updated
+	 * @param password        the new password to be set
+	 * @param confirmPassword confirmation of the new password; must match {@code password}
+	 * @return a {@link UserDto} representing the updated user
+	 *
+	 * @throws ApiException if the passwords do not match
+	 * @throws ApiException if the user cannot be found
+	 */
+	@Override
+	public UserDto updatePassword(Long userId, String password, String confirmPassword) {
+		log.info("Updating password for user ID {}", userId);
+
+	    // 1. Get user
+	    User user = this.getUserById(userId);
+
+	    // 3. Validate new password match
+	    if (!password.equals(confirmPassword)) {
+	        log.error("New passwords do not match for user {}", user.getEmail());
+	        throw new ApiException("Passwords do not match.");
+	    }
+
+	    // 4. Update and encode password
+	    user.setPassword(encoder.encode(password));
+	    userRepository.save(user);
+
+	    log.info("Password updated successfully for user {}", user.getEmail());
+	    return UserDtoMapper.fromUser(user);
 	}
 	
 	/**

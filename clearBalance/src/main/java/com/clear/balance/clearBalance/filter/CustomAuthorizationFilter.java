@@ -37,6 +37,7 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
 			"/user/verify/code",
 			"/user/register",
 			"/user/refresh/token",
+			"/user/new/password"
 			
 	};
 	

@@ -5,11 +5,13 @@ import { catchError, map, Observable, of, startWith } from 'rxjs';
 import { DataState } from 'src/app/enum/datastate.enum';
 import { RegisterState } from 'src/app/interface/registerState';
 import { UserService } from 'src/app/service/user.service';
+import { slideBlur } from 'src/app/animations/animations';
 
 @Component({
   selector: 'app-register',
   templateUrl: './register.component.html',
-  styleUrls: ['./register.component.css']
+  styleUrls: ['./register.component.css'],
+  animations: [ slideBlur]
 })
 export class RegisterComponent implements AfterViewInit, AfterViewChecked {
   registerState$: Observable<RegisterState> = of({ dataState: DataState.LOADED });

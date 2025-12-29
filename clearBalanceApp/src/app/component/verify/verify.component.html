@@ -1,1 +1,202 @@
-<p>verify works!</p>
+<!-- VERIFY COMPONENT TEMPLATE -->
+<section *ngIf="(verifyState$ | async) as state" [ngSwitch]="state.dataState" aria-live="polite" @slideBlur>
+  <!-- LOADING STATE -->
+  <ng-container *ngSwitchCase="DataState.LOADING">
+    <div class="container" role="status" aria-busy="true">
+      <div class="row justify-content-center">
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <div class="text-center">
+                <h2><i class="bi bi-safe me-2" aria-hidden="true"></i>Clear Balance</h2>
+                <h5 class="card-title mt-4 mb-4">{{ state.title }}</h5>
+                <div style="font-size: 30px;" class="spinner-border text-secondary" role="status" aria-label="Loading">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2" style="font-size: 20px;">{{ state.message }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- LOADED STATE -->
+  <ng-container *ngSwitchCase="DataState.LOADED">
+
+    <!-- ACCOUNT VERIFIED -->
+    <div *ngIf="state.type === 'account'" class="container" aria-label="Account Verified">
+      <div class="row justify-content-center">
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <div class="text-center">
+                <h2><i class="bi bi-safe me-2" aria-hidden="true"></i>Clear Balance</h2>
+                <h5 class="card-title mt-4 mb-4">{{ state.title }}</h5>
+                <i class="bi bi-check-circle-fill success-icon" aria-label="Success"></i>
+                <p class="mt-2" style="font-size: 20px;">{{ state.message }}</p>
+              </div>
+              <div class="row mb-4">
+                <div class="col d-flex justify-content-center">
+                  <a [routerLink]="['/login']" data-bs-toggle="tooltip" data-bs-placement="top"
+                    title="Go to account login page" aria-label="Go to account login page">
+                    <i class="bi bi-box-arrow-in-right me-1" aria-hidden="true"></i>Account Login
+                  </a>
+                </div>
+                <div class="col">
+                  <a [routerLink]="['/register']" style="color: #0D6EFD; text-decoration: underline; cursor: pointer;"
+                    data-bs-toggle="tooltip" data-bs-placement="top" title="Create another account"
+                    aria-label="Create another account">
+                    <i class="bi bi-person-plus me-1" aria-hidden="true"></i>Create another account
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PASSWORD RESET -->
+    <div *ngIf="state.type === 'password'" class="container" aria-label="Password Reset">
+      <div class="row justify-content-center">
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <div class="text-center">
+                <h2><i class="bi bi-safe me-2" aria-hidden="true"></i>Clear Balance</h2>
+                <h5 class="card-title mt-4 mb-5">Enter New Password</h5>
+              </div>
+              <div *ngIf="state.error"
+                class="alert alert-danger bg-danger text-light border-0 alert-dismissible fade show" role="alert">
+                {{ state.error }}
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"
+                  aria-label="Close"></button>
+              </div>
+              <!-- Password Reset Form -->
+              <form #resetPasswordForm="ngForm" (ngSubmit)="renewPassword(resetPasswordForm)"
+                aria-label="Reset Password Form">
+                <!-- Hidden username field for accessibility -->
+                <input type="text" name="username" ngModel [value]="getUserEmail()" autocomplete="username"
+                  style="display:none;" tabindex="-1" aria-hidden="true">
+                <div class="form-outline mb-4 position-relative">
+                  <label class="form-label" for="newPassword">
+                    <i class="bi bi-lock me-1" aria-hidden="true"></i>New Password
+                  </label>
+                  <div class="input-group">
+                    <input id="newPassword" [type]="showPassword ? 'text' : 'password'" ngModel name="password"
+                      [disabled]="(isLoading$ | async) ?? false" class="form-control" required minlength="5"
+                      autocomplete="new-password" aria-required="true" aria-label="New Password"
+                      aria-describedby="newPasswordToggle">
+                    <button class="btn btn-primary" type="button" id="newPasswordToggle"
+                      (click)="togglePasswordVisibility()"
+                      [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+                      [attr.aria-pressed]="showPassword" data-bs-toggle="tooltip" data-bs-placement="top"
+                      title="Toggle password visibility" tabindex="0" role="button">
+                      <i [class]="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'" aria-hidden="true"></i>
+                    </button>
+                  </div>
+                  <!-- Mensajes de validación para New Password -->
+                  <div *ngIf="resetPasswordForm.controls['password'] && resetPasswordForm.controls['password'].errors?.['required'] && (resetPasswordForm.controls['password'].touched || resetPasswordForm.controls['password'].dirty)" class="form-text text-danger mt-1" aria-live="polite">
+                    Password is required.
+                  </div>
+                  <div *ngIf="resetPasswordForm.controls['password'] && resetPasswordForm.controls['password'].errors?.['minlength'] && (resetPasswordForm.controls['password'].touched || resetPasswordForm.controls['password'].dirty)" class="form-text text-danger mt-1" aria-live="polite">
+                    Password must be at least 5 characters.
+                  </div>
+                </div>
+                <div class="form-outline mb-4 position-relative">
+                  <label for="confirmPassword" class="form-label">
+                    <i class="bi bi-lock-fill me-1" aria-hidden="true"></i>Confirm New Password
+                  </label>
+                  <div class="input-group">
+                    <input id="confirmPassword" [type]="showConfirmPassword ? 'text' : 'password'" ngModel
+                      name="confirmPassword" [disabled]="(isLoading$ | async) ?? false" class="form-control" required
+                      minlength="5" autocomplete="new-password" aria-required="true" aria-label="Confirm New Password"
+                      aria-describedby="confirmPasswordToggle">
+                    <button class="btn btn-primary" type="button" id="confirmPasswordToggle"
+                      (click)="toggleConfirmPasswordVisibility()"
+                      [attr.aria-label]="showConfirmPassword ? 'Hide password' : 'Show password'"
+                      [attr.aria-pressed]="showConfirmPassword" data-bs-toggle="tooltip" data-bs-placement="top"
+                      title="Toggle password visibility" tabindex="0" role="button">
+                      <i [class]="showConfirmPassword ? 'bi bi-eye-slash' : 'bi bi-eye'" aria-hidden="true"></i>
+                    </button>
+                  </div>
+                  <!-- Mensajes de validación para Confirm New Password -->
+                  <div *ngIf="resetPasswordForm.controls['confirmPassword'] && resetPasswordForm.controls['confirmPassword'].errors?.['required'] && (resetPasswordForm.controls['confirmPassword'].touched || resetPasswordForm.controls['confirmPassword'].dirty)" class="form-text text-danger mt-1" aria-live="polite">
+                    Confirm password is required.
+                  </div>
+                  <div *ngIf="resetPasswordForm.controls['confirmPassword'] && resetPasswordForm.controls['confirmPassword'].errors?.['minlength'] && (resetPasswordForm.controls['confirmPassword'].touched || resetPasswordForm.controls['confirmPassword'].dirty)" class="form-text text-danger mt-1" aria-live="polite">
+                    Confirm password must be at least 5 characters.
+                  </div>
+                </div>
+                <div class="d-flex justify-content-center mb-4">
+                  <button
+                    [disabled]="((isLoading$ | async) ?? false) || resetPasswordForm.invalid || resetPasswordForm.pristine"
+                    type="submit" class="btn btn-primary w-100" aria-label="Update Password" data-bs-toggle="tooltip"
+                    data-bs-placement="top" title="Update your password">
+                    <span *ngIf="(isLoading$ | async)" class="spinner-border spinner-border-sm" role="status"
+                      aria-hidden="true" style="margin-right: 5px;"></span>
+                    <span *ngIf="(isLoading$ | async)">Loading...</span>
+                    <span *ngIf="!(isLoading$ | async)">Update Password</span>
+                  </button>
+                </div>
+              </form>
+              <div class="row mb-4">
+                <div class="col d-flex justify-content-center">
+                  <a [ngStyle]="{'pointer-events' : state.dataState === DataState.LOADING || (isLoading$ | async)? 'none' : '' }"
+                    [routerLink]="['/login']" data-bs-toggle="tooltip" data-bs-placement="top"
+                    title="Go to account login page" aria-label="Go to account login page">
+                    <i class="bi bi-box-arrow-in-right me-1" aria-hidden="true"></i>Account Login
+                  </a>
+                </div>
+                <div class="col">
+                  <a [ngStyle]="{'pointer-events' : state.dataState === DataState.LOADING || (isLoading$ | async)? 'none' : '' }"
+                    [routerLink]="['/resetpassword']" data-bs-toggle="tooltip" data-bs-placement="top"
+                    title="Forgot your password?" aria-label="Forgot your password?">
+                    <i class="bi bi-key me-1" aria-hidden="true"></i>Forgot password?
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+
+  <!-- ERROR STATE -->
+  <ng-container *ngSwitchCase="DataState.ERROR">
+    <div class="container" aria-label="Error State">
+      <div class="row justify-content-center">
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <div class="text-center">
+                <h2><i class="bi bi-safe me-2" aria-hidden="true"></i>Clear Balance</h2>
+                <h5 class="card-title mt-4 mb-4">{{ state.title }}</h5>
+                <i class="bi bi-exclamation-circle-fill" style="font-size: 80px;color: red;" aria-label="Error"></i>
+                <p class="mt-2" style="font-size: 20px;">{{ state.message }}</p>
+              </div>
+              <div class="row mb-4">
+                <div class="col d-flex justify-content-center">
+                  <a [routerLink]="['/login']" data-bs-toggle="tooltip" data-bs-placement="top"
+                    title="Go to account login page" aria-label="Go to account login page">
+                    <i class="bi bi-box-arrow-in-right me-1" aria-hidden="true"></i>Account Login
+                  </a>
+                </div>
+                <div class="col">
+                  <a routerLink="['/register']" data-bs-toggle="tooltip" data-bs-placement="top"
+                    title="Create another account" aria-label="Create another account">
+                    <i class="bi bi-person-plus me-1" aria-hidden="true"></i>Create another account
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</section>

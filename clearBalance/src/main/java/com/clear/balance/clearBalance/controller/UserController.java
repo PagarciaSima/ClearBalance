@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -38,6 +39,7 @@ import com.clear.balance.clearBalance.domain.response.HttpResponse;
 import com.clear.balance.clearBalance.domain.user.User;
 import com.clear.balance.clearBalance.domain.user.UserPrincipal;
 import com.clear.balance.clearBalance.dto.login.LoginRequestDto;
+import com.clear.balance.clearBalance.dto.login.NewPasswordFormDto;
 import com.clear.balance.clearBalance.dto.profile.SettingsFormDto;
 import com.clear.balance.clearBalance.dto.profile.UpdatePasswordFormDto;
 import com.clear.balance.clearBalance.dto.profile.UpdateProfileFormDto;
@@ -265,61 +267,26 @@ public class UserController {
     }
     
     /**
-     * Verifies a password reset request using the provided verification key.
+     * Resets the password of an existing user.
      * <p>
-     * This endpoint is called when the user clicks the password reset link sent to their email.
-     * It performs the following actions:
-     * <ul>
-     *   <li>Logs the received verification key.</li>
-     *   <li>Delegates the verification process to {@code userService.verifyPassword(key)}.</li>
-     *   <li>Builds an {@link HttpResponse} instructing the client to prompt the user
-     *       to enter a new password.</li>
-     * </ul>
+     * This endpoint updates the user's password after validating the provided
+     * data contained in {@link NewPasswordFormDto}. Both the new password and its
+     * confirmation must match and comply with the defined validation rules.
      * </p>
      *
-     * @param key the unique verification key included in the password reset URL
-     * @return a {@link ResponseEntity} containing an {@link HttpResponse} with the user data
-     *         and a message indicating that the user may proceed to set a new password
-     */
-    @GetMapping("/verify/password/{key}")
-    public ResponseEntity<HttpResponse> verifyPassword(@PathVariable("key") String key) {
-        log.info("Verifying password reset key: {}", key);
-        UserDto user = userService.verifyPassword(key);
-        log.debug("Password verification process completed");
-
-        HttpResponse response = HttpResponse.builder()
-                .timeStamp(LocalDateTime.now().toString())
-                .data(Map.of("user", user))
-                .message("Please enter a new password")
-                .status(HttpStatus.OK)
-                .statusCode(HttpStatus.OK.value())
-                .build();
-
-
-        return ResponseEntity.ok().body(response);
-    }
-    
-    /**
-     * Resets the user's password using a password-reset key typically sent by email.
-     * <p>
-     * This endpoint validates the provided key and ensures the new password and its
-     * confirmation match. If the key is valid and the validation succeeds, the user's
-     * password is updated accordingly.
+     * @param newPasswordForm DTO containing the user identifier, the new password,
+     *                        and the password confirmation. Must be valid.
+     * @return a {@link ResponseEntity} containing an {@link HttpResponse} with the
+     *         updated {@link UserDto} and a success message.
      *
-     * @param key              Unique reset key associated with the user requesting the password reset.
-     * @param password         The new password to be assigned to the user.
-     * @param confirmPassword  Confirmation of the new password; must match {@code password}.
-     * @return A {@link ResponseEntity} containing an {@link HttpResponse} with the updated user information
-     *         and the status of the operation.
+     * @throws jakarta.validation.ConstraintViolationException if the input data
+     *         does not satisfy validation constraints.
      */
-    @PatchMapping("/resetpassword/{key}/{password}/{confirmPassword}")
+    @PutMapping("/new/password")
     public ResponseEntity<HttpResponse> resetPassword(
-    		@PathVariable("key") String key,
-    		@PathVariable("password") String password,
-    		@PathVariable("confirmPassword") String confirmPassword
+    		@RequestBody @Valid NewPasswordFormDto newPasswordForm
 	) {
-        log.info("Resetting password using key: {}", key);
-        UserDto user = userService.renewPassword(key, password, confirmPassword);
+        UserDto user = userService.updatePassword(newPasswordForm.getUserId(), newPasswordForm.getPassword(), newPasswordForm.getConfirmPassword());
         log.debug("Password reset process completed");
 
         HttpResponse response = HttpResponse.builder()
@@ -391,7 +358,7 @@ public class UserController {
 	 * @param key the unique verification key included in the account activation URL
 	 * @return a {@link ResponseEntity} containing an {@link HttpResponse} with a success message
 	 */
-	@GetMapping("/verify/account/{key}")
+	@GetMapping("/verify/code/account/{key}")
 	public ResponseEntity<HttpResponse> verifyAccount(@PathVariable String key) {
 		log.info("Verifying account with key: {}", key);
         UserDto user = userService.verifyAccount(key);
@@ -405,6 +372,41 @@ public class UserController {
 
         return ResponseEntity.ok().body(response);
 	}
+	
+    /**
+     * Verifies a password reset request using the provided verification key.
+     * <p>
+     * This endpoint is called when the user clicks the password reset link sent to their email.
+     * It performs the following actions:
+     * <ul>
+     *   <li>Logs the received verification key.</li>
+     *   <li>Delegates the verification process to {@code userService.verifyPassword(key)}.</li>
+     *   <li>Builds an {@link HttpResponse} instructing the client to prompt the user
+     *       to enter a new password.</li>
+     * </ul>
+     * </p>
+     *
+     * @param key the unique verification key included in the password reset URL
+     * @return a {@link ResponseEntity} containing an {@link HttpResponse} with the user data
+     *         and a message indicating that the user may proceed to set a new password
+     */
+    @GetMapping("/verify/code/password/{key}")
+    public ResponseEntity<HttpResponse> verifyPassword(@PathVariable("key") String key) {
+        log.info("Verifying password reset key: {}", key);
+        UserDto user = userService.verifyPassword(key);
+        log.debug("Password verification process completed");
+
+        HttpResponse response = HttpResponse.builder()
+                .timeStamp(LocalDateTime.now().toString())
+                .data(Map.of("user", user))
+                .message("Please enter a new password")
+                .status(HttpStatus.OK)
+                .statusCode(HttpStatus.OK.value())
+                .build();
+
+
+        return ResponseEntity.ok().body(response);
+    }
 	
 	/**
 	 * Updates the password of the currently authenticated user.
