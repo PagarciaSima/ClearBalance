@@ -1,7 +1,5 @@
 package com.clear.balance.clearBalance.service.impl;
 
-import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentContextPath;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -15,7 +13,6 @@ import javax.management.InstanceNotFoundException;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -123,9 +120,9 @@ public class UserServiceImpl implements UserService {
 			accountVerificationRepository.save(verification);
 			log.debug("Account verification entity saved for user: {}", user.getEmail());
 
-			// Optional: send verification email
-			// sendEmail(user.getFirstName(), user.getEmail(), verificationUrl,
-			// VerificationType.ACCOUNT);
+			// Send verification email
+			sendEmail(user.getFirstName(), user.getEmail(), verificationUrl,
+			VerificationType.ACCOUNT);
 
 			log.info("User created successfully: {}", user.getEmail());
 			return UserDtoMapper.fromUser(user);
@@ -284,8 +281,14 @@ public class UserServiceImpl implements UserService {
 	 * @param verificationType the type of verification being sent
 	 */
 	private void sendEmail(String firstName, String email, String verificationUrl, VerificationType verificationType) {
-		CompletableFuture.runAsync(
-				() -> emailService.sendVerificationEmail(firstName, email, verificationUrl, verificationType));
+	    CompletableFuture.runAsync(() -> {
+	        try {
+	            emailService.sendVerificationEmail(firstName, email, verificationUrl, verificationType);
+	            log.info("Email sent successfully to: {}", email);
+	        } catch (Exception e) {
+	            log.error("Failed to send email to {}: {}", email, e.getMessage());
+	        }
+	    });
 	}
 
 	/**
@@ -323,11 +326,40 @@ public class UserServiceImpl implements UserService {
 		twoFactorVerificationRepository.save(verification);
 		log.info("Saved new verification code for user ID: {}", user.getId());
 
-		// smsUtils.sendSMS(user.getPhone(), "From: ClearBalance \nVerification code \n"
-		// + verificationCode);
+	    // sendSmsAsync(verificationCode, user);
+		
 		log.info("Verification code: {}", verificationCode);
 
 		log.info("Sent SMS verification code to phone: {}", user.getPhone());
+	}
+
+	/**
+	 * Sends a verification SMS asynchronously.
+	 * <p>
+	 * This method executes the SMS sending process in a separate thread using
+	 * {@link CompletableFuture#runAsync(Runnable)} in order to avoid blocking
+	 * the main execution flow (e.g. user creation or verification process).
+	 * </p>
+	 *
+	 * <p>
+	 * Any exception thrown during the SMS sending process is caught and logged,
+	 * ensuring that failures do not affect the main business logic.
+	 * </p>
+	 *
+	 * @param verificationCode the verification code to be sent to the user
+	 * @param user the {@link User} entity containing the recipient phone number
+	 */
+	private void sendSmsAsync(String verificationCode, User user) {
+	    CompletableFuture.runAsync(() -> {
+	        try {
+	            smsUtils.sendSMS(
+	                    user.getPhone(),
+	                    "From: ClearBalance \nVerification code \n" + verificationCode
+	            );
+	        } catch (Exception e) {
+	            log.error("Failed to send sms to {}: {}", user.getPhone(), e.getMessage());
+	        }
+	    });
 	}
 	
 	/**
@@ -427,7 +459,7 @@ public class UserServiceImpl implements UserService {
 	    resetPasswordVerificationRepository.save(resetVerification);
 	    
 	    //Send email
-	    // sendEmail(user.getFirstName(), user.getEmail(), verificationUrl, VerificationType.PASSWORD);
+	    sendEmail(user.getFirstName(), user.getEmail(), verificationUrl, VerificationType.PASSWORD);
 	    
 	    log.info("Password reset initiated for user: {}", email);
 	    return UserDtoMapper.fromUser(user);

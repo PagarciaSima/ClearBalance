@@ -20,6 +20,23 @@ spring:
       mode: never
       continue-on-error: true
       
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${EMAIL_DIR}
+    from: Clear Balance <${EMAIL_DIR}>
+    password: ${EMAIL_PASS}
+    properties:
+      mail:
+        smtp:
+          writetimeout: 5000
+          connectiontimeout: 5000
+          timeout: 5000
+          auth: true
+          starttls:
+            enable: true
+            required: true
+      
 logging:
   level:
     "[org.springframework.security]": DEBUG

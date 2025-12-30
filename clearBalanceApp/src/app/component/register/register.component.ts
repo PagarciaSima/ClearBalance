@@ -13,7 +13,7 @@ import { slideBlur } from 'src/app/animations/animations';
   styleUrls: ['./register.component.css'],
   animations: [ slideBlur]
 })
-export class RegisterComponent implements AfterViewInit, AfterViewChecked {
+export class RegisterComponent implements AfterViewInit {
   registerState$: Observable<RegisterState> = of({ dataState: DataState.LOADED });
   readonly DataState = DataState;
   showPassword = false;
@@ -29,19 +29,6 @@ export class RegisterComponent implements AfterViewInit, AfterViewChecked {
    */
   ngAfterViewInit(): void {
     this.tooltipService.initialize();
-  }
-
-  /**
-   * Angular lifecycle hook that runs after every check of the component's view.
-   * Re-initializes Bootstrap tooltips when the success screen is shown.
-   */
-  ngAfterViewChecked(): void {
-    this.registerState$.subscribe(state => {
-      if (state.registerSuccess && !this.lastRegisterSuccess) {
-        setTimeout(() => this.tooltipService.initialize(), 0);
-      }
-      this.lastRegisterSuccess = !!state.registerSuccess;
-    });
   }
 
   /**
