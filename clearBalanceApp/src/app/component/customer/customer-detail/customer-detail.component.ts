@@ -13,14 +13,14 @@ import { CustomerService } from 'src/app/service/customer.service';
 import { TooltipService } from 'src/app/service/tooltip.service';
 
 @Component({
-  selector: 'app-customer',
-  templateUrl: './customer.component.html',
-  styleUrls: ['./customer.component.css'],
+  selector: 'app-customer-detail',
+  templateUrl: './customer-detail.component.html',
+  styleUrls: ['./customer-detail.component.css'],
   animations: [
     slideBlur
   ]
 })
-export class CustomerComponent implements OnInit {
+export class CustomerDetailComponent implements OnInit {
 
   customerState$!: Observable<State<CustomHttpResponse<{ user: User; customer: Customer }>>>;
   isLoading$!: Observable<boolean>;

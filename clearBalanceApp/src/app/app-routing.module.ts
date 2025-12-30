@@ -1,16 +1,16 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { LoginComponent } from './component/login/login.component';
-import { RegisterComponent } from './component/register/register.component';
-import { ResetpasswordComponent } from './component/resetpassword/resetpassword.component';
-import { VerifyComponent } from './component/verify/verify.component';
+import { LoginComponent } from './auth/login/login.component';
+import { RegisterComponent } from './auth/register/register.component';
+import { ResetpasswordComponent } from './auth/resetpassword/resetpassword.component';
+import { VerifyComponent } from './auth/verify/verify.component';
 import { PageNotFoundComponent } from './component/page-not-found/page-not-found.component';
-import { CustomerComponent } from './component/customer/customer.component';
+import { CustomerDetailComponent } from './component/customer/customer-detail/customer-detail.component';
 import { ProfileComponent } from './component/profile/profile.component';
-import { CustomersComponent } from './component/customers/customers.component';
+import { CustomersComponent } from './component/customer/customers/customers.component';
 import { HomeComponent } from './component/home/home.component';
 import { authenticationGuard } from './guards/authentication.guard';
-import { NewcustomerComponent } from './component/newcustomer/newcustomer.component';
+import { NewcustomerComponent } from './component/customer/newcustomer/newcustomer.component';
 import { NewinvoiceComponent } from './component/newinvoice/newinvoice.component';
 import { InvoicesComponent } from './component/invoices/invoices.component';
 import { InvoiceComponent } from './component/invoice/invoice.component';
@@ -29,7 +29,7 @@ const routes: Routes = [
   { path: 'customers/new', component: NewcustomerComponent, canActivate: [authenticationGuard] },
   { path: 'invoices/new', component: NewinvoiceComponent, canActivate: [authenticationGuard] },
   { path: 'invoices', component: InvoicesComponent, canActivate: [authenticationGuard] },
-  { path: 'customer/:id', component: CustomerComponent, canActivate: [authenticationGuard] },
+  { path: 'customer/:id', component: CustomerDetailComponent, canActivate: [authenticationGuard] },
   { path: 'invoices/:id/:invoiceNumber', component: InvoiceComponent, canActivate: [authenticationGuard] },
   { path: '', component: HomeComponent, canActivate: [authenticationGuard], pathMatch: 'full' },
   { path: '**', component: PageNotFoundComponent},
