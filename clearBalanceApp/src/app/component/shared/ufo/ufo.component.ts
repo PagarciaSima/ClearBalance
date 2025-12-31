@@ -1,9 +1,10 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
   selector: 'app-ufo',
   templateUrl: './ufo.component.html',
-  styleUrls: ['./ufo.component.css']
+  styleUrls: ['./ufo.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UfoComponent implements OnInit, OnDestroy {
   ufoStyle: any = {};

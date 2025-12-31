@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 
 interface Star {
   id: number;
@@ -10,7 +10,8 @@ interface Star {
 @Component({
   selector: 'app-shooting-star',
   templateUrl: './shooting-star.component.html',
-  styleUrls: ['./shooting-star.component.css']
+  styleUrls: ['./shooting-star.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ShootingStarComponent implements OnInit, OnDestroy {
   stars: Star[] = [];

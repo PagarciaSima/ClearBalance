@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ChangeDetectionStrategy } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { BehaviorSubject, catchError, map, Observable, of, startWith } from 'rxjs';
 import { slideBlur } from 'src/app/animations/animations';
@@ -16,7 +16,8 @@ import { TooltipService } from 'src/app/service/tooltip.service';
   styleUrls: ['./newcustomer.component.css'],
   animations: [
     slideBlur
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NewcustomerComponent implements OnInit, AfterViewInit {
 

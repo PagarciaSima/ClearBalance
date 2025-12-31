@@ -16,11 +16,11 @@ const INVOICE_ID = 'id';
 
 @Component({
   selector: 'app-invoice',
-  templateUrl: './invoice.component.html',
-  styleUrls: ['./invoice.component.css'],
+  templateUrl: './invoice-detail.component.html',
+  styleUrls: ['./invoice-detail.component.css'],
   animations: [ slideBlur]
 })
-export class InvoiceComponent {
+export class InvoiceDetailComponent {
   invoiceState$!: Observable<State<CustomHttpResponse<{ user: User; invoice: Invoice; customer: Customer }>>>;
   private dataSubject = new BehaviorSubject<CustomHttpResponse<{ user: User; invoice: Invoice; customer: Customer }> | null>(null);
   private isLoadingSubject = new BehaviorSubject<boolean>(false);

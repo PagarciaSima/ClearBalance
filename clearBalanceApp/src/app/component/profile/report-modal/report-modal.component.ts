@@ -1,10 +1,11 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'app-report-modal',
   templateUrl: './report-modal.component.html',
-  styleUrls: ['./report-modal.component.css']
+  styleUrls: ['./report-modal.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ReportModalComponent {
   @Input() reportForm!: FormGroup;

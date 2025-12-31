@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { Location } from '@angular/common';
 import { bounceIn } from 'src/app/animations/animations';
 
@@ -8,7 +8,8 @@ import { bounceIn } from 'src/app/animations/animations';
   styleUrls: ['./page-not-found.component.css'],
   animations: [
     bounceIn
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PageNotFoundComponent {
   /** Number of UFOs to display on the 404 page */

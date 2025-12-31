@@ -6,9 +6,9 @@ import { CustomersComponent } from './customers/customers.component';
 import { NewcustomerComponent } from './newcustomer/newcustomer.component';
 
 const routes: Routes = [
-  { path: 'customers', component: CustomersComponent, canActivate: [authenticationGuard] },
-  { path: 'customers/new', component: NewcustomerComponent, canActivate: [authenticationGuard] },
-  { path: 'customer/:id', component: CustomerDetailComponent, canActivate: [authenticationGuard] },
+  { path: '', component: CustomersComponent, canActivate: [authenticationGuard] },
+  { path: 'new', component: NewcustomerComponent, canActivate: [authenticationGuard] },
+  { path: ':id', component: CustomerDetailComponent, canActivate: [authenticationGuard] },
 ];
 
 @NgModule({
