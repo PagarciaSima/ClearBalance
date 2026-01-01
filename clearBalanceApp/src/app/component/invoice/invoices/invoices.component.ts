@@ -9,6 +9,7 @@ import { State } from 'src/app/interface/state';
 import { User } from 'src/app/interface/user';
 import { CustomerService } from 'src/app/service/customer.service';
 import { TooltipService } from 'src/app/service/tooltip.service';
+import { NotificationService } from 'src/app/service/notification.service';
 
 /**
  * Component for displaying the list of invoices.
@@ -32,7 +33,8 @@ export class InvoicesComponent implements OnInit {
 
   constructor(
     private customerService: CustomerService,
-    private tooltipService: TooltipService
+    private tooltipService: TooltipService,
+    private notificationService: NotificationService
   ) { }
 
   ngOnInit(): void {
@@ -54,9 +56,10 @@ export class InvoicesComponent implements OnInit {
         a.click();
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
+        this.notificationService.onSuccess('Excel file downloaded successfully.');
       },
       error: (err) => {
-        // Optionally, handle error (e.g., show a notification)
+        this.notificationService.onError('Failed to download Excel file.');
         console.error('Failed to download Excel file', err);
       }
     });
@@ -75,11 +78,13 @@ export class InvoicesComponent implements OnInit {
         map(response => {
           this.isLoadingSubject.next(false);
           this.dataSubject.next(response);
+          this.notificationService.onSuccess('Invoices loaded successfully.');
           return { dataState: DataState.LOADED, appData: response };
         }),
         startWith({ dataState: DataState.LOADING }),
         catchError((error: string) => {
           this.isLoadingSubject.next(false);
+          this.notificationService.onError('Failed to load invoices: ' + error);
           return of({ dataState: DataState.ERROR, error });
         })
       );
@@ -99,9 +104,10 @@ export class InvoicesComponent implements OnInit {
         a.click();
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
+        this.notificationService.onSuccess('CSV file downloaded successfully.');
       },
       error: (err) => {
-        // Optionally, handle error (e.g., show a notification)
+        this.notificationService.onError('Failed to download CSV file.');
         console.error('Failed to download CSV file', err);
       }
     });

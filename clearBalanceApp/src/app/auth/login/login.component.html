@@ -133,7 +133,7 @@
                   [class.disabled]="state.dataState === DataState.LOADING"
                   [attr.aria-disabled]="state.dataState === DataState.LOADING"
                   [attr.tabindex]="state.dataState === DataState.LOADING ? -1 : 0"
-                  routerLink="/register"
+                  routerLink="/auth/register"
                   data-bs-toggle="tooltip" 
                   data-bs-placement="top" 
                   title="Sign up for a new account">
@@ -147,7 +147,7 @@
                   [class.disabled]="state.dataState === DataState.LOADING"
                   [attr.aria-disabled]="state.dataState === DataState.LOADING"
                   [attr.tabindex]="state.dataState === DataState.LOADING ? -1 : 0"
-                  routerLink="/resetpassword"
+                  routerLink="/auth/resetpassword"
                   data-bs-toggle="tooltip" 
                   data-bs-placement="top" 
                   title="Reset your password via email">
@@ -259,7 +259,7 @@
                 <a 
                   class="d-flex align-items-center" 
                   (click)="loginPage()" 
-                  routerLink="/login"
+                  routerLink="/auth/login"
                   role="button"
                   tabindex="0"
                   data-bs-toggle="tooltip" 
@@ -272,7 +272,7 @@
               <div class="col d-flex justify-content-center">
                 <a 
                   class="d-flex align-items-center" 
-                  routerLink="/register"
+                  routerLink="/auth/register"
                   data-bs-toggle="tooltip" 
                   data-bs-placement="top" 
                   title="Sign up for a new account">

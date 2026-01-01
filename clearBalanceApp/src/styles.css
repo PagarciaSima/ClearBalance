@@ -1,31 +1,4 @@
-/* Popover image size fix for Bootstrap popover */
 
-.popover {
-    min-width: 120px;
-    max-width: 120px;
-    min-height: 120px;
-    max-height: 120px;
-    padding: 0 8px 16px 8px;
-    text-align: center;
-    background: rgba(34, 13, 70, 0.97) !important;
-    box-shadow: 0 8px 32px rgba(93, 66, 230, 0.25);
-    border-radius: 16px;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.popover img {
-    width: 88px !important;
-    height: 88px !important;
-    max-width: 88px !important;
-    max-height: 88px !important;
-    object-fit: cover;
-    border-radius: 50% !important;
-    display: block;
-    margin: auto;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
-}
 @import './styles/no-logs-margin.css';
 @import './styles/breadcrumbs.css';
 @import './styles/tables.css';
@@ -37,6 +10,7 @@
 @import './styles/cards.css';
 @import './styles/forms.css';
 @import './styles/galactic-modal.css';
+@import '../node_modules/angular-notifier/styles.css';
 
 .galactic-btn-danger {
     background: linear-gradient(135deg, #e63946 0%, #f72585 50%, #b5179e 100%) !important;
@@ -964,4 +938,33 @@ button:disabled,
 .form-label.required::after {
   content: " *";
   color: red;
+}
+
+/* Popover image size fix for Bootstrap popover */
+
+.popover {
+    min-width: 120px;
+    max-width: 120px;
+    min-height: 120px;
+    max-height: 120px;
+    padding: 0 8px 16px 8px;
+    text-align: center;
+    background: rgba(34, 13, 70, 0.97) !important;
+    box-shadow: 0 8px 32px rgba(93, 66, 230, 0.25);
+    border-radius: 16px;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.popover img {
+    width: 88px !important;
+    height: 88px !important;
+    max-width: 88px !important;
+    max-height: 88px !important;
+    object-fit: cover;
+    border-radius: 50% !important;
+    display: block;
+    margin: auto;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
 }

@@ -1,17 +1,18 @@
 
 import { AfterViewChecked, Component, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { Observable, BehaviorSubject, map, startWith, catchError, of } from 'rxjs';
+import { BehaviorSubject, catchError, map, Observable, of, startWith } from 'rxjs';
 import { slideBlur } from 'src/app/animations/animations';
 import { DataState } from 'src/app/enum/datastate.enum';
 import { Customer } from 'src/app/interface/customer';
 import { CustomHttpResponse } from 'src/app/interface/customhttpresponse';
+import { Invoice } from 'src/app/interface/invoice';
+import { InvoiceService } from 'src/app/interface/invoiceservice';
 import { State } from 'src/app/interface/state';
 import { User } from 'src/app/interface/user';
 import { CustomerService } from 'src/app/service/customer.service';
+import { NotificationService } from 'src/app/service/notification.service';
 import { TooltipService } from 'src/app/service/tooltip.service';
-import { Invoice } from 'src/app/interface/invoice';
-import { InvoiceService } from 'src/app/interface/invoiceservice';
 
 declare var bootstrap: any;
 
@@ -36,7 +37,8 @@ export class NewinvoiceComponent implements OnInit, AfterViewChecked {
 
   constructor(
     private customerService: CustomerService,
-    private tooltipService: TooltipService
+    private tooltipService: TooltipService,
+    private notificationService: NotificationService
   ) { }
 
   /**
@@ -69,10 +71,12 @@ export class NewinvoiceComponent implements OnInit, AfterViewChecked {
         map(response => {
           console.log(response);
           this.dataSubject.next(response);
+          this.notificationService.onSuccess('Invoice data loaded successfully.');
           return { dataState: DataState.LOADED, appData: response };
         }),
         startWith({ dataState: DataState.LOADING }),
         catchError((error: string) => {
+          this.notificationService.onError('Failed to load invoice data: ' + error);
           return of({ dataState: DataState.ERROR, error });
         })
       );
@@ -85,14 +89,13 @@ export class NewinvoiceComponent implements OnInit, AfterViewChecked {
    */
   createInvoice(newInvoiceForm: NgForm): void {
     if (this.servicesList.length === 0) {
-      // Optionally show error or mark as invalid
+      this.notificationService.onError('Please add at least one service to the invoice.');
       return;
     }
     if (this.dataSubject.value) {
       this.dataSubject.next({ ...this.dataSubject.value, message: null });
     }
     this.isLoadingSubject.next(true);
-    // Patch the services array and total into the form value
     newInvoiceForm.form.patchValue({ services: this.servicesList, total: this.total });
     const invoice: Invoice = { ...newInvoiceForm.value, services: this.servicesList, total: this.total };
     this.newInvoiceState$ = this.customerService.addInvoiceToCustomer$(newInvoiceForm.value.customerId, invoice)
@@ -109,14 +112,16 @@ export class NewinvoiceComponent implements OnInit, AfterViewChecked {
           this.servicesList = [];
           this.isLoadingSubject.next(false);
           this.dataSubject.next(response);
+          this.notificationService.onSuccess('Invoice created successfully.');
           return { dataState: DataState.LOADED, appData: this.dataSubject.value };
         }),
         startWith({ dataState: DataState.LOADED, appData: this.dataSubject.value }),
         catchError((error: string) => {
           this.isLoadingSubject.next(false);
-          return of({ dataState: DataState.LOADED, error })
+          this.notificationService.onError('Failed to create invoice: ' + error);
+          return of({ dataState: DataState.LOADED, error });
         })
-      )
+      );
   }
 
   /**

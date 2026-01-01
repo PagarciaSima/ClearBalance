@@ -1,14 +1,15 @@
-import { Component, AfterViewInit, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { catchError, map, startWith } from 'rxjs/operators';
+import { slideBlur } from 'src/app/animations/animations';
 import { DataState } from 'src/app/enum/datastate.enum';
 import { Key } from 'src/app/enum/key.enum';
 import { LoginState } from 'src/app/interface/appState';
-import { UserService } from 'src/app/service/user.service';
+import { NotificationService } from 'src/app/service/notification.service';
 import { TooltipService } from 'src/app/service/tooltip.service';
-import { slideBlur } from 'src/app/animations/animations';
+import { UserService } from 'src/app/service/user.service';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { catchError, map, startWith } from 'rxjs/operators';
 
 @Component({
   selector: 'app-login',
@@ -33,7 +34,8 @@ export class LoginComponent implements AfterViewInit, OnDestroy, OnInit {
   constructor(
     private router: Router,
     private userService: UserService,
-    private tooltipService: TooltipService
+    private tooltipService: TooltipService,
+    private notificationService: NotificationService
   ) {}
 
   // Angular lifecycle hooks
@@ -41,7 +43,7 @@ export class LoginComponent implements AfterViewInit, OnDestroy, OnInit {
     if (this.userService.isAuthenticated()) {
       this.router.navigate(['/']);
     } else {
-      this.router.navigate(['/login']);
+      this.router.navigate(['/auth/login']);
     }
   }
 
@@ -64,7 +66,12 @@ export class LoginComponent implements AfterViewInit, OnDestroy, OnInit {
       .pipe(
         map(response => this.handleLoginResponse(response)),
         startWith({ dataState: DataState.LOADING, usingMfa: false }),
-        catchError((error: string) => of(this.createErrorState(error, false)))
+        catchError((error: any) => {
+          this.notificationService.onError(
+            typeof error === 'string' ? error : (error?.error?.reason || error?.message || 'An unexpected error occurred.')
+          );
+          return of(this.createErrorState(error, false));
+        })
       );
   }
 
@@ -77,7 +84,12 @@ export class LoginComponent implements AfterViewInit, OnDestroy, OnInit {
       .pipe(
         map(response => this.handleVerificationSuccess(response)),
         startWith(this.createLoadingStateWithMfa()),
-        catchError((error: string) => of(this.createErrorState(error, true)))
+        catchError((error: any) => {
+          this.notificationService.onError(
+            typeof error === 'string' ? error : (error?.error?.reason || error?.message || 'An unexpected error occurred.')
+          );
+          return of(this.createErrorState(error, true));
+        })
       );
   }
 
@@ -129,6 +141,7 @@ export class LoginComponent implements AfterViewInit, OnDestroy, OnInit {
    */
   private handleSuccessfulLogin(response: any): LoginState {
     this.storeTokens(response?.data?.access_token, response?.data?.refresh_token);
+    this.notificationService.onSuccess('Login successful.');
     this.router.navigate(['/']);
     return {
       dataState: DataState.LOADED,
@@ -141,6 +154,7 @@ export class LoginComponent implements AfterViewInit, OnDestroy, OnInit {
    */
   private handleVerificationSuccess(response: any): LoginState {
     this.storeTokens(response?.data?.access_token, response?.data?.refresh_token);
+    this.notificationService.onSuccess('Verification successful.');
     this.router.navigate(['/']);
     return {
       dataState: DataState.LOADED,

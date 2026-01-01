@@ -1,17 +1,14 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { catchError, Observable, tap, throwError, map } from 'rxjs';
-import { CustomHttpResponse } from '../interface/customhttpresponse';
+import { catchError, map, Observable, tap, throwError } from 'rxjs';
 import { Customer, CustomerPage } from '../interface/customer';
+import { CustomHttpResponse } from '../interface/customhttpresponse';
+import { Invoice } from '../interface/invoice';
+import { Page } from '../interface/page';
 import { Stats } from '../interface/stats';
 import { User } from '../interface/user';
-import { Invoice } from '../interface/invoice';
-import { InvoiceService } from '../interface/invoiceservice';
-import { Page } from '../interface/page';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class CustomerService {
 
   private readonly server: string = 'http://localhost:8080';

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Observable, BehaviorSubject, catchError, map, of, startWith } from 'rxjs';
+import { BehaviorSubject, catchError, map, Observable, of, startWith } from 'rxjs';
 import { slideBlur } from 'src/app/animations/animations';
 import { DataState } from 'src/app/enum/datastate.enum';
 import { Customer, CustomerPage } from 'src/app/interface/customer';
@@ -9,6 +9,7 @@ import { CustomHttpResponse } from 'src/app/interface/customhttpresponse';
 import { State } from 'src/app/interface/state';
 import { CustomerService } from 'src/app/service/customer.service';
 import { TooltipService } from 'src/app/service/tooltip.service';
+import { NotificationService } from 'src/app/service/notification.service';
 
 @Component({
   selector: 'app-customers',
@@ -32,7 +33,8 @@ export class CustomersComponent implements OnInit {
   constructor(
     private customerService: CustomerService,
     private tooltipService: TooltipService,
-    private router: Router
+    private router: Router,
+    private notificationService: NotificationService
   ) {
     this.dataSubject = new BehaviorSubject<CustomHttpResponse<CustomerPage> | null>(null);
     this.isLoadingSubject = new BehaviorSubject<boolean>(false);
@@ -96,11 +98,13 @@ export class CustomersComponent implements OnInit {
         this.dataSubject.next(response);
         this.initialiceCustomerImagePopOver();
         this.isLoadingSubject.next(false);
+        this.notificationService.onSuccess('Customers loaded successfully.');
         return { dataState: DataState.LOADED, appData: response };
       }),
       startWith({ dataState: DataState.LOADING }),
       catchError((error: string) => {
         this.isLoadingSubject.next(false);
+        this.notificationService.onError('Failed to load customers: ' + error);
         return of({ dataState: DataState.ERROR, error });
       })
     );
@@ -161,9 +165,10 @@ export class CustomersComponent implements OnInit {
         a.click();
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
+        this.notificationService.onSuccess('Excel file downloaded successfully.');
       },
       error: (err) => {
-        // Optionally, handle error (e.g., show a notification)
+        this.notificationService.onError('Failed to download Excel file.');
         console.error('Failed to download Excel file', err);
       }
     });
@@ -183,9 +188,10 @@ export class CustomersComponent implements OnInit {
         a.click();
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
+        this.notificationService.onSuccess('CSV file downloaded successfully.');
       },
       error: (err) => {
-        // Optionally, handle error (e.g., show a notification)
+        this.notificationService.onError('Failed to download CSV file.');
         console.error('Failed to download CSV file', err);
       }
     });

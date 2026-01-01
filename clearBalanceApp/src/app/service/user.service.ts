@@ -1,19 +1,16 @@
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
-import { BehaviorSubject } from 'rxjs';
 import { Injectable } from '@angular/core';
-import { catchError, Observable, tap, throwError } from 'rxjs';
+import { JwtHelperService } from '@auth0/angular-jwt';
+import { BehaviorSubject, catchError, Observable, tap, throwError } from 'rxjs';
+import { Key } from '../enum/key.enum';
 import { CustomHttpResponse } from '../interface/customhttpresponse';
 import { Profile } from '../interface/profile';
-import { User } from '../interface/user';
-import { Key } from '../enum/key.enum';
-import { UpdatePasswordForm } from '../interface/updatePasswordForm';
 import { profileSettingsForm } from '../interface/profileSettingsForm';
-import { JwtHelperService } from '@auth0/angular-jwt';
+import { UpdatePasswordForm } from '../interface/updatePasswordForm';
+import { User } from '../interface/user';
 import { AccountType } from '../interface/verifyState';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class UserService {
 
   private readonly server: string = 'http://localhost:8080';

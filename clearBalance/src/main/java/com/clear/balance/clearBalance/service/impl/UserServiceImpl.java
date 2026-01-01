@@ -267,7 +267,7 @@ public class UserServiceImpl implements UserService {
 	 * @return the full verification URL as a String
 	 */
 	private String getVerificationUrl(String key, String type) {
-	    String url = frontendBaseUrl + "/user/verify/" + type + "/" + key;
+	    String url = frontendBaseUrl + "/auth/user/verify/" + type + "/" + key;
 	    log.debug("Generated verification URL: {}", url);
 	    return url;
 	}

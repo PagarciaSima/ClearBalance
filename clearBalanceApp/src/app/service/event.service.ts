@@ -1,14 +1,12 @@
-import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { EventsPage } from '../interface/events';
+import { Injectable } from '@angular/core';
 import { catchError, Observable, tap, throwError } from 'rxjs';
 import { CustomHttpResponse } from '../interface/customhttpresponse';
+import { EventsPage } from '../interface/events';
 import { ReportEventRequest } from '../interface/reportEventRequest';
 import { UserEventReportDetailDto, UserEventReportResponseDto } from '../interface/userEventReportResponse';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class EventService {
 
   private readonly server: string = 'http://localhost:8080';

@@ -39,13 +39,13 @@
               </div>
               <div class="row mb-4">
                 <div class="col d-flex justify-content-center">
-                  <a [routerLink]="['/login']" data-bs-toggle="tooltip" data-bs-placement="top"
+                  <a [routerLink]="['/auth/login']" data-bs-toggle="tooltip" data-bs-placement="top"
                     title="Go to account login page" aria-label="Go to account login page">
                     <i class="bi bi-box-arrow-in-right me-1" aria-hidden="true"></i>Account Login
                   </a>
                 </div>
                 <div class="col">
-                  <a [routerLink]="['/register']" style="color: #0D6EFD; text-decoration: underline; cursor: pointer;"
+                  <a [routerLink]="['/auth/register']" style="color: #0D6EFD; text-decoration: underline; cursor: pointer;"
                     data-bs-toggle="tooltip" data-bs-placement="top" title="Create another account"
                     aria-label="Create another account">
                     <i class="bi bi-person-plus me-1" aria-hidden="true"></i>Create another account
@@ -145,14 +145,14 @@
               <div class="row mb-4">
                 <div class="col d-flex justify-content-center">
                   <a [ngStyle]="{'pointer-events' : state.dataState === DataState.LOADING || (isLoading$ | async)? 'none' : '' }"
-                    [routerLink]="['/login']" data-bs-toggle="tooltip" data-bs-placement="top"
+                    [routerLink]="['/auth/login']" data-bs-toggle="tooltip" data-bs-placement="top"
                     title="Go to account login page" aria-label="Go to account login page">
                     <i class="bi bi-box-arrow-in-right me-1" aria-hidden="true"></i>Account Login
                   </a>
                 </div>
                 <div class="col">
                   <a [ngStyle]="{'pointer-events' : state.dataState === DataState.LOADING || (isLoading$ | async)? 'none' : '' }"
-                    [routerLink]="['/resetpassword']" data-bs-toggle="tooltip" data-bs-placement="top"
+                    [routerLink]="['/auth/resetpassword']" data-bs-toggle="tooltip" data-bs-placement="top"
                     title="Forgot your password?" aria-label="Forgot your password?">
                     <i class="bi bi-key me-1" aria-hidden="true"></i>Forgot password?
                   </a>
@@ -181,13 +181,13 @@
               </div>
               <div class="row mb-4">
                 <div class="col d-flex justify-content-center">
-                  <a [routerLink]="['/login']" data-bs-toggle="tooltip" data-bs-placement="top"
+                  <a [routerLink]="['/auth/login']" data-bs-toggle="tooltip" data-bs-placement="top"
                     title="Go to account login page" aria-label="Go to account login page">
                     <i class="bi bi-box-arrow-in-right me-1" aria-hidden="true"></i>Account Login
                   </a>
                 </div>
                 <div class="col">
-                  <a routerLink="['/register']" data-bs-toggle="tooltip" data-bs-placement="top"
+                  <a [routerLink]="['/auth/register']" data-bs-toggle="tooltip" data-bs-placement="top"
                     title="Create another account" aria-label="Create another account">
                     <i class="bi bi-person-plus me-1" aria-hidden="true"></i>Create another account
                   </a>

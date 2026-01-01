@@ -1,5 +1,5 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { Router, NavigationStart } from '@angular/router';
+import { NavigationStart, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 
 declare var bootstrap: any;
@@ -8,9 +8,7 @@ declare var bootstrap: any;
  * Service to manage Bootstrap tooltips globally across the application.
  * Handles initialization, cleanup, and automatic hiding on navigation.
  */
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class TooltipService implements OnDestroy {
   private routerSubscription?: Subscription;
 

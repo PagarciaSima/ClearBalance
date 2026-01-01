@@ -1,9 +1,10 @@
-import { Component, AfterViewInit, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { TooltipService } from 'src/app/service/tooltip.service';
 import { Key } from 'src/app/enum/key.enum';
-import { UserService } from 'src/app/service/user.service';
 import { Profile } from 'src/app/interface/profile';
+import { TooltipService } from 'src/app/service/tooltip.service';
+import { UserService } from 'src/app/service/user.service';
+import { NotificationService } from 'src/app/service/notification.service';
 
 @Component({
   selector: 'app-navbar',
@@ -20,7 +21,8 @@ export class NavbarComponent implements AfterViewInit, OnInit {
   constructor(
     private tooltipService: TooltipService,
     private router: Router,
-    private userService: UserService
+    private userService: UserService,
+    private notificationService: NotificationService
   ) {
     this.generateStars(8);
   }
@@ -61,11 +63,17 @@ export class NavbarComponent implements AfterViewInit, OnInit {
    * Fetches the current user's profile information
    */
   private getCurrentUser() {
-    this.userService.profile$().subscribe(resp => {
-      this.profile = resp.data ?? null;
-      console.log('Navbar profile:', this.profile);
-      if (this.profile && this.profile.user) {
-        this.userFullName = `${this.profile.user.firstName} ${this.profile.user.lastName}`;
+    this.userService.profile$().subscribe({
+      next: resp => {
+        this.profile = resp.data ?? null;
+        console.log('Navbar profile:', this.profile);
+        if (this.profile && this.profile.user) {
+          this.userFullName = `${this.profile.user.firstName} ${this.profile.user.lastName}`;
+        }
+        this.notificationService.onSuccess('Profile loaded successfully.');
+      },
+      error: err => {
+        this.notificationService.onError('Failed to load profile.');
       }
     });
   }
@@ -98,7 +106,8 @@ export class NavbarComponent implements AfterViewInit, OnInit {
   logOut(): void {
     localStorage.removeItem(Key.TOKEN);
     localStorage.removeItem(Key.REFRESH_TOKEN);
-    this.router.navigate(['/login']);
+    this.notificationService.onSuccess('Logged out successfully.');
+    this.router.navigate(['/auth/login']);
   }
 
 }

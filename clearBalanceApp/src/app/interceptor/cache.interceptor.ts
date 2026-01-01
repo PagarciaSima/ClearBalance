@@ -1,11 +1,11 @@
-import { Injectable } from '@angular/core';
 import {
-  HttpRequest,
-  HttpHandler,
   HttpEvent,
+  HttpHandler,
   HttpInterceptor,
+  HttpRequest,
   HttpResponse
 } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { filter, tap } from 'rxjs/operators';
 import { CacheService } from '../service/cache.service';

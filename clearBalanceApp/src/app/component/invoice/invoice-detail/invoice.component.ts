@@ -11,6 +11,7 @@ import { State } from 'src/app/interface/state';
 import { User } from 'src/app/interface/user';
 import { CustomerService } from 'src/app/service/customer.service';
 import { TooltipService } from 'src/app/service/tooltip.service';
+import { NotificationService } from 'src/app/service/notification.service';
 
 const INVOICE_ID = 'id';
 
@@ -30,7 +31,8 @@ export class InvoiceDetailComponent {
   constructor(
     private activatedRoute: ActivatedRoute,
     private customerService: CustomerService,
-    private tooltipService: TooltipService
+    private tooltipService: TooltipService,
+    private notificationService: NotificationService
   ) { }
 
   /**
@@ -51,15 +53,20 @@ export class InvoiceDetailComponent {
       switchMap(idStr => {
         const id = idStr ? Number(idStr) : null;
         if (id === null || isNaN(id)) {
+          this.notificationService.onError('Invalid invoice ID.');
           return of({ dataState: DataState.ERROR, error: 'Invalid invoice ID' });
         }
         return this.customerService.getInvoice$(id).pipe(
           map(response => {
             this.dataSubject.next(response);
+            this.notificationService.onSuccess('Invoice loaded successfully.');
             return { dataState: DataState.LOADED, appData: response };
           }),
           startWith({ dataState: DataState.LOADING }),
-          catchError((error: string) => of({ dataState: DataState.ERROR, error }))
+          catchError((error: string) => {
+            this.notificationService.onError('Failed to load invoice: ' + error);
+            return of({ dataState: DataState.ERROR, error });
+          })
         );
       })
     );
@@ -72,6 +79,7 @@ export class InvoiceDetailComponent {
     const invoiceId = this.dataSubject.value?.data?.invoice?.id;
     const invoiceNumber = this.dataSubject.value?.data?.invoice?.invoiceNumber ?? 'unknown';
     if (!invoiceId) {
+      this.notificationService.onError('No invoice ID found.');
       console.error('No invoice ID found');
       return;
     }
@@ -85,8 +93,10 @@ export class InvoiceDetailComponent {
         a.click();
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
+        this.notificationService.onSuccess('Invoice PDF downloaded successfully.');
       },
       error: (err) => {
+        this.notificationService.onError('Failed to download invoice PDF.');
         console.error('Error downloading PDF:', err);
       }
     });

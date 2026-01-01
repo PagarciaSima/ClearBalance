@@ -234,7 +234,7 @@
               <div class="col d-flex justify-content-center">
                 <a
                   [ngStyle]="{'pointer-events' : state.dataState === DataState.LOADING ? 'none' : 'auto'}"
-                  [routerLink]="['/login']"
+                  [routerLink]="['/auth/login']"
                   data-bs-toggle="tooltip"
                   data-bs-placement="top"
                   title="Go to account login page"
@@ -245,7 +245,7 @@
               <div class="col">
                 <a
                   [ngStyle]="{'pointer-events' : state.dataState === DataState.LOADING ? 'none' : 'auto'}"
-                  [routerLink]="['/resetpassword']"
+                  [routerLink]="['/auth/resetpassword']"
                   data-bs-toggle="tooltip"
                   data-bs-placement="top"
                   title="Forgot your password? Reset it here."
@@ -279,7 +279,7 @@
             <!-- Success Links -->
             <div class="row mb-4">
               <div class="col d-flex justify-content-center">
-                <a [routerLink]="['/login']"
+                <a [routerLink]="['/auth/login']"
                    data-bs-toggle="tooltip"
                    data-bs-placement="top"
                    title="Go to account login page">

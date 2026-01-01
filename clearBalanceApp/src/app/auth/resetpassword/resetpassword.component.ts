@@ -1,11 +1,10 @@
 import { Component } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { Observable, of, map, startWith, catchError } from 'rxjs';
+import { catchError, map, Observable, of, startWith } from 'rxjs';
 import { DataState } from 'src/app/enum/datastate.enum';
-import { RegisterState } from 'src/app/interface/registerState';
 import { ResetPasswordState } from 'src/app/interface/resetPasswordState';
-import { TooltipService } from 'src/app/service/tooltip.service';
 import { UserService } from 'src/app/service/user.service';
+import { NotificationService } from 'src/app/service/notification.service';
 
 @Component({
   selector: 'app-resetpassword',
@@ -17,20 +16,25 @@ export class ResetpasswordComponent {
 resetPasswordState$: Observable<ResetPasswordState> = of({ dataState: DataState.LOADED });
 readonly DataState = DataState;
 
-constructor(private userService: UserService) {}
+constructor(private userService: UserService, private notificationService: NotificationService) {}
 
+  /**
+   * Initiates the password reset process using the provided form.
+   * @param resetPasswordForm - The form containing the user's email for password reset.
+   */
 resetPassword(resetPasswordForm: NgForm): void {
   this.resetPasswordState$ = this.userService.requestPasswordReset$(resetPasswordForm.value.email)
     .pipe(
       map(response => {
         console.log(response);
         resetPasswordForm.reset();
+        this.notificationService.onSuccess('Password reset email sent successfully! Please check your inbox.');
         return { dataState: DataState.LOADED, registerSuccess: true, message: response.message };
       }),
       startWith({ dataState: DataState.LOADING, registerSuccess: false }),
       catchError((error: any) => {
          // Extract a user-friendly error message
-          let errorMessage = 'Registration failed.';
+          let errorMessage = 'Password reset failed. Please try again.';
           if (error?.error) {
             if (typeof error.error === 'string') {
               errorMessage = error.error;
@@ -44,6 +48,7 @@ resetPassword(resetPasswordForm: NgForm): void {
           } else if (error?.message) {
             errorMessage = error.message;
           }
+          this.notificationService.onError('Password reset failed: ' + errorMessage);
           return of({ dataState: DataState.ERROR, registerSuccess: false, error: errorMessage })
       })
     );

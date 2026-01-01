@@ -7,8 +7,8 @@ import { Customer, CustomerPage } from 'src/app/interface/customer';
 import { CustomHttpResponse } from 'src/app/interface/customhttpresponse';
 import { State } from 'src/app/interface/state';
 import { CustomerService } from 'src/app/service/customer.service';
+import { NotificationService } from 'src/app/service/notification.service';
 import { TooltipService } from 'src/app/service/tooltip.service';
-import { UserService } from 'src/app/service/user.service';
 
 @Component({
   selector: 'app-home',
@@ -29,6 +29,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
   constructor(
     private customerService: CustomerService,
+    private notificationService: NotificationService,
     private tooltipService: TooltipService,
     private router: Router
   ) { 
@@ -71,11 +72,13 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
           this.dataSubject.next(response);
           this.initializePopovers();
           this.isLoadingSubject.next(false);
+          this.notificationService.onSuccess('Customers loaded successfully.');
           return { dataState: DataState.LOADED, appData: response };
         }),
         startWith({ dataState: DataState.LOADING }),
         catchError((error: string) => {
           this.isLoadingSubject.next(false);
+          this.notificationService.onError('Failed to load customers: ' + error);
           return of({ dataState: DataState.ERROR, error });
         })
       );

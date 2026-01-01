@@ -1,12 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ActivatedRoute, ParamMap } from '@angular/router';
-import { Observable, BehaviorSubject, switchMap, map, startWith, catchError, of } from 'rxjs';
+import { BehaviorSubject, catchError, map, Observable, of, startWith, switchMap } from 'rxjs';
 import { slideBlur } from 'src/app/animations/animations';
 import { DataState } from 'src/app/enum/datastate.enum';
 import { User } from 'src/app/interface/user';
 import { AccountType, VerifyState } from 'src/app/interface/verifyState';
 import { UserService } from 'src/app/service/user.service';
+import { NotificationService } from 'src/app/service/notification.service';
 
 @Component({
   selector: 'app-verify',
@@ -28,7 +29,11 @@ export class VerifyComponent implements OnInit {
   readonly DataState = DataState;
   private readonly ACCOUNT_KEY: string = 'key';
 
-  constructor(private activatedRoute: ActivatedRoute, private userService: UserService) { }
+  constructor(
+    private activatedRoute: ActivatedRoute,
+    private userService: UserService,
+    private notificationService: NotificationService
+  ) { }
 
   ngOnInit(): void {
     this.verifyPasswordOrAccount();
@@ -49,11 +54,12 @@ export class VerifyComponent implements OnInit {
               if (type === 'password' && response.data && response.data.user) {
                 this.userSubject.next(response.data.user);
               }
+              this.notificationService.onSuccess('Verification successful!');
               return { type, title: 'Verified!', dataState: DataState.LOADED, message: response.message ?? '', verifySuccess: true };
             }),
             startWith({ title: 'Verifying...', dataState: DataState.LOADING, message: 'Please wait while we verify the information', verifySuccess: false }),
             catchError((error: any) => {
-              let errorMsg = 'An error occurred.';
+              let errorMsg = 'Verification failed.';
               if (error && error.error) {
                 if (typeof error.error === 'string') {
                   errorMsg = error.error;
@@ -63,6 +69,7 @@ export class VerifyComponent implements OnInit {
               } else if (error && error.message) {
                 errorMsg = error.message;
               }
+              this.notificationService.onError('Verification failed: ' + errorMsg);
               return of({ title: 'Error', dataState: DataState.ERROR, error: errorMsg, message: errorMsg, verifySuccess: false });
             })
           );
@@ -81,12 +88,13 @@ export class VerifyComponent implements OnInit {
         map(response => {
           console.log(response);
           this.isLoadingSubject.next(false);
+          this.notificationService.onSuccess('Password changed successfully! You can now log in.');
           return { type: 'account' as AccountType, title: 'Success', dataState: DataState.LOADED, message: response.message ?? '', verifySuccess: true };
         }),
         startWith({ type: 'password' as AccountType, title: 'Verified!', dataState: DataState.LOADED, verifySuccess: false }),
         catchError((error: any) => {
           console.log("error renewing password:", error);
-          let errorMsg = 'An error occurred.';
+          let errorMsg = 'Password change failed.';
           if (error && error.error) {
             if (typeof error.error === 'string') {
               errorMsg = error.error;
@@ -97,6 +105,7 @@ export class VerifyComponent implements OnInit {
             errorMsg = error.message;
           }
           this.isLoadingSubject.next(false);
+          this.notificationService.onError('Password change failed: ' + errorMsg);
           return of({ type: 'password' as AccountType, title: 'Verified!', dataState: DataState.LOADED, error: errorMsg, verifySuccess: true })
         })
       )

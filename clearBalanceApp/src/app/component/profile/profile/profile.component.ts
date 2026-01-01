@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
 import { NavigationStart, Router } from '@angular/router';
 import { BehaviorSubject, Observable, of, Subscription } from 'rxjs';
@@ -6,6 +6,8 @@ import { catchError, map, startWith } from 'rxjs/operators';
 import { slideBlur } from 'src/app/animations/animations';
 import { DataState } from 'src/app/enum/datastate.enum';
 import { CustomHttpResponse } from 'src/app/interface/customhttpresponse';
+import { Events } from 'src/app/interface/events';
+import { Page } from 'src/app/interface/page';
 import { Profile } from 'src/app/interface/profile';
 import { State } from 'src/app/interface/state';
 import { UserEventReportDetailDto } from 'src/app/interface/userEventReportResponse';
@@ -13,8 +15,6 @@ import { EventService } from 'src/app/service/event.service';
 import { NotificationService } from 'src/app/service/notification.service';
 import { TooltipService } from 'src/app/service/tooltip.service';
 import { UserService } from 'src/app/service/user.service';
-import { Page } from 'src/app/interface/page';
-import { Events } from 'src/app/interface/events';
 
 declare var bootstrap: any;
 
@@ -182,6 +182,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
         map(response => {
           console.log('Received response:', response);
           this.dataSubject.next(response);
+          this.notificationService.onSuccess('Profile loaded successfully.');
           return {
             dataState: DataState.LOADED,
             appData: response
@@ -191,7 +192,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
         catchError((error: any) => {
           console.log('Error in profile$:', { error });
           const reason = error?.error?.reason || error?.message || 'An unknown error occurred while loading the profile.';
-          this.notificationService.showError(reason, 'Profile Load Error');
+          this.notificationService.onError('Failed to load profile: ' + reason);
           return of({ dataState: DataState.ERROR, appData: this.dataSubject.value === null ? undefined : this.dataSubject.value, error });
         })
       );
@@ -215,7 +216,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
           this.dataSubject.next({ ...response, data: response.data });
           this.isLoadingSubject.next(false);
           this.loadEvents(this.currentPage);
-
+          this.notificationService.onSuccess('Profile updated successfully.');
           return {
             dataState: DataState.LOADED,
             appData: this.dataSubject.value === null ? undefined : this.dataSubject.value
@@ -226,7 +227,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
           console.error('Error in updateProfile:', error);
           this.isLoadingSubject.next(false);
           const reason = error?.error?.reason || error?.message || 'An unknown error occurred while updating the profile.';
-          this.notificationService.showError(reason, 'Profile Update Error');
+          this.notificationService.onError('Failed to update profile: ' + reason);
           return of({ dataState: DataState.LOADED, appData: this.dataSubject.value === null ? undefined : this.dataSubject.value, error });
         })
       );
@@ -252,18 +253,21 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
             passwordForm.reset();
             this.isLoadingSubject.next(false);
             this.loadEvents(this.currentPage);
+            this.notificationService.onSuccess('Password updated successfully.');
             return { dataState: DataState.LOADED, appData: this.dataSubject.value === null ? undefined : this.dataSubject.value };
           }),
           startWith({ dataState: DataState.LOADED, appData: this.dataSubject.value === null ? undefined : this.dataSubject.value }),
           catchError((error: string) => {
             console.error('Error in updatePassword:', error);
             this.isLoadingSubject.next(false);
+            this.notificationService.onError('Failed to update password: ' + error);
             return of({ dataState: DataState.LOADED, appData: this.dataSubject.value === null ? undefined : this.dataSubject.value, error });
           })
         );
     } else {
       passwordForm.reset();
       this.isLoadingSubject.next(false);
+      this.notificationService.onError('New password and confirmation do not match.');
     }
   }
 
@@ -285,14 +289,16 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
           this.dataSubject.next({ ...response, data: response.data });
           this.isLoadingSubject.next(false);
           this.loadEvents(this.currentPage);
+          this.notificationService.onSuccess('Role updated successfully.');
           return { dataState: DataState.LOADED, appData: this.dataSubject.value };
         }),
         startWith({ dataState: DataState.LOADED, appData: this.dataSubject.value }),
         catchError((error: string) => {
           this.isLoadingSubject.next(false);
+          this.notificationService.onError('Failed to update role: ' + error);
           return of({ dataState: DataState.LOADED, appData: this.dataSubject.value, error })
         })
-      )
+      );
   }
 
   /**
@@ -313,12 +319,13 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
           this.dataSubject.next({ ...response, data: response.data });
           this.isLoadingSubject.next(false);
           this.loadEvents(this.currentPage);
+          this.notificationService.onSuccess('Account settings updated successfully.');
           return { dataState: DataState.LOADED, appData: this.dataSubject.value };
-
         }),
         startWith({ dataState: DataState.LOADED, appData: this.dataSubject.value }),
         catchError((error: string) => {
           this.isLoadingSubject.next(false);
+          this.notificationService.onError('Failed to update account settings: ' + error);
           return of({ dataState: DataState.LOADED, appData: this.dataSubject.value, error })
         })
       );
@@ -341,12 +348,13 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
           this.dataSubject.next({ ...response, data: response.data });
           this.isLoadingSubject.next(false);
           this.loadEvents(this.currentPage);
+          this.notificationService.onSuccess('Multi-factor authentication setting updated.');
           return { dataState: DataState.LOADED, appData: this.dataSubject.value };
-
         }),
         startWith({ dataState: DataState.LOADED, appData: this.dataSubject.value }),
         catchError((error: string) => {
           this.isLoadingSubject.next(false);
+          this.notificationService.onError('Failed to update multi-factor authentication: ' + error);
           return of({ dataState: DataState.LOADED, appData: this.dataSubject.value, error })
         })
       );
@@ -373,12 +381,13 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
             this.isLoadingSubject.next(false);
             this.imageTimestamp = Date.now();
             this.loadEvents(this.currentPage);
+            this.notificationService.onSuccess('Profile image updated successfully.');
             return { dataState: DataState.LOADED, appData: this.dataSubject.value };
-
           }),
           startWith({ dataState: DataState.LOADED, appData: this.dataSubject.value }),
           catchError((error: string) => {
             this.isLoadingSubject.next(false);
+            this.notificationService.onError('Failed to update profile image: ' + error);
             return of({ dataState: DataState.LOADED, appData: this.dataSubject.value, error })
           })
         );
@@ -462,7 +471,6 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
         }
       },
       error: () => {
-        this.notificationService.showError('No se pudo cargar el reporte para editar.', 'Error');
       }
     });
   }
@@ -483,9 +491,10 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
             this.reportForm.reset();
             this.reportUpdateId = null;
             this.loadEvents(this.currentPage);
+            this.notificationService.onSuccess('Report updated successfully.');
           },
           error: (err) => {
-            this.notificationService.showError('No se pudo actualizar el reporte.', 'Error');
+            this.notificationService.onError('Failed to update report.');
           }
         });
       } else {
@@ -496,9 +505,10 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
             if (modalInstance) modalInstance.hide();
             this.reportForm.reset();
             this.loadEvents(this.currentPage);
+            this.notificationService.onSuccess('Report submitted successfully.');
           },
           error: (err) => {
-            this.notificationService.showError('No se pudo crear el reporte.', 'Error');
+            this.notificationService.onError('Failed to submit report.');
           }
         });
       }
@@ -519,9 +529,10 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
         }
         const modal = new bootstrap.Modal(document.getElementById('reportDetailModal'));
         modal.show();
+        this.notificationService.onSuccess('Report detail loaded successfully.');
       },
       error: (err) => {
-        this.notificationService.showError('No se pudo cargar el detalle del reporte.', 'Error');
+        this.notificationService.onError('Failed to load report detail.');
       }
     });
   }

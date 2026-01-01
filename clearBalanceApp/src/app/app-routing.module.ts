@@ -7,6 +7,7 @@ import { authenticationGuard } from './guards/authentication.guard';
  *  set up the routes for the application
  */
 const routes: Routes = [
+  { path: 'auth', loadChildren: () => import('./auth/auth.module').then(m => m.AuthModule) },
   { path: 'profile', loadChildren: () => import('./component/profile/profile.module').then(m => m.ProfileModule), canActivate: [authenticationGuard] },
   { path: 'invoices', loadChildren: () => import('./component/invoice/invoice.module').then(m => m.InvoiceModule), canActivate: [authenticationGuard] },
   { path: 'customers', loadChildren: () => import('./component/customer/customer.module').then(m => m.CustomerModule), canActivate: [authenticationGuard] },

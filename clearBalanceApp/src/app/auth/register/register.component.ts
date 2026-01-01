@@ -1,11 +1,12 @@
-import { Component, AfterViewInit, AfterViewChecked } from '@angular/core';
-import { TooltipService } from 'src/app/service/tooltip.service';
+import { AfterViewInit, Component } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { catchError, map, Observable, of, startWith } from 'rxjs';
+import { slideBlur } from 'src/app/animations/animations';
 import { DataState } from 'src/app/enum/datastate.enum';
 import { RegisterState } from 'src/app/interface/registerState';
+import { TooltipService } from 'src/app/service/tooltip.service';
 import { UserService } from 'src/app/service/user.service';
-import { slideBlur } from 'src/app/animations/animations';
+import { NotificationService } from 'src/app/service/notification.service';
 
 @Component({
   selector: 'app-register',
@@ -19,9 +20,12 @@ export class RegisterComponent implements AfterViewInit {
   showPassword = false;
   showConfirmPassword = false;
   passwordMismatch = false;
-  private lastRegisterSuccess = false;
 
-  constructor(private userService: UserService, private tooltipService: TooltipService) { }
+  constructor(
+    private userService: UserService,
+    private tooltipService: TooltipService,
+    private notificationService: NotificationService
+  ) { }
 
   /**
    * Angular lifecycle hook that runs after the component's view has been fully initialized.
@@ -47,13 +51,14 @@ export class RegisterComponent implements AfterViewInit {
         map(response => {
           registerForm.reset();
           this.passwordMismatch = false;
+          this.notificationService.onSuccess('Registration successful! You can now log in.');
           return { dataState: DataState.LOADED, registerSuccess: true, message: response.message };
         }),
         startWith({ dataState: DataState.LOADING, registerSuccess: false }),
         catchError((error: any) => {
           console.log('Registration error:', error);
           // Extract a user-friendly error message
-          let errorMessage = 'Registration failed.';
+          let errorMessage = 'Registration failed. Please try again.';
           if (error?.error) {
             if (typeof error.error === 'string') {
               errorMessage = error.error;
@@ -67,7 +72,8 @@ export class RegisterComponent implements AfterViewInit {
           } else if (error?.message) {
             errorMessage = error.message;
           }
-          return of({ dataState: DataState.ERROR, registerSuccess: false, error: errorMessage })
+          this.notificationService.onError('Registration failed: ' + errorMessage);
+          return of({ dataState: DataState.ERROR, registerSuccess: false, error: errorMessage });
         })
       );
   }

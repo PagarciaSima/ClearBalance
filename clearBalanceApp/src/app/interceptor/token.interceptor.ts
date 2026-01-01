@@ -1,16 +1,16 @@
-import { Injectable } from '@angular/core';
 import {
-  HttpRequest,
-  HttpHandler,
+  HttpErrorResponse,
   HttpEvent,
+  HttpHandler,
   HttpInterceptor,
-  HttpErrorResponse
+  HttpRequest
 } from '@angular/common/http';
-import { BehaviorSubject, catchError, Observable, switchMap, throwError, filter, take } from 'rxjs';
-import { Key } from '../enum/key.enum';
-import { UserService } from '../service/user.service';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject, catchError, filter, Observable, switchMap, take, throwError } from 'rxjs';
 import { CustomHttpResponse } from 'src/app/interface/customhttpresponse';
 import { Profile } from 'src/app/interface/profile';
+import { Key } from '../enum/key.enum';
+import { UserService } from '../service/user.service';
 
 @Injectable({ providedIn: 'root' })
 export class TokenInterceptor implements HttpInterceptor {

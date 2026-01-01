@@ -19,6 +19,7 @@
     "@angular/platform-browser-dynamic": "^16.2.0",
     "@angular/router": "^16.2.0",
     "@auth0/angular-jwt": "^5.2.0",
+    "angular-notifier": "^14.0.0",
     "bootstrap": "^5.3.8",
     "bootstrap-icons": "^1.13.1",
     "particles.js": "^2.0.0",

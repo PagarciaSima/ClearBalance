@@ -11,6 +11,7 @@ import { State } from 'src/app/interface/state';
 import { User } from 'src/app/interface/user';
 import { CustomerService } from 'src/app/service/customer.service';
 import { TooltipService } from 'src/app/service/tooltip.service';
+import { NotificationService } from 'src/app/service/notification.service';
 
 @Component({
   selector: 'app-customer-detail',
@@ -32,7 +33,8 @@ export class CustomerDetailComponent implements OnInit {
   constructor(
     private customerService: CustomerService,
     private tooltipService: TooltipService,
-    private activatedRoute: ActivatedRoute
+    private activatedRoute: ActivatedRoute,
+    private notificationService: NotificationService
   ) {
     this.dataSubject = new BehaviorSubject<CustomHttpResponse<{ user: User; customer: Customer }> | null>(null);
     this.isLoadingSubject = new BehaviorSubject<boolean>(false);
@@ -67,10 +69,14 @@ export class CustomerDetailComponent implements OnInit {
         map(response => {
           console.log("details ", response);
           this.dataSubject.next(response);
+          this.notificationService.onSuccess('Customer details loaded successfully.');
           return { dataState: DataState.LOADED, appData: response };
         }),
         startWith({ dataState: DataState.LOADING }),
-        catchError((error: string) => of({ dataState: DataState.ERROR, error }))
+        catchError((error: string) => {
+          this.notificationService.onError('Failed to load customer details: ' + error);
+          return of({ dataState: DataState.ERROR, error });
+        })
       );
   }
 
@@ -87,12 +93,14 @@ export class CustomerDetailComponent implements OnInit {
           console.log("update ", response);
           this.dataSubject.next(response);
           this.isLoadingSubject.next(false);
+          this.notificationService.onSuccess('Customer updated successfully.');
           return { dataState: DataState.LOADED, appData: this.dataSubject.value };
         }),
         startWith({ dataState: DataState.LOADING }),
         catchError((error: string) => {
           this.isLoadingSubject.next(false);
-          return of({ dataState: DataState.ERROR, error })
+          this.notificationService.onError('Failed to update customer: ' + error);
+          return of({ dataState: DataState.ERROR, error });
         })
       );
   }

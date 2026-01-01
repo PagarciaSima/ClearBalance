@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { BehaviorSubject, catchError, map, Observable, of, startWith } from 'rxjs';
 import { slideBlur } from 'src/app/animations/animations';
@@ -9,6 +9,7 @@ import { State } from 'src/app/interface/state';
 import { User } from 'src/app/interface/user';
 import { CustomerService } from 'src/app/service/customer.service';
 import { TooltipService } from 'src/app/service/tooltip.service';
+import { NotificationService } from 'src/app/service/notification.service';
 
 @Component({
   selector: 'app-newcustomer',
@@ -27,7 +28,11 @@ export class NewcustomerComponent implements OnInit, AfterViewInit {
   isLoading$ = this.isLoadingSubject.asObservable();
   readonly DataState = DataState;
 
-  constructor(private customerService: CustomerService, private tooltipService: TooltipService) { }
+  constructor(
+    private customerService: CustomerService,
+    private tooltipService: TooltipService,
+    private notificationService: NotificationService
+  ) { }
   
   /**
    * Initializes Bootstrap tooltips after the view is fully initialized.
@@ -56,19 +61,20 @@ export class NewcustomerComponent implements OnInit, AfterViewInit {
           console.log(response);
           newCustomerForm.reset({ type: 'INDIVIDUAL', status: 'ACTIVE' });
           this.isLoadingSubject.next(false);
+          this.notificationService.onSuccess('Customer created successfully.');
           return { dataState: DataState.LOADED, appData: this.dataSubject.value };
         }),
         startWith({ dataState: DataState.LOADED, appData: this.dataSubject.value }),
         catchError((error: any) => {
           this.isLoadingSubject.next(false);
           console.log(error);
-          // Extract a readable error message
-          let errorMessage = 'An error occurred.';
+          let errorMessage = 'Failed to create customer.';
           if (error && error.error && error.error.reason) {
             errorMessage = error.error.reason;
           } else if (error && error.message) {
             errorMessage = error.message;
           }
+          this.notificationService.onError(errorMessage);
           return of({ dataState: DataState.LOADED, error: errorMessage });
         })
       );
