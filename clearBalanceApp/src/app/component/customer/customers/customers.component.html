@@ -60,33 +60,36 @@
                         </form>
                     </div>
                     <!-- ========================= CUSTOMERS TABLE ========================= -->
-                    <div class="col-12">
+                    <div class="col-12 table-responsive-custom">
                         <ng-container *ngIf="state?.appData?.data?.customers?.content!.length > 0; else noResults">
                             <table class="table table-hover" aria-label="Customers list">
                                 <thead>
                                     <tr>
-                                        <th class="text-center" scope="col">
+                                            <th class="text-center" scope="col" style="width: 4%; white-space: nowrap;">
                                             <i class="bi bi-hash me-2" aria-hidden="true"></i>ID
                                         </th>
-                                        <th scope="col">
+                                            <th scope="col" style="width: 7%; white-space: nowrap;">
                                             <i class="bi bi-person-circle me-2" aria-hidden="true"></i>Photo
                                         </th>
-                                        <th scope="col">
+                                        <th scope="col" style="width: 13%; white-space: nowrap;">
                                             <i class="bi bi-person me-2" aria-hidden="true"></i>Name
                                         </th>
-                                        <th scope="col">
+                                        <th scope="col" style="width: 13%; white-space: nowrap;">
                                             <i class="bi bi-envelope me-2" aria-hidden="true"></i>Email
                                         </th>
-                                        <th scope="col">
+                                        <th scope="col" style="width: 22%; white-space: nowrap;">
+                                            <i class="bi bi-geo-alt me-2" aria-hidden="true"></i>Address
+                                        </th>
+                                        <th scope="col" style="width: 12%; white-space: nowrap;">
                                             <i class="bi bi-telephone me-2" aria-hidden="true"></i>Phone
                                         </th>
-                                        <th scope="col">
+                                        <th scope="col" style="width: 8%; white-space: nowrap;">
                                             <i class="bi bi-circle-fill me-2" aria-hidden="true"></i>Status
                                         </th>
-                                        <th scope="col">
+                                        <th scope="col" style="width: 8%; white-space: nowrap;">
                                             <i class="bi bi-star me-2" aria-hidden="true"></i>Type
                                         </th>
-                                        <th scope="col">
+                                        <th scope="col" style="width: 10%; white-space: nowrap;">
                                             <i class="bi bi-gear me-2" aria-hidden="true"></i>Action
                                         </th>
                                     </tr>
@@ -104,6 +107,7 @@
                                         </td>
                                         <td>{{ customer.name }}</td>
                                         <td>{{ customer.email }}</td>
+                                        <td>{{ customer.address }}</td>
                                         <td>{{ customer.phone }}</td>
                                         <td>
                                             <span class="badge" [ngClass]="customer.status | customerStatus" role="status">
@@ -140,6 +144,13 @@
                             (pageChange)="onPageChange(($event ? $event : 1) - 1)"
                             (pageSizeChange)="onPageSizeChange($event)">
                         </app-pagination>
+                    </div>
+                    <!-- ========================= CUSTOMERS MAP ========================= -->
+                    <div class="col-12 mt-4 map-wrapper card py-5 my-5">
+                        <h3 class="text-white d-flex align-items-center">
+                            <i class="bi bi-map me-2" aria-hidden="true"></i>Customers Map
+                        </h3>
+                        <app-customers-map [customers]="allCustomers"></app-customers-map>
                     </div>
                 </div>
             </div>

@@ -1,3 +1,15 @@
+/* Responsive Table Wrapper */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent table cell content from overflowing */
+.table-responsive .table td,
+.table-responsive .table th {
+    white-space: nowrap;
+}
 /* ================================================
    Modern Galactic Table Styles
    ================================================ */

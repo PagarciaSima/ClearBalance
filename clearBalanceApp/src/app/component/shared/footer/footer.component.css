@@ -1,6 +1,62 @@
-/* ================================================
-   Galactic Footer Styles
-   ================================================ */
+
+@media (max-width: 991.98px) {
+  .galactic-footer .row {
+    flex-direction: column !important;
+    align-items: center;
+  }
+  .galactic-footer [class^="col-"],
+  .galactic-footer [class*=" col-"] {
+    max-width: 100%;
+    flex: 0 0 100%;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  .footer-brand,
+  .footer-title,
+  .footer-description,
+  .footer-links,
+  .footer-social {
+    justify-content: center !important;
+    text-align: center !important;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .footer-links li {
+    display: inline-block;
+    margin: 0 1rem 1rem 1rem;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .galactic-footer {
+    padding: 1.5rem 0 0.5rem;
+  }
+  .galactic-footer .row {
+    flex-direction: column !important;
+    align-items: center;
+  }
+  .galactic-footer [class^="col-"],
+  .galactic-footer [class*=" col-"] {
+    max-width: 100%;
+    flex: 0 0 100%;
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  .footer-brand,
+  .footer-title,
+  .footer-description,
+  .footer-links,
+  .footer-social {
+    justify-content: center !important;
+    text-align: center !important;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .footer-links li {
+    display: block;
+    margin: 0.5rem 0;
+  }
+}
 
 .galactic-footer {
   background: linear-gradient(135deg, rgba(34, 13, 70, 0.98) 0%, rgba(61, 24, 94, 0.98) 50%, rgba(30, 58, 95, 0.98) 100%);

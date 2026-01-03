@@ -24,5 +24,6 @@ public interface CustomerService {
     void addInvoiceToCustomer(Long id, Invoice invoice);
 	Invoice getInvoice(Long id);
 	List<Invoice> getAllInvoices();
+	List<Customer> getAllCustomers();
 
 }

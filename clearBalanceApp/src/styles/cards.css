@@ -1,3 +1,26 @@
+/* Ensure stat cards have equal height and do not cut content */
+.stat-card {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        min-height: 170px;
+        /* Adjust min-height as needed for your content */
+}
+
+.stat-card .card-body {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        overflow: visible;
+}
+
+@media (max-width: 768px) {
+    .stat-card {
+        min-height: 140px;
+    }
+}
 /* ================================================
    Card Styles
    ================================================ */

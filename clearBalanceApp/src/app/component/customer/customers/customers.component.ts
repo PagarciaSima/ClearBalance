@@ -20,14 +20,28 @@ import { NotificationService } from 'src/app/service/notification.service';
   ]
 })
 export class CustomersComponent implements OnInit {
- 
+  /**
+   * Search term for filtering customers by name.
+   */
   searchTerm: string = '';
+  /**
+   * Page size for paginated customer table.
+   */
   customerPageSize: number = 10;
+  /**
+   * Observable for paginated customer state.
+   */
   customersState$!: Observable<State<CustomHttpResponse<CustomerPage>>>;
-
+  /**
+   * Observable for loading state.
+   */
   isLoading$!: Observable<boolean>;
   private dataSubject: BehaviorSubject<CustomHttpResponse<CustomerPage> | null>;
   private isLoadingSubject: BehaviorSubject<boolean>;
+  /**
+   * Holds all customers for the map (not paginated).
+   */
+  allCustomers: Customer[] = [];
   readonly DataState = DataState;
 
   constructor(
@@ -50,6 +64,27 @@ export class CustomersComponent implements OnInit {
     // Initialize loading observable
     this.isLoading$ = this.isLoadingSubject.asObservable();
     this.getCustomers();
+    this.loadAllCustomersForMap();
+  }
+
+  /**
+   * Loads all customers (no pagination) for the map display.
+   */
+  private loadAllCustomersForMap(): void {
+    this.customerService.getAllCustomers$().subscribe({
+      next: (response) => {
+        if (response && response.data && Array.isArray(response.data.customers)) {
+          this.allCustomers = response.data.customers;
+        } else {
+          this.allCustomers = [];
+        }
+      },
+      error: (err) => {
+        this.allCustomers = [];
+        this.notificationService.onError('Failed to load all customers for map.');
+        console.error('Failed to load all customers for map', err);
+      }
+    });
   }
 
   /**
@@ -118,6 +153,7 @@ export class CustomersComponent implements OnInit {
   searchCustomers(searchForm: NgForm): void {
     this.searchTerm = searchForm.value.name || '';
     this.getCustomers(0, this.customerPageSize);
+    this.loadAllCustomersForMap();
     this.initializeSearchTooltips();
   }
 
@@ -203,6 +239,7 @@ export class CustomersComponent implements OnInit {
   resetSearch(): void {
     this.searchTerm = '';
     this.getCustomers(0, this.customerPageSize);
+    this.loadAllCustomersForMap();
     this.initializeSearchTooltips();
   }
 

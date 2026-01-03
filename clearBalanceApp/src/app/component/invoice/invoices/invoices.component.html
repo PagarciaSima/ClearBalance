@@ -56,7 +56,8 @@
 
           <!-- ========================= INVOICES TABLE ========================= -->
           <div class="col-12">
-            <table class="table table-hover" aria-label="Invoices list">
+            <div class="table-responsive">
+              <table class="table table-hover" aria-label="Invoices list">
               <thead>
                 <tr>
                   <th scope="col">
@@ -110,7 +111,8 @@
                   </td>
                 </tr>
               </tbody>
-            </table>
+              </table>
+            </div>
             <!-- ========================= PAGINATION ========================= -->
             <app-pagination [currentPage]="(state.appData?.data?.page?.number ?? 0) + 1"
               [totalPages]="state.appData?.data?.page?.totalPages ?? 1" [pageSize]="invoicePageSize"

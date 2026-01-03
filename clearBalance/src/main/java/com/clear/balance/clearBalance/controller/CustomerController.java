@@ -7,6 +7,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.domain.Page;
@@ -580,6 +581,49 @@ public class CustomerController {
 					.body(("Error generating CSV report: " + e.getMessage()).getBytes());
 		}
 	}
+	
+	/**
+	 * Retrieves all customers without pagination.
+	 *
+	 * <p>
+	 * This endpoint is intended for bulk operations such as exports,
+	 * dropdown selectors, or global processing where pagination is not required.
+	 * </p>
+	 *
+	 * @param authentication the authentication token of the logged-in user
+	 * @return a {@link ResponseEntity} containing the authenticated user
+	 *         and the complete list of customers
+	 */
+	@GetMapping("/all")
+	public ResponseEntity<HttpResponse> getAllCustomers(final Authentication authentication) {
+	    log.info("Received request to retrieve all customers without pagination");
+
+	    // Retrieve authenticated user
+	    final UserDto userDto = userService
+	            .getUserDtoByEmail(UserUtils.getAuthenticatedUserDto(authentication).getEmail());
+	    log.debug("Authenticated user resolved: {}", userDto);
+
+	    // Fetch all customers
+	    final List<Customer> customers = customerService.getAllCustomers();
+	    log.info("Total customers retrieved: {}", customers.size());
+
+	    // Build response
+	    final HttpResponse response = HttpResponse.builder()
+	            .timeStamp(LocalDateTime.now().toString())
+	            .data(Map.of(
+	                    "user", userDto,
+	                    "customers", customers
+	            ))
+	            .message("All customers retrieved successfully")
+	            .status(HttpStatus.OK)
+	            .statusCode(HttpStatus.OK.value())
+	            .build();
+
+	    log.debug("Response prepared successfully for getAllCustomers");
+
+	    return ResponseEntity.ok(response);
+	}
+
 
 	/**
 	 * Adds a new invoice to a customer identified by its ID.

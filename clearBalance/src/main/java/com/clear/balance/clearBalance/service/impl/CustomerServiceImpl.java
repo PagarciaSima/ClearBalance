@@ -308,4 +308,22 @@ public class CustomerServiceImpl implements CustomerService {
         return invoices;
     }
 
+    /**
+     * Retrieves all customers without pagination.
+     *
+     * <p>This method is intended for bulk operations such as exports,
+     * reports, or global processing where pagination is not required.</p>
+     *
+     * @return a list of all {@link Customer} entities
+     */
+    @Override
+    public List<Customer> getAllCustomers() {
+        log.info("Fetching all customers without pagination");
+
+        List<Customer> customers = customerRepository.findAll();
+
+        log.info("Total customers retrieved: {}", customers.size());
+        return customers;
+    }
+
 }

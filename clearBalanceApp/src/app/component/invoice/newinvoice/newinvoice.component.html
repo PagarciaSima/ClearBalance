@@ -53,27 +53,27 @@
                                     <div class="col-md-12 border boder-white rounded-3 mt-3 p-3">
                                         <div class="form-group mb-2">
                                             <label class="form-label required"><i class="bi bi-list-task me-2" aria-hidden="true"></i>Services</label>
-                                            <div class="row g-2 align-items-end pt-2">
-                                                <div class="col-6 col-md-5">
+                                            <div class="row g-2 align-items-end pt-2 flex-column flex-md-row">
+                                                <div class="col-12 col-md-5">
                                                     <label for="serviceDescriptionTemp" class="form-label required">
                                                         <i class="bi bi-card-text me-2" aria-hidden="true"></i>Description
                                                     </label>
-                                                    <input id="serviceDescriptionTemp" type="text" class="form-control" [(ngModel)]="serviceForm.description" name="serviceDescriptionTemp" aria-label="Service Description">
+                                                    <input id="serviceDescriptionTemp" type="text" class="form-control w-100" [(ngModel)]="serviceForm.description" name="serviceDescriptionTemp" aria-label="Service Description">
                                                 </div>
-                                                <div class="col-3 col-md-3">
+                                                <div class="col-12 col-md-3" style="min-width: 150px;">
                                                     <label for="servicePriceTemp" class="form-label required">
                                                         <i class="bi bi-currency-dollar me-2" aria-hidden="true"></i>Price
                                                     </label>
-                                                    <input id="servicePriceTemp" type="number" class="form-control" [(ngModel)]="serviceForm.price" name="servicePriceTemp" aria-label="Service Price">
+                                                    <input id="servicePriceTemp" type="number" class="form-control w-100" [(ngModel)]="serviceForm.price" name="servicePriceTemp" aria-label="Service Price">
                                                 </div>
-                                                <div class="col-3 col-md-2">
+                                                <div class="col-12 col-md-2" style="min-width: 150px;">
                                                     <label for="serviceQuantityTemp" class="form-label required">
                                                         <i class="bi bi-stack me-2" aria-hidden="true"></i>Quantity
                                                     </label>
-                                                    <input id="serviceQuantityTemp" type="number" class="form-control" [(ngModel)]="serviceForm.quantity" name="serviceQuantityTemp" aria-label="Service Quantity">
+                                                    <input id="serviceQuantityTemp" type="number" class="form-control w-100" [(ngModel)]="serviceForm.quantity" name="serviceQuantityTemp" aria-label="Service Quantity">
                                                 </div>
-                                                <div class="col-auto">
-                                                    <button type="button" class="btn btn-success" (click)="addService()" [disabled]="!serviceForm.description || !serviceForm.price || !serviceForm.quantity" data-bs-toggle="tooltip" data-bs-placement="top" title="Add service to invoice">
+                                                <div class="col-12 col-md-auto">
+                                                    <button type="button" class="btn btn-success w-100 w-md-auto" (click)="addService()" [disabled]="!serviceForm.description || !serviceForm.price || !serviceForm.quantity" data-bs-toggle="tooltip" data-bs-placement="top" title="Add service to invoice">
                                                         <i class="bi bi-plus-lg"></i> Add
                                                     </button>
                                                 </div>
