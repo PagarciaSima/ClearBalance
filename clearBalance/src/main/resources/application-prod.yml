@@ -1,21 +1,19 @@
-spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/clearbalance
-    username: root
-    password: admin
+# Database
+MYSQL_USERNAME: root
+MYSQL_PASSWORD: admin
+MYSQL_HOST: localhost
+MYSQL_PORT: 3306
+MYSQL_DATABASE: clearbalance
 
-  jpa:
-    database-platform: org.hibernate.dialect.MySQL8InnoDBDialect
-    show-sql: true
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        "[globally_quoted_identifiers]": true
-        dialect: org.hibernate.dialect.MySQL8Dialect
-        "[format_sql]": true
+# Server Config
+CONTAINER_PORT: 8085
+ACTIVE_PROFILE: prod
 
-  sql:
-    init:
-      mode: never
-      continue-on-error: true
+# Email Config
+EMAIL_HOST: smtp.gmail.com
+EMAIL_PORT: 587
+VERIFY_EMAIL_HOST: http://localhost:${CONTAINER_PORT}
+
+UI_APP_URL: http://localhost:4200
+
+JWT_SECRET: mysecuresecret

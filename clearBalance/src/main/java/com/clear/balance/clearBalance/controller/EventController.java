@@ -29,6 +29,7 @@ import com.clear.balance.clearBalance.dto.user.UserDto;
 import com.clear.balance.clearBalance.service.EventService;
 import com.clear.balance.clearBalance.service.UserEventReportService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +41,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/events")
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name = "Events", description = "API for managing events")
 public class EventController {
 
 	private final EventService eventService;

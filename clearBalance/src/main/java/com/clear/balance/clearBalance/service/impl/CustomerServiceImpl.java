@@ -143,7 +143,8 @@ public class CustomerServiceImpl implements CustomerService {
      * @param invoice invoice to create
      * @return created invoice
      */
-    @Override
+    @SuppressWarnings("deprecation")
+	@Override
     public Invoice createInvoice(Invoice invoice) {
         log.info("Creating invoice for customer ID: {}", 
                  invoice.getCustomer() != null ? invoice.getCustomer().getId() : "null");
@@ -188,7 +189,8 @@ public class CustomerServiceImpl implements CustomerService {
      * @param invoice the invoice to be created and persisted
      * @throws EntityNotFoundException if the customer does not exist
      */
-    @Override
+    @SuppressWarnings("deprecation")
+	@Override
     public void addInvoiceToCustomer(Long customerId, Invoice invoice) {
 
         log.info("Starting invoice creation for customerId={}", customerId);

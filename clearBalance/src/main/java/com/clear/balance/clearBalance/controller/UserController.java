@@ -55,6 +55,7 @@ import com.clear.balance.clearBalance.service.EventService;
 import com.clear.balance.clearBalance.service.UserRoleService;
 import com.clear.balance.clearBalance.service.UserService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -71,6 +72,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/user")
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name = "Users", description = "API for managing users")
 public class UserController {
 
 	private static final String TOKEN_PREFIX = "Bearer ";

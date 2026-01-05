@@ -4,6 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.UUID;
@@ -11,7 +12,6 @@ import java.util.concurrent.CompletableFuture;
 
 import javax.management.InstanceNotFoundException;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -58,7 +58,9 @@ public class UserServiceImpl implements UserService {
 	private final TwoFactorVerificationRepository twoFactorVerificationRepository;
 	private final ResetPasswordVerificationRepository resetPasswordVerificationRepository;
 	private final SmsUtils smsUtils;
-	@Value("${frontend.url}")
+	private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+
+	@Value("${ui.app.url}")
 	private String frontendBaseUrl;
 
 	/**
@@ -308,7 +310,7 @@ public class UserServiceImpl implements UserService {
 		log.info("Generating verification code for user: {}", userDto.getEmail());
 
 		LocalDateTime expirationDate = LocalDateTime.now().plusDays(1);
-		String verificationCode = RandomStringUtils.randomAlphabetic(8).toUpperCase();
+		String verificationCode = String.valueOf(SECURE_RANDOM.nextInt(900_000) + 100_000);
 		log.debug("Generated verification code: {}", verificationCode);
 
 		User user = userRepository.findByEmail(userDto.getEmail()).orElseThrow(() -> {
@@ -326,7 +328,7 @@ public class UserServiceImpl implements UserService {
 		twoFactorVerificationRepository.save(verification);
 		log.info("Saved new verification code for user ID: {}", user.getId());
 
-	    // sendSmsAsync(verificationCode, user);
+	    sendSmsAsync(verificationCode, user);
 		
 		log.info("Verification code: {}", verificationCode);
 

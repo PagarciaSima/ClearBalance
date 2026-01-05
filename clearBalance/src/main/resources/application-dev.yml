@@ -1,44 +1,19 @@
-spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/clearbalance
-    username: root
-    password: admin
+# Database
+MYSQL_USERNAME: root
+MYSQL_PASSWORD: admin
+MYSQL_HOST: localhost
+MYSQL_PORT: 3306
+MYSQL_DATABASE: clearbalance
 
-  jpa:
-    database-platform: org.hibernate.dialect.MySQL8InnoDBDialect
-    show-sql: true
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        "[globally_quoted_identifiers]": true
-        dialect: org.hibernate.dialect.MySQL8Dialect
-        "[format_sql]": true
+# Server Config
+CONTAINER_PORT: 8080
+ACTIVE_PROFILE: dev
 
-  sql:
-    init:
-      mode: never
-      continue-on-error: true
-      
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: ${EMAIL_DIR}
-    from: Clear Balance <${EMAIL_DIR}>
-    password: ${EMAIL_PASS}
-    properties:
-      mail:
-        smtp:
-          writetimeout: 5000
-          connectiontimeout: 5000
-          timeout: 5000
-          auth: true
-          starttls:
-            enable: true
-            required: true
-      
-logging:
-  level:
-    "[org.springframework.security]": DEBUG
-    "[org.springframework.security.web.authentication]": DEBUG
-    "[org.springframework.security.authentication]": DEBUG
+# Email Config
+EMAIL_HOST: smtp.gmail.com
+EMAIL_PORT: 587
+VERIFY_EMAIL_HOST: http://localhost:${CONTAINER_PORT}
+
+UI_APP_URL: http://localhost:4200
+
+JWT_SECRET: mysecuresecret

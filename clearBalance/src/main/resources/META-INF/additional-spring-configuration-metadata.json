@@ -43,5 +43,85 @@
     "name": "spring.mail.from",
     "type": "java.lang.String",
     "description": "A description for 'spring.mail.from'"
+  },
+  {
+    "name": "openapi.server.url",
+    "type": "java.lang.String",
+    "description": "A description for 'openapi.server.url'"
+  },
+  {
+    "name": "openapi.server.description",
+    "type": "java.lang.String",
+    "description": "A description for 'openapi.server.description'"
+  },
+  {
+    "name": "MYSQL_USERNAME",
+    "type": "java.lang.String",
+    "description": "A description for 'MYSQL_USERNAME'"
+  },
+  {
+    "name": "MYSQL_PASSWORD",
+    "type": "java.lang.String",
+    "description": "A description for 'MYSQL_PASSWORD'"
+  },
+  {
+    "name": "MYSQL_HOST",
+    "type": "java.lang.String",
+    "description": "A description for 'MYSQL_HOST'"
+  },
+  {
+    "name": "MYSQL_HOST",
+    "type": "java.lang.String",
+    "description": "A description for 'MYSQL_HOST'"
+  },
+  {
+    "name": "MYSQL_PORT",
+    "type": "java.lang.String",
+    "description": "A description for 'MYSQL_PORT'"
+  },
+  {
+    "name": "MYSQL_DATABASE",
+    "type": "java.lang.String",
+    "description": "A description for 'MYSQL_DATABASE'"
+  },
+  {
+    "name": "ACTIVE_PROFILE",
+    "type": "java.lang.String",
+    "description": "A description for 'ACTIVE_PROFILE'"
+  },
+  {
+    "name": "CONTAINER_PORT",
+    "type": "java.lang.String",
+    "description": "A description for 'CONTAINER_PORT'"
+  },
+  {
+    "name": "CONTAINER_PORT",
+    "type": "java.lang.String",
+    "description": "A description for 'CONTAINER_PORT'"
+  },
+  {
+    "name": "EMAIL_HOST",
+    "type": "java.lang.String",
+    "description": "A description for 'EMAIL_HOST'"
+  },
+  {
+    "name": "EMAIL_PORT",
+    "type": "java.lang.String",
+    "description": "A description for 'EMAIL_PORT'"
+  },
+  {
+    "name": "VERIFY_EMAIL_HOST",
+    "type": "java.lang.String",
+    "description": "A description for 'VERIFY_EMAIL_HOST'"
+  },
+  {
+    "name": "UI_APP_URL",
+    "type": "java.lang.String",
+    "description": "A description for 'UI_APP_URL'"
+  },
+  {
+    "name": "JWT_SECRET",
+    "type": "java.lang.String",
+    "description": "A description for 'JWT_SECRET'"
   }
 ]}

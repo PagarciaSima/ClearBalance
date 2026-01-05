@@ -1,25 +1,68 @@
 jwt:
   secret: ${JWT_SECRET}
+
 server:
   error:
     path: /user/error
     whitelabel:
       enabled: false
-      
+  port: ${CONTAINER_PORT:8080}
+
 spring:
   profiles:
     active: ${ACTIVE_PROFILE:dev}
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}
+    password: ${MYSQL_PASSWORD}
+    username: ${MYSQL_USERNAME}
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL8InnoDBDialect
+    generate-ddl: true
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        globally_quoted_indentifiers: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+  sql:
+    init:
+      mode: never
+      continue-on-error: false
+  mail:
+    host: ${EMAIL_HOST}
+    port: ${EMAIL_PORT}
+    username: ${EMAIL_ID}
+    password: ${EMAIL_PASSWORD}
+    from: Clear Balance <${EMAIL_ID}>
+    properties:
+      mail:
+        smtp:
+          writetimeout: 5000
+          connectiontimeout: 5000
+          timeout: 5000
+          auth: true
+          starttls:
+            enable: true
+            required: true
+    verify:
+      host: ${VERIFY_EMAIL_HOST}
+
+ui:
+  app:
+    url: ${UI_APP_URL}
 
 application:
   title: ClearBalance
   version: 1.0
-  
+
 twilio:
   from-number: ${FROM_NUMBER}
   sid-key: ${SID_KEY}
   token-key: ${TOKEN_KEY}
-
-frontend:
-  url: ${FRONTEND_URL:http://localhost:4200}
-
   
+openapi:
+  server:
+    url: http://localhost:8080
+    description: Dev environment

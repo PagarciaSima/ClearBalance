@@ -1,0 +1,15 @@
+services:
+  clearbalance:
+    container_name: securecapitacontainer
+    build:
+      context: .
+      args:
+        CONTAINER_PORT: ${CONTAINER_PORT}
+    image: clearbalance:v1
+    restart: unless-stopped
+    env_file:
+      - ${ENV_FILE}
+    expose:
+      - ${CONTAINER_PORT}
+    ports:
+      - ${CONTAINER_PORT}:${HOST_PORT}

@@ -37,6 +37,7 @@ import com.clear.balance.clearBalance.service.CustomerService;
 import com.clear.balance.clearBalance.service.InvoiceReportService;
 import com.clear.balance.clearBalance.service.UserService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -47,6 +48,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/customer")
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name = "Customers", description = "API for managing customers")
 public class CustomerController {
 
 	private final CustomerService customerService;
