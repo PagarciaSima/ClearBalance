@@ -1,6 +1,6 @@
 services:
   clearbalance:
-    container_name: securecapitacontainer
+    container_name: clearbalancecontainer
     build:
       context: .
       args:

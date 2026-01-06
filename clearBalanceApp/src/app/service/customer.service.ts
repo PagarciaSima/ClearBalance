@@ -7,11 +7,12 @@ import { Invoice } from '../interface/invoice';
 import { Page } from '../interface/page';
 import { Stats } from '../interface/stats';
 import { User } from '../interface/user';
+import { environment } from 'src/environments/environment.prod';
 
 @Injectable()
 export class CustomerService {
 
-  private readonly server: string = 'http://localhost:8080';
+  private readonly server: string = environment.API_BASE_URL;
 
   constructor(private http: HttpClient) { }
 

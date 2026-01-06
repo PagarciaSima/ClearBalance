@@ -1,0 +1,15 @@
+services:
+  clearbalanceapp:
+    container_name: clearbalanceappcontainer
+    build: .
+    image: clearbalanceapp:v1
+    ports:
+      - 80:80
+    expose:
+      - 80
+    networks:
+      - internalnet
+
+networks:
+  internalnet:
+    driver: bridge

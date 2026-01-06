@@ -9,11 +9,12 @@ import { profileSettingsForm } from '../interface/profileSettingsForm';
 import { UpdatePasswordForm } from '../interface/updatePasswordForm';
 import { User } from '../interface/user';
 import { AccountType } from '../interface/verifyState';
+import { environment } from 'src/environments/environment.prod';
 
 @Injectable()
 export class UserService {
 
-  private readonly server: string = 'http://localhost:8080';
+  private readonly server: string = environment.API_BASE_URL;
   private readonly jwtHelper = new JwtHelperService();
 
   private profileSubject = new BehaviorSubject<Profile | null>(null);

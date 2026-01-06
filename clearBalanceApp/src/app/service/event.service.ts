@@ -5,11 +5,12 @@ import { CustomHttpResponse } from '../interface/customhttpresponse';
 import { EventsPage } from '../interface/events';
 import { ReportEventRequest } from '../interface/reportEventRequest';
 import { UserEventReportDetailDto, UserEventReportResponseDto } from '../interface/userEventReportResponse';
+import { environment } from 'src/environments/environment.prod';
 
 @Injectable()
 export class EventService {
 
-  private readonly server: string = 'http://localhost:8080';
+  private readonly server: string = environment.API_BASE_URL;
   constructor(
     private http: HttpClient
   ) { }

@@ -1,7 +1,7 @@
 # Database
 MYSQL_USERNAME: root
 MYSQL_PASSWORD: admin
-MYSQL_HOST: localhost
+MYSQL_HOST: 192.168.18.5
 MYSQL_PORT: 3306
 MYSQL_DATABASE: clearbalance
 
@@ -17,3 +17,7 @@ VERIFY_EMAIL_HOST: http://localhost:${CONTAINER_PORT}
 UI_APP_URL: http://localhost:4200
 
 JWT_SECRET: mysecuresecret
+
+
+OPENAPI_DESCRIPTION: dev environment
+OPENAPI_SERVER_URL: http://localhost:8080

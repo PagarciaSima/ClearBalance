@@ -64,5 +64,5 @@ twilio:
   
 openapi:
   server:
-    url: http://localhost:8080
-    description: Dev environment
+    url: ${OPENAPI_SERVER_URL:http://localhost:8080}
+    description: ${OPENAPI_DESCRIPTION:local environment}

@@ -10,3 +10,7 @@ Página donde se ven todos los usuarios como marcadores en el mapa.
 Al hacer clic en un marcador, muestra nombre, email y enlace al perfil.
 Visualización de actividad
 
+set SECRET=newsecretyooooo
+set ENV_FILE=.env.dev
+docker-compose up -d --build
+docker logs clearbalancecontainer -f
