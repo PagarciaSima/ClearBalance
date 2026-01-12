@@ -67,7 +67,6 @@ export class CustomerDetailComponent implements OnInit {
     return this.customerService.getCustomer$(customerId)
       .pipe(
         map(response => {
-          console.log("details ", response);
           this.dataSubject.next(response);
           this.notificationService.onSuccess('Customer details loaded successfully.');
           return { dataState: DataState.LOADED, appData: response };
@@ -90,7 +89,6 @@ export class CustomerDetailComponent implements OnInit {
     this.customerState$ = this.customerService.updateCustomer(customerForm.value)
       .pipe(
         map(response => {
-          console.log("update ", response);
           this.dataSubject.next(response);
           this.isLoadingSubject.next(false);
           this.notificationService.onSuccess('Customer updated successfully.');

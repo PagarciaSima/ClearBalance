@@ -66,7 +66,6 @@ export class NavbarComponent implements AfterViewInit, OnInit {
     this.userService.profile$().subscribe({
       next: resp => {
         this.profile = resp.data ?? null;
-        console.log('Navbar profile:', this.profile);
         if (this.profile && this.profile.user) {
           this.userFullName = `${this.profile.user.firstName} ${this.profile.user.lastName}`;
         }

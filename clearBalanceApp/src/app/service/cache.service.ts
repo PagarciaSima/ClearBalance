@@ -12,7 +12,6 @@ export class CacheService {
    * @param httpResponse The HTTP response to cache
    */
   put = (key: string, httpResponse: HttpResponse<any>): void => {
-    console.log('Caching response', httpResponse);
     this.httpResponseCache[key] = httpResponse;
   }
 
@@ -34,7 +33,6 @@ export class CacheService {
    * Clears the entire cache of HTTP responses.
    */
   deleteAll = (): void => {
-    console.log('Clearing entire cache');
     this.httpResponseCache = {};
   }
 

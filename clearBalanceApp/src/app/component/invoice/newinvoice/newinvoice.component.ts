@@ -69,7 +69,6 @@ export class NewinvoiceComponent implements OnInit, AfterViewChecked {
     this.newInvoiceState$ = this.customerService.getNewInvoiceData$()
       .pipe(
         map(response => {
-          console.log(response);
           this.dataSubject.next(response);
           this.notificationService.onSuccess('Invoice data loaded successfully.');
           return { dataState: DataState.LOADED, appData: response };
@@ -101,7 +100,6 @@ export class NewinvoiceComponent implements OnInit, AfterViewChecked {
     this.newInvoiceState$ = this.customerService.addInvoiceToCustomer$(newInvoiceForm.value.customerId, invoice)
       .pipe(
         map(response => {
-          console.log(response);
           newInvoiceForm.reset({
             customerId: '',
             status: '',

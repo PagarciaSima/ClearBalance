@@ -1,13 +1,17 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-ufo',
   templateUrl: './ufo.component.html',
-  styleUrls: ['./ufo.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  styleUrls: ['./ufo.component.css']
 })
 export class UfoComponent implements OnInit, OnDestroy {
-  ufoStyle: any = {};
+  ufoStyle: any = {
+    left: '50px',
+    top: '50px',
+    position: 'fixed',
+    zIndex: 999
+  };
   isAbducting = false;
   showBeam = false;
   private intervalId: any;
@@ -59,8 +63,10 @@ export class UfoComponent implements OnInit, OnDestroy {
     const randomY = Math.random() * maxY;
     
     this.ufoStyle = {
+      ...this.ufoStyle,
       left: `${randomX}px`,
-      top: `${randomY}px`
+      top: `${randomY}px`,
+      transition: 'all 2s ease-in-out'
     };
   }
 
@@ -86,6 +92,7 @@ export class UfoComponent implements OnInit, OnDestroy {
 
     // Position UFO above the person, centered properly
     this.ufoStyle = {
+      ...this.ufoStyle,
       left: `${personX - (ufoWidth / 2)}px`,  // centered above person
       top: `${personY - 150}px`,
       transition: 'all 2s ease-in-out'

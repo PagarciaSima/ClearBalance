@@ -88,7 +88,6 @@ export class TokenInterceptor implements HttpInterceptor {
    * @returns An Observable of the HTTP event stream
    */
   private startTokenRefresh(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
-    console.log('Refreshing Token...');
     this.isTokenRefreshing = true;
     this.refreshTokenSubject.next(null);
     const refreshToken = localStorage.getItem(Key.REFRESH_TOKEN);
@@ -100,7 +99,6 @@ export class TokenInterceptor implements HttpInterceptor {
 
     return this.userService.refreshToken$(refreshToken).pipe(
       switchMap((response: CustomHttpResponse<Profile>) => {
-        console.log('Token Refresh Response:', response);
         this.isTokenRefreshing = false;
         this.refreshTokenSubject.next(null);
 

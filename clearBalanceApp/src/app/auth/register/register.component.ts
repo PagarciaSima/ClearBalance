@@ -56,7 +56,6 @@ export class RegisterComponent implements AfterViewInit {
         }),
         startWith({ dataState: DataState.LOADING, registerSuccess: false }),
         catchError((error: any) => {
-          console.log('Registration error:', error);
           // Extract a user-friendly error message
           let errorMessage = 'Registration failed. Please try again.';
           if (error?.error) {

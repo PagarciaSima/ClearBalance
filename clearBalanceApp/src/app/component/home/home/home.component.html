@@ -31,9 +31,16 @@
           </div>
           <div class="col">
             <div class="fw-bold text-end">
-              <button type="button" class="mb-3 btn btn-link p-0 border-0 bg-transparent" data-bs-toggle="tooltip"
-                data-bs-placement="top" title="Export customers to Excel" aria-label="Export customers to Excel">
-                <i class="bi bi-file-earmark-excel success-icon fs-1 mb-0" aria-hidden="true"></i>
+              <button type="button" class="mb-3 btn btn-link p-0 border-0 bg-transparent" 
+                [disabled]="(isLoading$ | async)"
+                data-bs-toggle="tooltip"
+                data-bs-placement="top" title="Export customers to Excel" 
+                aria-label="Export customers to Excel"
+                (click)="downloadAllCustomersExcel()">
+                <i *ngIf="!(isLoading$ | async)" class="bi bi-file-earmark-excel success-icon fs-1 mb-0" aria-hidden="true"></i>
+                <div *ngIf="(isLoading$ | async)" class="spinner-border text-success" role="status" style="width: 2rem; height: 2rem;">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
               </button>
             </div>
           </div>

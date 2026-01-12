@@ -26,7 +26,6 @@ resetPassword(resetPasswordForm: NgForm): void {
   this.resetPasswordState$ = this.userService.requestPasswordReset$(resetPasswordForm.value.email)
     .pipe(
       map(response => {
-        console.log(response);
         resetPasswordForm.reset();
         this.notificationService.onSuccess('Password reset email sent successfully! Please check your inbox.');
         return { dataState: DataState.LOADED, registerSuccess: true, message: response.message };

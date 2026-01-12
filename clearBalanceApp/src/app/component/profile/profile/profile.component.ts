@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
 import { NavigationStart, Router } from '@angular/router';
 import { BehaviorSubject, Observable, of, Subscription } from 'rxjs';
@@ -58,7 +58,8 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
     private userService: UserService,
     private eventService: EventService,
     private notificationService: NotificationService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private cdr: ChangeDetectorRef
   ) {
     this.dataSubject = new BehaviorSubject<CustomHttpResponse<Profile> | null>(null);
     this.isLoadingSubject = new BehaviorSubject<boolean>(false);
@@ -99,12 +100,20 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
 
   /**
    * Loads the user's events for the specified page.
-   * @param eventsPageSize - The page number to load (default is 0)
+   * @param page - The page number to load (default is 0)
    */
   loadEvents(page: number = 0): void {
-    this.eventService.getUserEvents$(page, this.eventsPageSize).subscribe(response => {
-      this.eventsPage = response?.data?.events;
-      this.currentPage = this.eventsPage?.number || 0;
+    this.eventService.getUserEvents$(page, this.eventsPageSize).subscribe({
+      next: (response) => {
+        this.eventsPage = response?.data?.events;
+        this.currentPage = this.eventsPage?.number || 0;
+        // Trigger change detection to update the view
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Error loading events:', error);
+        this.notificationService.onError('Failed to load events. Please try again.');
+      }
     });
   }
 
@@ -180,7 +189,6 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
     this.profileState$ = this.userService.profile$()
       .pipe(
         map(response => {
-          console.log('Received response:', response);
           this.dataSubject.next(response);
           this.notificationService.onSuccess('Profile loaded successfully.');
           return {
@@ -190,7 +198,6 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
         }),
         startWith({ dataState: DataState.LOADING }),
         catchError((error: any) => {
-          console.log('Error in profile$:', { error });
           const reason = error?.error?.reason || error?.message || 'An unknown error occurred while loading the profile.';
           this.notificationService.onError('Failed to load profile: ' + reason);
           return of({ dataState: DataState.ERROR, appData: this.dataSubject.value === null ? undefined : this.dataSubject.value, error });
@@ -212,7 +219,6 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
     this.profileState$ = this.userService.update$(profileForm.value)
       .pipe(
         map(response => {
-          console.log('Received response:', response);
           this.dataSubject.next({ ...response, data: response.data });
           this.isLoadingSubject.next(false);
           this.loadEvents(this.currentPage);
@@ -249,7 +255,6 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
       this.profileState$ = this.userService.updatePassword$(passwordForm.value)
         .pipe(
           map(response => {
-            console.log(response);
             passwordForm.reset();
             this.isLoadingSubject.next(false);
             this.loadEvents(this.currentPage);
@@ -315,7 +320,6 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
     this.profileState$ = this.userService.updateSettings$(settingsForm.value)
       .pipe(
         map(response => {
-          console.log('Settings updated:', response);
           this.dataSubject.next({ ...response, data: response.data });
           this.isLoadingSubject.next(false);
           this.loadEvents(this.currentPage);
@@ -344,7 +348,6 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
     this.profileState$ = this.userService.toggleMfa$()
       .pipe(
         map(response => {
-          console.log('toggleMfa:', response);
           this.dataSubject.next({ ...response, data: response.data });
           this.isLoadingSubject.next(false);
           this.loadEvents(this.currentPage);
@@ -376,7 +379,6 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
       this.profileState$ = this.userService.updateImage$(this.getFormData(image))
         .pipe(
           map(response => {
-            console.log('updateProfileImage:', response);
             this.dataSubject.next({ ...response, data: response.data });
             this.isLoadingSubject.next(false);
             this.imageTimestamp = Date.now();
@@ -398,7 +400,14 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
    * Toggles the visibility of logs in the profile component.
    */
   toggleLogs(): void {
-    this.showLogsSubject.next(!this.showLogsSubject.value);
+    const newValue = !this.showLogsSubject.value;
+    this.showLogsSubject.next(newValue);
+    
+    // If showing logs, reload events to ensure fresh data
+    if (newValue) {
+      this.loadEvents(this.currentPage);
+    }
+    
     setTimeout(() => this.tooltipService.initialize(), 100);
   }
 
@@ -454,6 +463,10 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
     modal.show();
   }
 
+  /**
+   * Opens the update report modal with existing report data.
+   * @param eventId - The ID of the event whose report should be updated
+   */
   updateReport(eventId: number): void {
     // Load current report data to edit
     this.eventService.getEventReport$(eventId).subscribe({
@@ -468,9 +481,14 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
           });
           const modal = new bootstrap.Modal(document.getElementById('reportEventModal'));
           modal.show();
+        } else {
+          this.notificationService.onError('No report found for this event.');
         }
       },
-      error: () => {
+      error: (err) => {
+        console.error('Error loading report data:', err);
+        const errorMessage = err?.error?.reason || err?.message || 'Failed to load report data.';
+        this.notificationService.onError(errorMessage);
       }
     });
   }
@@ -485,33 +503,49 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
       if (this.reportUpdateId) {
         // Update existing report
         this.eventService.updateReport$(this.reportUpdateId, this.reportForm.value).subscribe({
-          next: () => {
+          next: (response) => {
+            console.log('Report updated successfully:', response);
             const modalInstance = bootstrap.Modal.getInstance(document.getElementById('reportEventModal'));
             if (modalInstance) modalInstance.hide();
             this.reportForm.reset();
             this.reportUpdateId = null;
-            this.loadEvents(this.currentPage);
+            
+            // Add small delay to ensure server processing is complete
+            setTimeout(() => {
+              this.loadEvents(this.currentPage);
+            }, 500);
             this.notificationService.onSuccess('Report updated successfully.');
           },
           error: (err) => {
-            this.notificationService.onError('Failed to update report.');
+            console.error('Error updating report:', err);
+            const errorMessage = err?.error?.reason || err?.message || 'Failed to update report.';
+            this.notificationService.onError(errorMessage);
           }
         });
       } else {
         // Create new report
         this.eventService.reportEvent$(this.reportForm.value).subscribe({
-          next: () => {
+          next: (response) => {
+            console.log('Report submitted successfully:', response);
             const modalInstance = bootstrap.Modal.getInstance(document.getElementById('reportEventModal'));
             if (modalInstance) modalInstance.hide();
             this.reportForm.reset();
-            this.loadEvents(this.currentPage);
+            
+            // Add small delay to ensure server processing is complete
+            setTimeout(() => {
+              this.loadEvents(this.currentPage);
+            }, 500);
             this.notificationService.onSuccess('Report submitted successfully.');
           },
           error: (err) => {
-            this.notificationService.onError('Failed to submit report.');
+            console.error('Error submitting report:', err);
+            const errorMessage = err?.error?.reason || err?.message || 'Failed to submit report.';
+            this.notificationService.onError(errorMessage);
           }
         });
       }
+    } else {
+      this.notificationService.onError('Please fill in all required fields correctly.');
     }
   }
 
@@ -527,11 +561,16 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
         } else {
           this.selectedReportDetail = { hasReport: false, report: null };
         }
+        
+        // Trigger change detection to update the view
+        this.cdr.detectChanges();
+        
         const modal = new bootstrap.Modal(document.getElementById('reportDetailModal'));
         modal.show();
         this.notificationService.onSuccess('Report detail loaded successfully.');
       },
       error: (err) => {
+        console.error('Error loading report detail:', err);
         this.notificationService.onError('Failed to load report detail.');
       }
     });
@@ -557,6 +596,8 @@ export class ProfileComponent implements AfterViewInit, OnDestroy, OnInit {
       modalInstance.hide();
     }
     this.selectedReportDetail = null;
+    // Trigger change detection to update the view
+    this.cdr.detectChanges();
   }
 
   /**

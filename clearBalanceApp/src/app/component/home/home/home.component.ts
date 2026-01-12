@@ -123,6 +123,38 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
    * @param customer - The selected customer
    */
   selectCustomer(customer: Customer) {
-    this.router.navigate(['/customer', customer.id]);
+    this.router.navigate(['/customers/customer', customer.id]);
+  }
+
+  /**
+   * Downloads all customers as an Excel file by calling the service and triggers a file download in the browser.
+   */
+  downloadAllCustomersExcel(): void {
+    this.isLoadingSubject.next(true);
+    
+    this.customerService.downloadAllCustomersExcel$().subscribe({
+      next: (blob: Blob) => {
+        if (blob && blob.size > 0) {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `customers_report_${new Date().toISOString().replace(/[:.]/g, '-')}.xlsx`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          window.URL.revokeObjectURL(url);
+          this.notificationService.onSuccess('Excel file downloaded successfully.');
+        } else {
+          this.notificationService.onError('Received empty file from server.');
+        }
+        this.isLoadingSubject.next(false);
+      },
+      error: (err) => {
+        console.error('Excel download error:', err);
+        const errorMessage = err?.error?.reason || err?.message || `Failed to download Excel file. Status: ${err.status}`;
+        this.notificationService.onError(errorMessage);
+        this.isLoadingSubject.next(false);
+      }
+    });
   }
 }

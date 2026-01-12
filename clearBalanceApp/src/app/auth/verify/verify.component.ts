@@ -86,14 +86,12 @@ export class VerifyComponent implements OnInit {
     this.verifyState$ = this.userService.renewPassword$({ userId: this.userSubject.value?.id ?? 0, password: resetPasswordform.value.password, confirmPassword: resetPasswordform.value.confirmPassword })
       .pipe(
         map(response => {
-          console.log(response);
           this.isLoadingSubject.next(false);
           this.notificationService.onSuccess('Password changed successfully! You can now log in.');
           return { type: 'account' as AccountType, title: 'Success', dataState: DataState.LOADED, message: response.message ?? '', verifySuccess: true };
         }),
         startWith({ type: 'password' as AccountType, title: 'Verified!', dataState: DataState.LOADED, verifySuccess: false }),
         catchError((error: any) => {
-          console.log("error renewing password:", error);
           let errorMsg = 'Password change failed.';
           if (error && error.error) {
             if (typeof error.error === 'string') {

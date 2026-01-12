@@ -25,7 +25,6 @@ export class CustomerService {
   customers$(page: number = 0, size: number = 10): Observable<CustomHttpResponse<CustomerPage>> {
     return this.http.get<CustomHttpResponse<CustomerPage>>(`${this.server}/customer/list?page=${page}&size=${size}`)
       .pipe(
-        tap(console.log),
         catchError(this.handleError)
       );
   }
@@ -39,7 +38,6 @@ export class CustomerService {
     return this.http.get<CustomHttpResponse<{ user: any; customers: Customer[] }>>(
       `${this.server}/customer/all`
     ).pipe(
-      tap(console.log),
       catchError(this.handleError)
     );
   }
@@ -60,7 +58,6 @@ export class CustomerService {
     ].filter(Boolean).join('&');
     return this.http.get<CustomHttpResponse<CustomerPage>>(`${this.server}/customer/search?${params}`)
       .pipe(
-        tap(console.log),
         catchError(this.handleError)
       );
   }
@@ -76,7 +73,6 @@ export class CustomerService {
       `${this.server}/customer/create`,
       customer
     ).pipe(
-      tap(console.log),
       catchError(this.handleError)
     );
   }
@@ -89,7 +85,6 @@ export class CustomerService {
   getGlobalStats$(): Observable<CustomHttpResponse<{ user: User; stats: Stats }>> {
     return this.http.get<CustomHttpResponse<{ user: User; stats: Stats }>>(`${this.server}/customer/stats`)
       .pipe(
-        tap(console.log),
         catchError(this.handleError)
       );
   }
@@ -104,7 +99,6 @@ export class CustomerService {
     return this.http.get<CustomHttpResponse<{ user: User; customer: Customer }>>(
       `${this.server}/customer/get/${id}`
     ).pipe(
-      tap(console.log),
       catchError(this.handleError)
     );
   }
@@ -128,7 +122,6 @@ export class CustomerService {
     return this.http.get<CustomHttpResponse<{ user: User; customers: Customer[] }>>(
       `${this.server}/customer/invoice/new`
     ).pipe(
-      tap(console.log),
       catchError(this.handleError)
     );
   }
@@ -145,7 +138,6 @@ export class CustomerService {
       `${this.server}/customer/invoice/addtocustomer/${customerId}`,
       invoice
     ).pipe(
-      tap(console.log),
       catchError(this.handleError)
     );
   }
@@ -188,7 +180,6 @@ export class CustomerService {
         }
         return response as CustomHttpResponse<{ user: User; page: Page<Invoice> }>;
       }),
-      tap(console.log),
       catchError(this.handleError)
     );
   }
@@ -203,7 +194,6 @@ export class CustomerService {
     return this.http.get<CustomHttpResponse<{ user: User; invoice: Invoice; customer: Customer }>>(
       `${this.server}/customer/invoice/get/${invoiceId}`
     ).pipe(
-      tap(console.log),
       catchError(this.handleError)
     );
   }
@@ -218,7 +208,6 @@ export class CustomerService {
     return this.http.get(`${this.server}/customer/invoice/${invoiceId}/pdf/download`, {
       responseType: 'blob'
     }).pipe(
-      tap(() => console.log('PDF downloaded for invoice', invoiceId)),
       catchError(this.handleError)
     );
   }
@@ -232,7 +221,6 @@ export class CustomerService {
     return this.http.get(`${this.server}/customer/invoices/csv/download`, {
       responseType: 'blob'
     }).pipe(
-      tap(() => console.log('CSV file with all invoices downloaded')),
       catchError(this.handleError)
     );
   }
@@ -246,7 +234,6 @@ export class CustomerService {
     return this.http.get(`${this.server}/customer/invoices/excel/download`, {
       responseType: 'blob'
     }).pipe(
-      tap(() => console.log('Excel file with all invoices downloaded')),
       catchError(this.handleError)
     );
   }
@@ -260,7 +247,6 @@ export class CustomerService {
     return this.http.get(`${this.server}/customer/excel/download`, {
       responseType: 'blob'
     }).pipe(
-      tap(() => console.log('Excel file with all customers downloaded')),
       catchError(this.handleError)
     );
   }
@@ -274,7 +260,6 @@ export class CustomerService {
     return this.http.get(`${this.server}/customer/csv/download`, {
       responseType: 'blob'
     }).pipe(
-      tap(() => console.log('CSV file with all customers downloaded')),
       catchError(this.handleError)
     );
   }

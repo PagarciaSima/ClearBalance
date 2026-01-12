@@ -35,7 +35,6 @@ export class UserService {
   login$(email: string, password: string): Observable<CustomHttpResponse<Profile>> {
     return this.http.post<CustomHttpResponse<Profile>>(`${this.server}/user/login`, { email, password })
       .pipe(
-        tap(console.log),
         catchError(this.handleError)
       );
   }
@@ -62,7 +61,6 @@ export class UserService {
   verifyCode$(email: string, code: string): Observable<CustomHttpResponse<Profile>> {
     return this.http.get<CustomHttpResponse<Profile>>(`${this.server}/user/verify/code/${email}/${code}`)
       .pipe(
-        tap(console.log),
         catchError(this.handleError)
       );
   }
@@ -77,7 +75,6 @@ export class UserService {
     return this.http.get<CustomHttpResponse<Profile>>(
       `${this.server}/user/verify/code/${type}/${key}`
     ).pipe(
-      tap(console.log),
       catchError(this.handleError)
     );
   }
@@ -95,7 +92,6 @@ export class UserService {
     return this.http.put<CustomHttpResponse<Profile>>(
       `${this.server}/user/new/password`, form
     ).pipe(
-      tap(console.log),
       catchError(this.handleError)
     );
   }
@@ -145,7 +141,6 @@ export class UserService {
         if (resp.data) {
           this.profileSubject.next(resp.data);
         }
-        console.log(resp);
       }),
       catchError(this.handleError)
     );
@@ -163,7 +158,6 @@ export class UserService {
   requestPasswordReset$(email: string): Observable<CustomHttpResponse<Profile>> {
     return this.http.get<CustomHttpResponse<Profile>>(`${this.server}/user/resetpassword/${encodeURIComponent(email)}`)
       .pipe(
-        tap(console.log),
         catchError(this.handleError)
       );
   }
@@ -198,7 +192,6 @@ export class UserService {
       }
     ).pipe(
       tap(response => {
-        console.log('Refresh Token Response:', response);
         localStorage.removeItem(Key.TOKEN);
         localStorage.removeItem(Key.REFRESH_TOKEN);
 
@@ -228,7 +221,6 @@ export class UserService {
       form,
       { headers }
     ).pipe(
-      tap(console.log),
       catchError(this.handleError)
     );
   }
@@ -252,7 +244,6 @@ export class UserService {
       {},
       { headers }
     ).pipe(
-      tap(console.log),
       catchError(this.handleError)
     );
   }
@@ -276,7 +267,6 @@ export class UserService {
       form,
       { headers }
     ).pipe(
-      tap(console.log),
       catchError(this.handleError)
     );
   }
@@ -299,7 +289,6 @@ export class UserService {
       {},
       { headers }
     ).pipe(
-      tap(console.log),
       catchError(this.handleError)
     );
   }
@@ -318,7 +307,6 @@ export class UserService {
       `${this.server}/user/update/image`,
       formData,
     ).pipe(
-      tap(console.log),
       catchError(this.handleError)
     );
   }

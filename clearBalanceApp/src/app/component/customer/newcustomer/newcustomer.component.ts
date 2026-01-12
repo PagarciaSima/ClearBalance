@@ -67,7 +67,6 @@ export class NewcustomerComponent implements OnInit, AfterViewInit {
         startWith({ dataState: DataState.LOADED, appData: this.dataSubject.value }),
         catchError((error: any) => {
           this.isLoadingSubject.next(false);
-          console.log(error);
           let errorMessage = 'Failed to create customer.';
           if (error && error.error && error.error.reason) {
             errorMessage = error.error.reason;

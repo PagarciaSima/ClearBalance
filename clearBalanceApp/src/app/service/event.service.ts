@@ -17,12 +17,13 @@ export class EventService {
 
     /**
      * Retrieves a paginated list of user events from the server.
+     * @param page - Page number to retrieve  
+     * @param size - Number of items per page
      */
     getUserEvents$(page: number = 0, size: number = 10): Observable<CustomHttpResponse<EventsPage>> {
       return this.http.get<CustomHttpResponse<EventsPage>>(
         `${this.server}/events/userevents?page=${page}&size=${size}`
       ).pipe(
-        tap(response => console.log({response})),
         catchError(this.handleError)
       );
     }

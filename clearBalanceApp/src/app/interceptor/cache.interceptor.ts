@@ -30,6 +30,12 @@ export class CacheInterceptor implements HttpInterceptor {
         || req.url.includes('refresh') || req.url.includes('resetpassword') || req.url.includes('new/password')) {
       return next.handle(req);
     }
+    
+    // NEVER cache anything related to events
+    if (req.url.includes('/events')) {
+      return next.handle(req);
+    }
+    
     // Clear cache for non-GET requests
     if (req.method !== 'GET' || req.url.includes('download')) {
       this.cacheService.deleteAll();
@@ -40,7 +46,6 @@ export class CacheInterceptor implements HttpInterceptor {
     const cachedResponse = this.cacheService.get(req.url);
 
     if (cachedResponse !== undefined) {
-      console.log('Found Response in Cache', cachedResponse);
       this.cacheService.logCache();
       return of(cachedResponse);
     }
@@ -62,7 +67,6 @@ export class CacheInterceptor implements HttpInterceptor {
       tap((response: HttpResponse<any>) => {
         // Cache only GET / PUT / POST responses
         if (request.method !== 'DELETE') {
-          console.log('Caching Response', response);
           this.cacheService.put(request.url, response);
         }
       })
