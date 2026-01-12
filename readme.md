@@ -47,7 +47,7 @@ Beyond standard CRUD, the application allows administrators to generate complex 
 ---
 ## 🎥 Application Demo Video
 
-**📺 Watch here:** https://www.youtube.com/watch?v=GMzUMhRNuaM
+**📺 Watch here:** https://www.youtube.com/watch?v=Kh9sh8FGMsI
 
 ---
 ## 📐 ER Diagram & Architecture
